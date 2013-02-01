@@ -1,0 +1,3 @@
+[submodule "node_modules/nodejs-module-webos-ipkg"]
+	path = node_modules/nodejs-module-webos-ipkg
+	url = ../nodejs-module-webos-ipkg
