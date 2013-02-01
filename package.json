@@ -1,0 +1,8 @@
+{
+  "name": "odejs-module-webos-ipkg",
+  "version": "0.0.1",
+  "dependencies": {
+    "nodejs-module-webos-ipkg": "0.0.1",
+    "async": "0.1.22"
+  }
+}

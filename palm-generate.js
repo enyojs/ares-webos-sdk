@@ -7,7 +7,7 @@
 /*
 	Examples:
 	./palm-generate.js -t ddd -p "p1=one" -p "p2=two" -p "{'id':'three'}"  DESTI
-	./palm-generate.js -t webos-app -p id=com.ydm --debug -p version=1.2.3 DESTI
+	./palm-generate.js -t bootplate-2.1.1-owo -p id=com.ydm --debug -p version=1.2.3 DESTI
  */
 
 var fs = require("fs"),
@@ -16,20 +16,21 @@ var fs = require("fs"),
     async = require('async'),
     tools = require('nodejs-module-webos-ipkg');
 
-(function () {
+function PalmGenerate() {
 
-	var pversion = '10.0.1';
-	var destination;
-	var options = {};
-	var substitutions = [];
+	this.version = '0.0.1';
+	this.destination = undefined;
+	this.options = {};
+	this.substitutions = [];
+	this.templates = {};
 
-	// Main
-	var version = process.version.match(/[0-9]+.[0-9]+/)[0];
-	if (version <= 0.7) {
-		process.exit("Only supported on Node.js version 0.8 and above");
-	}
+	this.repositories = [
+		"https://raw.github.com/yves-del-medico/other-templates/master/project-templates.json"
+	];
 
-	var argv = optimist.usage('palm-generate\nUsage: $0 [OPTIONS] APP_DIR')
+	this.localTemplates = undefined;
+
+	this.argv = optimist.usage('palm-generate\nUsage: $0 [OPTIONS] APP_DIR')
 		.options({
 			help : {
 				alias : 'h',
@@ -62,7 +63,7 @@ var fs = require("fs"),
 			}
 		}).argv;
 
-	var helpFooter = [
+	this.helpFooter = [
 		"APP_DIR is the application directory. It will be created if it does not exist.",
 		"",
 		"PROPERTY defines properties to be used during generation. Properties can be",
@@ -74,173 +75,223 @@ var fs = require("fs"),
 		"template is used ('enyo_singlepane').",
 		""
 	];
+}
 
-	function showUsage(exitCode) {
-		if (exitCode === undefined) {
-			exitCode = 0;
-		}
-		optimist.showHelp();
-		helpFooter.forEach(function(line) {
-			console.log(line);
-		});
-		process.exit(0);
-	}
+PalmGenerate.prototype = {
 
-	function checkTemplateValid() {
+	checkTemplateValid: function(next) {
+		this.log("checkTemplateValid");
 		// Verify it's a string
-		if (typeof argv.template != 'string') {
-			showUsage();
+		if (typeof this.argv.template != 'string') {
+			this.showUsage();
 		}
 
 		// Verify it exist
 		// TODO: TBC
-	}
 
-	function checkCreateAppDir() {
+		next();
+	},
+
+	checkCreateAppDir: function(next) {
+		this.log("checkCreateAppDir");
 		// Verify we have an APP_DIR parameter
-		if (argv._.length != 1) {
-			showUsage();
+		if (this.argv._.length != 1) {
+			this.showUsage();
 		}
-		destination = argv._[0];
+		this.destination = this.argv._[0];
 
 		// Create the directorie if it does not exist
-		if (fs.existsSync(destination)) {
-			var stats = fs.statSync(destination);
+		if (fs.existsSync(this.destination)) {
+			var stats = fs.statSync(this.destination);
 			if ( ! stats.isDirectory()) {
-				console.log("ERROR: " + destination + "is not a directory");
+				console.log("ERROR: '" + this.destination + "' is not a directory");
 				process.exit(1);
 			}
 		} else {
-			fs.mkdirSync(destination);
+			fs.mkdirSync(this.destination);
 		}
-	}
+		next();
+	},
 
-	function generateProject() {
-
-		if (argv.overwitre) {
-			options.overwrite = true;
+	instantiateProject: function(next) {
+		this.log("instantiateProject");
+		if (this.argv.overwitre) {
+			this.options.overwrite = true;
 		}
 
-		tools.generate(argv.template, substitutions, destination, options, function(inError, inData) {
+		tools.generate(this.argv.template, this.substitutions, this.destination, this.options, function(inError, inData) {
 			if (inError) {
-				console.log("An error occured, err: " + inError);
+				next("An error occured, err: " + inError);
 				return;
 			}
-
-			console.log('DONE: ' + destination);
+			next();
 		});
-	}
+	},
 
-	function insertProperty(prop, properties) {
+	insertProperty: function(prop, properties) {
 		var values = prop.split('=');
 		properties[values[0]] = values[1];
-	}
+		console.log("Inserting property " + values[0] + " = " + values[1]);
+	},
 
-	function manageProperties() {
+	manageProperties: function(next) {
+		this.log("manageProperties");
 		var properties = {};
-		if (argv.property) {
-			if (typeof argv.property === 'string') {
-				insertProperty(argv.property, properties);
+		if (this.argv.property) {
+			if (typeof this.argv.property === 'string') {
+				this.insertProperty(this.argv.property, properties);
 			} else {
-				argv.property.forEach(function(prop) {
-					insertProperty(prop, properties);
-				});
+				this.argv.property.forEach(function(prop) {
+					this.insertProperty(prop, properties);
+				}, this);
 			}
-			substitutions.push({ fileRegexp: "appinfo.json", json: properties});
+			this.substitutions.push({ fileRegexp: "appinfo.json", json: properties});
 		}
-	}
-
-	function checkAndShowHelp() {
-		if (argv.help) {
-			showUsage();
-		}
-	}
-
-	function checkAndShowVersion() {
-		if (argv.version) {
-			console.log("Version: " + pversion);
-			process.exit(0);
-		}
-	}
-
-	function handleDebugOptions() {
-		if (argv.debug) {
-			console.dir(argv);
-			options.verbose = true;
-		}
-	}
-
-	function loadTemplateList(context, next) {
-		tools.registerTemplates([{
-				id: "bootplate-2.1.1-local",
-				zipfiles: [{
-					url: "/Users/yvesdel-medico/GIT/ares-project/templates/projects/bootplate-2.1.1.zip"
-				},{
-					url: "/Users/yvesdel-medico/GIT/other-templates/webos-app-config.zip"
-				}],
-				description: "Enyo bootplate 2.1.1 (local)"
-			},{
-				id: "webos-app",
-				zipfiles: [{
-					url: "/Users/yvesdel-medico/GIT/other-templates/webos-app-config.zip"
-				}],
-				description: "Open webOS app no bootplate (local)"
-			}
-		]);
 		next();
-	}
+	},
 
-	function getTemplateList(context, next) {
+	loadTemplateList: function(next) {
+		this.log("loadTemplateList");
+
+		if (this.localTemplates) {
+			tools.registerTemplates(this.localTemplates);
+		}
+
+		if (this.argv.repo) {
+			// Some additionnal repos where specified thru --repo xxxx
+			if (util.isArray(this.argv.repo)) {
+				this.argv.repo.forEach(function(repo) {
+					this.repositories.push(repo);
+				}, this);
+			} else {
+				this.repositories.push(this.argv.repo);
+			}
+		}
+
+		if (this.repositories.length > 0) {
+			async.forEachSeries(this.repositories, function(item, callback) {
+				tools.registerRemoteTemplates(item, callback);
+			}, next);
+		} else {
+			next();
+		}
+	},
+
+	getTemplateList: function(next) {
+		this.log("getTemplateList");
 		tools.list(function(err, data) {
 			if (err) {
 				next(err);
 				return;
 			}
-			context.list = [];
 			data.forEach(function(template) {
-				context.list.push(template);
-			});
+				this.templates[template.id] = template;
+			}, this);
 			next();
-		});
-	}
+		}.bind(this));
+	},
 
-	function displayTemplateList(context, err, results) {
+	projectReady: function(err, results) {
+		this.log("projectReady");
 		if (err) {
 			console.log(err);
 			process.exit(1);
 		}
-		context.list.forEach(function(template) {
-			console.log(util.format("%s\t%s", template.id, template.description));
-		});
+		console.log("DONE");
+		process.exit(0);
+	},
+
+	displayTemplateList: function(err, results) {
+		this.log("displayTemplateList");
+		if (err) {
+			console.log(err);
+			process.exit(1);
+		}
+		var keys = Object.keys(this.templates);
+		keys.forEach(function(key) {
+			console.log(util.format("%s\t%s", key, this.templates[key].description));
+		}, this);
 
 		process.exit(0);
-	}
+	},
 
-	function listTemplates() {
-		var context = {};
+	listTemplates: function() {
 		async.series([
-				loadTemplateList.bind(this, context),
-				getTemplateList.bind(this, context)
+				this.loadTemplateList.bind(this),
+				this.getTemplateList.bind(this)
 			],
-			displayTemplateList.bind(this, context));
-	}
+			this.displayTemplateList.bind(this));
+	},
 
-	function main() {
-		checkAndShowHelp();
-		checkAndShowVersion();
-		handleDebugOptions();
+	showUsage: function(exitCode) {
+		if (exitCode === undefined) {
+			exitCode = 0;
+		}
+		optimist.showHelp();
+		this.helpFooter.forEach(function(line) {
+			console.log(line);
+		});
+		process.exit(0);
+	},
 
-		if (argv.list) {
-			listTemplates();
+	checkAndShowHelp: function() {
+		if (this.argv.help) {
+			this.showUsage();
+		}
+	},
+
+	checkAndShowVersion: function() {
+		if (this.argv.version) {
+			console.log("Version: " + this.version);
+			process.exit(0);
+		}
+	},
+
+	handleDebugOptions: function() {
+		if (this.argv.debug) {
+			this.options.verbose = true;
+		}
+	},
+
+	log: function(msg) {
+		if (this.argv.debug) {
+			console.log(msg);
+		}
+	},
+
+	generateProject: function() {
+		async.series([
+			this.checkCreateAppDir.bind(this),
+			this.loadTemplateList.bind(this),
+			this.checkTemplateValid.bind(this),
+			this.manageProperties.bind(this),
+			this.instantiateProject.bind(this)
+			],
+			this.projectReady.bind(this));
+	},
+
+	exec: function() {
+		this.handleDebugOptions();
+		this.checkAndShowHelp();
+		this.checkAndShowVersion();
+
+		if (this.argv.list) {
+			this.listTemplates();
 		} else {
-			loadTemplateList();
-			checkTemplateValid();
-			manageProperties();
-			checkCreateAppDir();
-			generateProject();
+			this.generateProject();
 		}
 	}
+};
 
-	// Execute the commmand
-	main();
-}());
+function checkNodeVersion() {
+	var version = process.version.match(/[0-9]+.[0-9]+/)[0];
+	if (version <= 0.7) {
+		process.exit("Only supported on Node.js version 0.8 and above");
+	}
+}
+
+// Main
+checkNodeVersion();
+
+var cmd = new PalmGenerate();
+cmd.exec();
