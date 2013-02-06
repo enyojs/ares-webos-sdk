@@ -4,12 +4,6 @@
  * palm-generate
  */
 
-/*
-	Examples:
-	./palm-generate.js -t ddd -p "p1=one" -p "p2=two" -p "{'id':'three'}"  DESTI
-	./palm-generate.js -t bootplate-2.1.1-owo -p id=com.ydm --debug -p version=1.2.3 DESTI
- */
-
 var fs = require("fs"),
     optimist = require('optimist'),
     util = require('util'),
