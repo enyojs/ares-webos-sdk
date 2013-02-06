@@ -44,6 +44,12 @@ function PalmPackage() {
 
 PalmPackage.prototype = {
 
+	unsupportedOptions: {
+		"verbose": 1,
+		"noclean": 1,
+		"nativecmd": 1
+	},
+
 	showUsage: function(exitCode) {
 		if (exitCode === undefined) {
 			exitCode = 0;
@@ -72,13 +78,16 @@ PalmPackage.prototype = {
 		if (this.argv.debug) {
 			this.options.verbose = true;
 		}
-		if (this.argv.noclean) {					// TODO: To remove ?
-			this.options.noclean = true;
+		// Pass unsupported options verbatim thru the options Object -- TODO: TBR
+		for(var key in this.argv) {
+			if (this.unsupportedOptions[key]) {
+				this.options[key] = true;
+			}
 		}
 	},
 
 	debug: function(msg) {
-		if (this.argv.debug) {
+		if (this.argv.verbose || this.argv.debug) {
 			console.log(msg);
 		}
 	},
