@@ -4,11 +4,6 @@
  * palm-package
  */
 
-/*
-	Examples:
-	./palm-package.js ~/GIT/TipCalc/deploy/TipCalc --debug
- */
-
 var fs = require("fs"),
     optimist = require('optimist'),
     util = require('util'),
