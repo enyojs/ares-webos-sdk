@@ -75,7 +75,7 @@ PalmPackage.prototype = {
 	},
 
 	handleOptions: function() {
-		if (this.argv.debug) {
+		if (this.argv.debug || this.argv.verbose) {
 			this.options.verbose = true;
 		}
 		// Pass unsupported options verbatim thru the options Object -- TODO: TBR
@@ -84,6 +84,8 @@ PalmPackage.prototype = {
 				this.options[key] = true;
 			}
 		}
+
+		this.options.nativecmd = true;			// TODO: TBR when ar will be available in nodejs
 	},
 
 	debug: function(msg) {
@@ -107,7 +109,6 @@ PalmPackage.prototype = {
 			console.log(err);
 			process.exit(1);
 		}
-		console.log("DONE");
 		process.exit(0);
 	},
 
@@ -116,6 +117,10 @@ PalmPackage.prototype = {
 
 		if (this.argv.outdir) {
 			this.destination = this.argv.outdir;
+		}
+
+		if (this.destination === '.') {
+			this.destination = process.cwd();
 		}
 
 		// Check that the directorie exist
