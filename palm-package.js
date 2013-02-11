@@ -120,6 +120,16 @@ PalmPackage.prototype = {
 		process.exit(0);
 	},
 
+	appOk: function(err, results) {
+		this.debug("appOk");
+		if (err) {
+			console.log(err);
+			this.showUsage(1);
+		}
+		this.log("no problems detected");
+		process.exit(0);
+	},
+
 	setOutputDir: function(next) {
 		this.debug("setOutputDir");
 
@@ -167,7 +177,10 @@ PalmPackage.prototype = {
 	},
 
 	checkApplication: function() {
-		this.exitOnError("--check is not yet implemented");
+		async.series([
+				this.checkInputDir.bind(this)
+			],
+			this.appOk.bind(this));
 	},
 
 	exec: function() {
