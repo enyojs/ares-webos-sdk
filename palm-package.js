@@ -132,6 +132,7 @@ PalmPackage.prototype = {
 		} else {
 			this.exitOnError("ERROR: '" + this.destination + "' does not exist");
 		}
+		this.destination = fs.realpathSync(this.destination);
 		next();
 	},
 
