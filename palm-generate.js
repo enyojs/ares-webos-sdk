@@ -74,7 +74,7 @@ function PalmGenerate() {
 PalmGenerate.prototype = {
 
 	checkTemplateValid: function(next) {
-		this.log("checkTemplateValid");
+		this.debug("checkTemplateValid");
 		// Verify it's a string
 		if (typeof this.argv.template != 'string') {
 			this.showUsage();
@@ -87,7 +87,7 @@ PalmGenerate.prototype = {
 	},
 
 	checkCreateAppDir: function(next) {
-		this.log("checkCreateAppDir");
+		this.debug("checkCreateAppDir");
 		// Verify we have an APP_DIR parameter
 		if (this.argv._.length != 1) {
 			this.showUsage();
@@ -104,11 +104,12 @@ PalmGenerate.prototype = {
 		} else {
 			fs.mkdirSync(this.destination);
 		}
+		this.destination = fs.realpathSync(this.destination);
 		next();
 	},
 
 	instantiateProject: function(next) {
-		this.log("instantiateProject");
+		this.debug("instantiateProject");
 		if (this.argv.overwitre) {
 			this.options.overwrite = true;
 		}
@@ -125,11 +126,11 @@ PalmGenerate.prototype = {
 	insertProperty: function(prop, properties) {
 		var values = prop.split('=');
 		properties[values[0]] = values[1];
-		console.log("Inserting property " + values[0] + " = " + values[1]);
+		this.debug("Inserting property " + values[0] + " = " + values[1]);
 	},
 
 	manageProperties: function(next) {
-		this.log("manageProperties");
+		this.debug("manageProperties");
 		var properties = {};
 		if (this.argv.property) {
 			if (typeof this.argv.property === 'string') {
@@ -145,7 +146,7 @@ PalmGenerate.prototype = {
 	},
 
 	loadTemplateList: function(next) {
-		this.log("loadTemplateList");
+		this.debug("loadTemplateList");
 
 		if (this.localTemplates) {
 			tools.registerTemplates(this.localTemplates);
@@ -172,7 +173,7 @@ PalmGenerate.prototype = {
 	},
 
 	getTemplateList: function(next) {
-		this.log("getTemplateList");
+		this.debug("getTemplateList");
 		tools.list(function(err, data) {
 			if (err) {
 				next(err);
@@ -186,17 +187,17 @@ PalmGenerate.prototype = {
 	},
 
 	projectReady: function(err, results) {
-		this.log("projectReady");
+		this.debug("projectReady");
 		if (err) {
 			console.log(err);
 			process.exit(1);
 		}
-		console.log("DONE");
+		this.log("generating " + this.argv.template + " in " + this.destination);
 		process.exit(0);
 	},
 
 	displayTemplateList: function(err, results) {
-		this.log("displayTemplateList");
+		this.debug("displayTemplateList");
 		if (err) {
 			console.log(err);
 			process.exit(1);
@@ -241,16 +242,20 @@ PalmGenerate.prototype = {
 		}
 	},
 
-	handleDebugOptions: function() {
-		if (this.argv.debug) {
+	handleOptions: function() {
+		if (this.argv.debug || this.argv.verbose) {
 			this.options.verbose = true;
 		}
 	},
 
-	log: function(msg) {
-		if (this.argv.debug) {
+	debug: function(msg) {
+		if (this.argv.verbose || this.argv.debug) {
 			console.log(msg);
 		}
+	},
+
+	log: function(msg) {
+		console.log(msg);
 	},
 
 	generateProject: function() {
@@ -265,7 +270,7 @@ PalmGenerate.prototype = {
 	},
 
 	exec: function() {
-		this.handleDebugOptions();
+		this.handleOptions();
 		this.checkAndShowHelp();
 		this.checkAndShowVersion();
 
