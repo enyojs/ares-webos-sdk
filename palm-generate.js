@@ -39,10 +39,13 @@ function PalmGenerate() {
 			},
 			overwrite: {
 				alias: 'f',
-				description: "Overwrite existing files"
+				description: "Overwrite existing files",
+				boolean: true
 			},
 			debug : {
-				description : 'List the available templates'
+				alias: 'verbose',
+				description : 'Enable debug mode',
+				boolean: true
 			},
 			template : {
 				alias : 't',
