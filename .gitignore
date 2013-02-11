@@ -4,6 +4,7 @@ node_modules/mkdirp
 node_modules/request
 node_modules/rimraf
 node_modules/shelljs
+node_modules/ssh2
 node_modules/temp
 node_modules/unzip
 node_modules/.bin
