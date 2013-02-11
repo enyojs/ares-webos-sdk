@@ -26,13 +26,19 @@ function PalmPackage() {
 			version : {
 				description : 'Display version info and exit'
 			},
+			debug : {
+				alias: 'verbose',
+				description : 'Enable debug mode',
+				boolean: true
+			},
 			outdir : {
 				alias : 'o',
 				string: true,
 				description : 'Use OUTPUT_DIR as the output directory'
 			},
 			check : {
-				description : "Check the application but don't package it"
+				description : "Check the application but don't package it",
+				boolean: true
 			}
 		}).argv;
 
@@ -75,14 +81,18 @@ PalmPackage.prototype = {
 	},
 
 	handleOptions: function() {
-		if (this.argv.debug) {
+		if (this.argv.debug || this.argv.verbose) {
 			this.options.verbose = true;
 		}
 		// Pass unsupported options verbatim thru the options Object -- TODO: TBR
 		for(var key in this.argv) {
 			if (this.unsupportedOptions[key]) {
-				this.options[key] = true;
+				this.options[key] = this.argv[key];
 			}
+		}
+
+		if ( ! this.argv.hasOwnProperty('nativecmd')) {			// TODO: TBR when ar will be available in nodejs
+			this.options.nativecmd = true;
 		}
 	},
 
@@ -105,9 +115,18 @@ PalmPackage.prototype = {
 		this.debug("projectReady");
 		if (err) {
 			console.log(err);
-			process.exit(1);
+			this.showUsage(1);
 		}
-		console.log("DONE");
+		process.exit(0);
+	},
+
+	appOk: function(err, results) {
+		this.debug("appOk");
+		if (err) {
+			console.log(err);
+			this.showUsage(1);
+		}
+		this.log("no problems detected");
 		process.exit(0);
 	},
 
@@ -116,6 +135,10 @@ PalmPackage.prototype = {
 
 		if (this.argv.outdir) {
 			this.destination = this.argv.outdir;
+		}
+
+		if (this.destination === '.') {
+			this.destination = process.cwd();
 		}
 
 		// Check that the directorie exist
@@ -127,16 +150,14 @@ PalmPackage.prototype = {
 		} else {
 			this.exitOnError("ERROR: '" + this.destination + "' does not exist");
 		}
+		this.destination = fs.realpathSync(this.destination);
 		next();
 	},
 
 	checkInputDir: function(next) {
 		this.debug("checkInputDir");
 
-		if (this.argv._.length < 1) {
-			this.showUsage();
-		}
-
+		// Check the directories, ...
 		tools.checkApp(this.argv._, this.options, next);
 	},
 
@@ -156,7 +177,10 @@ PalmPackage.prototype = {
 	},
 
 	checkApplication: function() {
-		this.exitOnError("--check is not yet implemented");
+		async.series([
+				this.checkInputDir.bind(this)
+			],
+			this.appOk.bind(this));
 	},
 
 	exec: function() {
