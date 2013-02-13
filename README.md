@@ -9,7 +9,7 @@ A module for nodejs that allows to generate, package, install, run and debug Ope
 Install
 -------
 
-* In order to hack on `nodejs-module-webos-ipkg`, clone from [GitHub](https://github.com/enyojs/nodejs-module-webos-ipkg), then run `npm install`.
+* In order to hack on `nodejs-module-webos-ipkg`, clone from [GitHub](https://github.com/enyojs/nodejs-module-webos-ipkg), cd into the new directory and then run `npm install`.
 * In order to use `nodejs-module-webos-ipkg` in your own modules, without actually working on it, then run `npm install git@github.com:enyojs/nodejs-module-webos-ipkg.git#0.0.1` where `0.0.1` is the version you want to use (_not yet working_).
 
 Use
@@ -30,7 +30,7 @@ Use
 
 3. Generate the SSH keypair using Open-SSH
 
-		$ ssh-keygen -f webos -C root@localhost:5522
+		$ ssh-keygen -f ~/.ssh/webos -C root@localhost:5522
 		
 		Generating public/private rsa key pair.
 		Enter passphrase (empty for no passphrase): 
@@ -63,7 +63,7 @@ Use
 
 5. Test the SSH login
 
-		$ ssh -i ~/.ssh/webos -p 5522 localhost
+		$ ssh -i ~/.ssh/webos -p 5522 root@localhost
 		root@qemux86:/var/home/root# 
 
 6. Run the module test suite
