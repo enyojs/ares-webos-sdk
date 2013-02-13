@@ -3,20 +3,18 @@
 var path = require('path'),
     fs = require('fs'),
     temp = require("temp"),
-    winston = require('winston'),
+    log = require('npmlog'),
     should = require('should'),
     novacom = require(path.join(__dirname, '..', 'lib', 'novacom'));
 
-var logger = new (winston.Logger)({
-	transports: [
-		new (winston.transports.Console)({ level: 'debug' })
-		]
-});
+log.heading = 'novacom.spec';
+log.level = 'warn';
+novacom.log.level = log.level;
 
 var session;
 
 function openSession(done) {
-	logger.debug("openSession");
+	log.verbose("openSession");
 	// create session & wait for it to be established
 	session = new novacom.Session();
 	session.addJob(null, function() {
@@ -25,7 +23,7 @@ function openSession(done) {
 }
 
 function closeSession(done) {
-	logger.debug("closeSession");
+	log.verbose("closeSession");
 	session.end();
 	session = undefined;
 	done();
@@ -34,15 +32,15 @@ function closeSession(done) {
 var tmps = [];
 
 function initTmp(done) {
-	logger.debug("initTmp");
+	log.verbose("initTmp");
 	tmps = [];
 	done();
 }
 
 function cleanTmp(done) {
-	logger.debug("cleanTmp");
+	log.verbose("cleanTmp");
 	tmps.forEach(function(tmp) {
-		logger.debug("removing " + tmp);
+		log.verbose("cleanTmp", "removing " + tmp);
 		fs.unlinkSync(tmp);
 	});
 	tmps = [];
@@ -57,7 +55,7 @@ function mkReadableStream(data) {
 		buf = new Buffer(data);
 	}
 	var tmp = temp.path({prefix: 'mocha-novacom.'});
-	logger.debug("creating " + tmp);
+	log.verbose("mkReadableStream", "creating " + tmp);
 	var os = fs.createWriteStream(tmp);
 	os.write(buf);
 	os.end();
@@ -73,7 +71,7 @@ describe("novacom", function() {
 	var sampleText = "This is a sample text.";
 
 	var deviceTmp = '/tmp/mocha' + process.pid;
-/*
+
 	describe("#put", function() {
 
 		beforeEach(initTmp);
@@ -104,7 +102,6 @@ describe("novacom", function() {
 			});
 		});
 	});
-*/
 
 	describe("#get", function() {
 		beforeEach(initTmp);
@@ -115,22 +112,22 @@ describe("novacom", function() {
 
 		it("should write then read the same file from the device", function(done) {
 			var is = mkReadableStream(sampleText);
-			logger.debug("put()...");
+			log.verbose("put()", "...");
 			session.put(deviceTmp, is, function(err) {
-				logger.debug("put() done");
+				log.verbose("put()", "done");
 				should.not.exist(err);
 				is.destroy();
 				
 				var hostTmp = temp.path({prefix: 'mocha-novacom.'});
 				var os = fs.createWriteStream(hostTmp);
-				logger.debug("get()...");
+				log.verbose("get()", "...");
 				session.get(deviceTmp, os, function(err) {
-					logger.debug("get() done");
+					log.verbose("get()", "done");
 					should.not.exist(err);
 					os.end();
-					logger.debug("readFile()...");
+					log.verbose("readFile()", "...");
 					fs.readFile(hostTmp, function(err, buf) {
-						logger.debug("readFile() done");
+						log.verbose("readFile()", "done");
 						should.not.exist(err);
 						should.exist(buf);
 						buf.should.be.an.instanceof(Buffer);
