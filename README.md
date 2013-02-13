@@ -49,10 +49,12 @@ palm-generate.js refers a ***temporary unofficial*** repository located at  [pro
 ### Run
 
 	$ palm-generate.js -l
-	$ palm-generate.js -t bootplate-2.1.1-owo -p id=com.myapp -p version=1.2.3 -p title=MyApp .../MyApp
+	$ palm-generate.js -t bootplate-2.1.1-owo -p id=com.myapp -p version=1.2.3 -p title=MyApp ../MyApp
 
-	$ cd .../MyApp
-	$ tools/deploy.sh
+	$ pushd ../MyApp
+	$ chmod +x tools/deploy.sh
+	$ ./tools/deploy.sh
 	$ cp appinfo.json framework_config.json deploy/MyApp
+	$ popd
 
-	$ palm-package.js deploy/MyApp
+	$ palm-package.js ../MyApp/deploy/MyApp
