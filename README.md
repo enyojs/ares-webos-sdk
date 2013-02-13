@@ -58,3 +58,19 @@ palm-generate.js refers a ***temporary unofficial*** repository located at  [pro
 	$ popd
 
 	$ palm-package.js ../MyApp/deploy/MyApp
+	
+### Run (without node installed)
+
+If you do not have node installed but just have the binaries from e.g. [node-v0.8.19-darwin-x64.tar.gz](http://nodejs.org/dist/v0.8.19/node-v0.8.19-darwin-x64.tar.gz), you can still generate, deploy and package.
+
+	$ export $NODE_PATH=(path to downloaded node binary e.g. /Users/andrewrich/Downloads/node-v0.8.19-darwin-x64/bin)
+	$ PATH=$PATH:$NODE_PATH node palm-generate.js -l
+	$ PATH=$PATH:$NODE_PATH node palm-generate.js -t bootplate-2.1.1-owo -p id=com.myapp -p version=1.2.3 -p title=MyApp ../MyApp
+
+	$ pushd ../MyApp
+	$ PATH=$PATH:$NODE_PATH node enyo/tools/deploy.js
+	$ cp appinfo.json framework_config.json deploy/MyApp
+	$ popd
+
+	$ PATH=$PATH:$NODE_PATH node palm-package.js ../MyApp/deploy/MyApp
+	
