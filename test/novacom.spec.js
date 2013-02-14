@@ -2,13 +2,26 @@
 
 var path = require('path'),
     fs = require('fs'),
+    util = require('util'),
     temp = require("temp"),
     log = require('npmlog'),
+    nopt = require('nopt'),
     should = require('should'),
     novacom = require(path.join(__dirname, '..', 'lib', 'novacom'));
 
+var knownOpts = {
+	"level": ['silly', 'verbose', 'info', 'http', 'warn', 'error']
+};
+var argv = nopt(knownOpts, null /*shortHands*/, process.argv, 1 /*drop 'node'*/);
+
+if (argv.help) {
+	console.log("Usage: mocha novacom.spec.js [--level=LEVEL]\n" +
+		    "\tLEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error'");
+	process.exit(0);
+}
+
 log.heading = 'novacom.spec';
-log.level = 'warn';
+log.level = argv.level || 'warn';
 novacom.log.level = log.level;
 
 var session;
