@@ -10,5 +10,6 @@ node_modules/shelljs
 node_modules/should
 node_modules/ssh2
 node_modules/temp
+node_modules/stream-buffers
 node_modules/unzip
 node_modules/.bin
