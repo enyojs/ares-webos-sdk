@@ -15,10 +15,7 @@ or
 ####Install the dependencies
 
 	$ cd webos-sdk-commands
-	$ cd node_modules/nodejs-module-webos-ipk
-	$ npm install .
-	$ cd ../..
-	$ npm install .
+	$ npm install
 
 ### Warnings
 
