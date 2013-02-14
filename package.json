@@ -13,5 +13,11 @@
   ],
   "scripts" : {
 	"install" : "cd node_modules/nodejs-module-webos-ipkg ; npm install"
-  }
+  },
+  "files": [
+    "node",
+    "lib",
+    "ares-generate.sh",
+    "ares-package.sh"
+  ]
 }
