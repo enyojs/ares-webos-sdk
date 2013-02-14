@@ -10,4 +10,4 @@ PACKAGE="$ARES_DIR/lib/ares-package.js"
 export NODE_PATH="$ARES_DIR/node/bin"
 
 # run node script with imported params
-PATH=$PATH:$NODE_PATH node $PACKAGE $@
+PATH=$NODE_PATH:$PATH node $PACKAGE $@

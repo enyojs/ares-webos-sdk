@@ -10,4 +10,4 @@ GENERATE="$ARES_DIR/lib/ares-generate.js"
 export NODE_PATH="$ARES_DIR/node/bin"
 
 # run node script with imported params
-PATH=$PATH:$NODE_PATH node $GENERATE $@
+PATH=$NODE_PATH:$PATH node $GENERATE $@
