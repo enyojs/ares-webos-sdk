@@ -6,6 +6,11 @@
     "async": "0.1.22",
     "optimist": "0.3.5"
   },
+  "bundledDependencies": [
+    "async",
+    "optimist",
+    "nodejs-module-webos-ipkg"
+  ],
   "scripts" : {
 	"install" : "cd node_modules/nodejs-module-webos-ipkg ; npm install"
   }
