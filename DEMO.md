@@ -49,3 +49,19 @@ installing package com.yourdomain.enyo-app_0.0.1_all.ipk on device "emulator" {a
 $ palm-launch com.yourdomain.enyo-app
 launching application com.yourdomain.enyo-app on device "emulator" {a8de72353f9a1b2e7fa075075d7ae1862db43cc6} tcp 51810
 ```
+
+####Launch Ares in default Web browser####
+
+```bash
+$ ./ares-ide.sh 
+> Service['home']: executing 'node hermes/fsLocal.js --pathname /files --port 0 --root /Users/andrewrich'
+> Service['dropbox']: executing 'node hermes/fsDropbox.js -P /files -p 0'
+> Service['phonegap']: executing 'node hermes/bdPhoneGap.js -P /phonegap -p 0'
+> Service['openwebos']: executing 'node hermes/bdOpenwebOS.js -P /openwebos -p 0 -v'
+Press CTRL + C to shutdown
+[...]
+^CTerminating sub-processes...
+Exiting...
+*** Service['phonegap']: abnormal exit (code=1)
+*** Exiting...
+```
