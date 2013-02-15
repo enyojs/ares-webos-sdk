@@ -18,6 +18,9 @@
     "node",
     "lib",
     "ares-generate.sh",
-    "ares-package.sh"
+    "ares-package.sh",
+    "DEMO.md",
+    "ares-deploy.sh",
+    "ares-ide.sh"
   ]
 }

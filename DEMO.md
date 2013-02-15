@@ -28,7 +28,7 @@ This is currently working on Mac OS X only.
 
 ####Package the template app####
 
-	$ ./ares-package.sh ../MyApp
+	$ ./ares-package.sh ../MyApp/deploy/MyApp
 	creating package com.yourdomain.enyo-app_0.0.1_all.ipk in /Users/andrewrich/Downloads/webos-sdk-commands-0.0.1
 
 
