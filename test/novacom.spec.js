@@ -151,6 +151,17 @@ describe("novacom", function() {
 		beforeEach(openSession);
 		afterEach(closeSession);
 
+		it("should fail to run a non-existing command", function(done) {
+			log.verbose("run()", "...");
+			var os = mkWritableStream();
+			var es = mkWritableStream();
+			session.run('/dev/null/toto', null /*stdin*/, os /*stdout*/, es /*stderr*/, function(err) {
+				log.verbose("run()", "done err=" + err);
+				should.exist(err);
+				done();
+			});
+		});
+
 		it("should write a file on the device and 'ls' it successfully", function(done) {
 			var is = mkReadableStream(sampleText);
 			log.verbose("put()", "...");
@@ -162,7 +173,7 @@ describe("novacom", function() {
 				var os = mkWritableStream();
 				var es = mkWritableStream();
 				log.verbose("run()", "...");
-				session.run('/bin/ls -l ' + deviceTmp, null /*stdin*/, os /*stdout*/, es /*stderr*/, function(err) {
+				session.run('/bin/ls -l ' + deviceTmp, null, os, es, function(err) {
 					log.verbose("run()", "done");
 					should.not.exist(err);
 					os.end();
