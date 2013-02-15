@@ -18,7 +18,7 @@
 	"devDependencies": {
 		"mocha": "1.8.1",
 		"should": "1.2.1",
-		"stream-buffers": "0.2.3"
+		"stream-buffers": "0.2.4"
   },	"scripts": {
 		"test": "node_modules/.bin/mocha test/novacom.spec.js"
 	}
