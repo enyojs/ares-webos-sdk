@@ -42,7 +42,7 @@ Setup
 
 1. Generate the SSH keypair using Open-SSH
 
-		$ ssh-keygen -f webos -C root@localhost:5522
+		$ ssh-keygen -f ~/.ssh/webos -C root@webos-emulator
 		
 		Generating public/private rsa key pair.
 		Enter passphrase (empty for no passphrase): 
