@@ -1,5 +1,7 @@
 #!/usr/bin/env node_modules/.bin/mocha
 
+/**********************************************************************/
+
 var path = require('path'),
     fs = require('fs'),
     util = require('util'),
@@ -7,7 +9,7 @@ var path = require('path'),
     nopt = require('nopt'),
     should = require('should'),
     streamBuffers = require("stream-buffers"),
-    novacom = require(path.join(__dirname, '..', 'lib', 'novacom'));
+    novacom = require('./../lib/novacom');
 
 var knownOpts = {
 	"level": ['silly', 'verbose', 'info', 'http', 'warn', 'error']
