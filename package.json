@@ -9,7 +9,8 @@
 		"async": "0.1.22",
 		"mkdirp": "0.3.4",
 		"temp": "0.4.0",
-		"tar": "",
+		// temporary URL until https://github.com/isaacs/node-tar/pull/17 is done
+		"tar": "git+http@github.com:dod38fr/node-tar.git",
 		"fstream": "",
 		"rimraf": "2.1.4",
 		"ssh2": "0.1.12",
