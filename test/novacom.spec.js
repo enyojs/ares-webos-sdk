@@ -28,11 +28,8 @@ var session;
 
 function openSession(done) {
 	log.verbose("openSession");
-	// create session & wait for it to be established
-	session = new novacom.Session();
-	session.addJob(null, function() {
-		done();
-	});
+	// create session & wait for it to be established (done)
+	session = new novacom.Session(undefined, done);
 }
 
 function closeSession(done) {

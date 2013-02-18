@@ -111,5 +111,16 @@ Setup
 		root@qemux86:/var/home/root# 
 
 
+## Reference
 
+### Emulator
 
+Whether there are one or several Emulator images, TCP Ports Redirections remain the same:
+
+| Name | Host Port | Guest Port | Role |
+| palm.emulator.debugger | 5858 | 5858 | **TBC** |
+| palm.emulator.hostmode | 5880 | 8080 | **TBC** |
+| palm.emulator.inspector | 9991 | 9991 | **TBC** |
+| palm.emulator.ls2.private | 5512 | 4412 | **TBC** |
+| palm.emulator.ls2.public | 5511 | 4411 | **TBC** |
+| palm.emulator.ssh | 5522 | 22 | **TBC** |
