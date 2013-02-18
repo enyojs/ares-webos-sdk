@@ -15,7 +15,8 @@ Install
 Test
 ----
 
-3. Run the module test suite
+3. Start the emulator
+4. Run the `novacom` interface tester
 
 		  novacom
 		    #put
@@ -32,6 +33,18 @@ Test
 		
 		
 		  6 tests complete (11 seconds)
+
+5. Run the `luna` interface tester
+
+        $ test/luna.spec.js
+          luna
+            #send
+              ✓ should fail to invoke non-existing service 
+              ✓ should list luna statistics (51ms)
+        
+          2 tests complete (132 ms)
+
+        $ test/novacom.spec.js
 
 Setup
 -----
