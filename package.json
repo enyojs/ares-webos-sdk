@@ -20,6 +20,7 @@
 		"should": "1.2.1",
 		"stream-buffers": "0.2.4"
   },	"scripts": {
-		"test": "node_modules/.bin/mocha test/novacom.spec.js"
+		"test": "node_modules/.bin/mocha test/novacom.spec.js",
+		"install" : "cd node_modules/unzip ; npm install"
 	}
 }
