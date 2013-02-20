@@ -7,6 +7,7 @@ var path = require('path'),
     util = require('util'),
     log = require('npmlog'),
     nopt = require('nopt'),
+    async = require('async'),
     should = require('should'),
     streamBuffers = require("stream-buffers"),
     novacom = require('./../lib/novacom');
@@ -59,13 +60,16 @@ function cleanTmp(done) {
 	done();
 }
 
-function mkReadableStream(data) {
+function mkReadableStream(data, count) {
 	var is = new streamBuffers.ReadableStreamBuffer({
 		frequency: 10,       // in milliseconds.
 		chunkSize: 2048     // in bytes.
 	});
 	is.pause();
-	is.put(data);
+	count = count || 1;
+	while(count --) {
+		is.put(data);
+	}
 	return is;
 }
 
@@ -77,7 +81,7 @@ function mkWritableStream() {
 }
 
 describe("novacom", function() {
-	this.timeout(7000);
+	this.timeout(3000);
 
 	var sampleText = "This is a sample text.";
 
@@ -91,20 +95,18 @@ describe("novacom", function() {
 		beforeEach(openSession);
 		afterEach(closeSession);
 
-		it("should write a file on the device", function(done) {
+		it("should write a (small) file on the device", function(done) {
 			var is = mkReadableStream(sampleText);
 			session.put(deviceTmp, is, function(err) {
 				should.not.exist(err);
-				is.destroy();
 				done();
 			});
 		});
-
+		
 		it("should fail to write a file in a non-existing device folder", function(done) {
-			var is = mkReadableStream(sampleText);
+			var is = mkReadableStream(sampleText, 10000);
 			var deviceTmp = '/dev/null/mocha' + process.pid;
 			session.put(deviceTmp, is, function(err) {
-				is.destroy();
 				should.exist(err);
 				err.should.be.an.instanceOf(Error);
 				should.exist(err.code);
@@ -112,6 +114,7 @@ describe("novacom", function() {
 				done();
 			});
 		});
+		
 	});
 
 	describe("#get", function() {
@@ -123,18 +126,15 @@ describe("novacom", function() {
 
 		it("should write then read the same file from the device", function(done) {
 			var is = mkReadableStream(sampleText);
-			log.verbose("put()", "...");
 			session.put(deviceTmp, is, function(err) {
 				log.verbose("put()", "done");
 				should.not.exist(err);
-				is.destroy();
 				
 				var os = mkWritableStream();
-				log.verbose("get()", "...");
 				session.get(deviceTmp, os, function(err) {
 					log.verbose("get()", "done");
-					should.not.exist(err);
 					os.end();
+					should.not.exist(err);
 					var str = os.getContents().toString();
 					str.should.equal(sampleText);
 					done();
@@ -151,45 +151,49 @@ describe("novacom", function() {
 		afterEach(closeSession);
 
 		it("should fail to run a non-existing command", function(done) {
-			log.verbose("run()", "...");
 			var os = mkWritableStream();
 			var es = mkWritableStream();
 			session.run('/dev/null/toto', null /*stdin*/, os /*stdout*/, es /*stderr*/, function(err) {
+				os.end();
+				es.end();
 				log.verbose("run()", "done err=" + err);
 				should.exist(err);
 				done();
 			});
 		});
 
-		it("should write a file on the device and 'ls' it successfully", function(done) {
-			var is = mkReadableStream(sampleText);
-			log.verbose("put()", "...");
-			session.put(deviceTmp, is, function(err) {
-				log.verbose("put()", "done");
-				should.not.exist(err);
-				is.destroy();
-
-				var os = mkWritableStream();
-				var es = mkWritableStream();
-				log.verbose("run()", "...");
-				session.run('/bin/ls -l ' + deviceTmp, null, os, es, function(err) {
-					log.verbose("run()", "done");
-					should.not.exist(err);
+		it("should write a (large) file on the device and find its size using 'ls -l'", function(done) {
+			this.timeout(15000);
+			var count = 100000;
+			var is = mkReadableStream(sampleText, count);
+			var os = mkWritableStream();
+			var es = mkWritableStream();
+			is.pause();
+			async.series([
+				session.put.bind(session, deviceTmp, is),
+				session.run.bind(session, '/bin/ls -l ' + deviceTmp, null, os, es),
+				function(next) {
 					os.end();
+					es.end();
 					var str = os.getContents().toString();
 					var length = str.split(/[ \t]+/)[4];
 					should.exist(length);
-					length.should.equal(sampleText.length.toString(), "length of '" + sampleText + "'");
-					done();
-				});
+					length.should.equal((sampleText.length * count).toString(), "length of '" + sampleText + "'");
+					next();
+				},
+				session.run.bind(session, '/bin/rm ' + deviceTmp, null, null, null)
+			], function(err) {
+				should.not.exist(err);
+				done();
 			});
 		});
 
 		it("should fail to 'ls' a non-existing file", function(done) {
-			log.verbose("run()", "...");
 			var os = mkWritableStream();
 			var es = mkWritableStream();
 			session.run('/bin/ls -l /dev/null/toto', null /*stdin*/, os /*stdout*/, es /*stderr*/, function(err) {
+				os.end();
+				es.end();
 				log.verbose("run()", "done err=" + err);
 				should.exist(err);
 				done();
