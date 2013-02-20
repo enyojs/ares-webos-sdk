@@ -13,3 +13,4 @@ node_modules/temp
 node_modules/stream-buffers
 node_modules/.bin
 node_modules/hexy
+node_modules/npm
