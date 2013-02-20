@@ -1,3 +1,5 @@
 node_modules/async
 node_modules/optimist
+node_modules/npm
+node_modules/.bin/
 node/
