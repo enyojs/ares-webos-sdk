@@ -18,7 +18,7 @@ var knownOpts = {
 var argv = nopt(knownOpts, null /*shortHands*/, process.argv, 1 /*drop 'node'*/);
 
 if (argv.help) {
-	console.log("Usage: mocha novacom.spec.js [--level=LEVEL]\n" +
+	console.log("Usage: mocha luna.spec.js [--level=LEVEL]\n" +
 		    "\tLEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error'");
 	process.exit(0);
 }
@@ -47,7 +47,7 @@ describe ("luna", function() {
 		it ("should fail to invoke non-existing service", function(done) {
 			luna.send({
 				// luna options
-				novacom: session
+				session: session
 			}, {
 				// luna addr
 				service: 'com.ibm',
@@ -65,20 +65,26 @@ describe ("luna", function() {
 			});
 		});
 		it ("should list luna statistics", function(done) {
+			// This is a funky service: Although it
+			// provides a single answer, the caller needs
+			// to call it in interactive mode, with
+			// subscription turned on...
 			luna.send({
-				novacom: session
+				session: session,
+				nReplies: 0
 			}, {
 				service: 'com.palm.lunastats',
 				method: 'getStats'
 			}, {
 				// luna param
+				subscribe: true
 			}, function(obj, next) {
-				log.verbose('onResponse', obj);
+				log.verbose('luna#send.onResponse', obj);
 				should.exist(obj);
 				should.exist(obj.documents);
 				next(null, obj);
 			}, function(err, obj) {
-				log.verbose('next', obj);
+				log.verbose('luna#send.next', obj);
 				should.exist(obj);
 				should.exist(obj.documents);
 				done(err);
