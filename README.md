@@ -46,6 +46,18 @@ Test
 
         $ test/novacom.spec.js
 
+6. Run the `sdk` interface tester (_**Note:** you need a specific package in you home directory_).
+
+        $ test/sdk.spec.js
+        
+          installer
+            #install
+              ✓ should install a package (2808ms)
+            #list
+              ✓ should list installed packages (141ms)
+        
+          2 tests complete (3 seconds)
+
 Setup
 -----
 
