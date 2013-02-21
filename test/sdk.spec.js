@@ -6,6 +6,7 @@ var path = require('path'),
     util = require('util'),
     log = require('npmlog'),
     nopt = require('nopt'),
+    async = require('async'),
     should = require('should'),
     packager = require('./../lib/packager'),
     installer = require('./../lib/installer');
@@ -37,6 +38,7 @@ describe ("installer", function() {
 
 	describe ("#install", function() {
 		this.timeout(5000);
+
 		it ("should install a package", function(done) {
 			var pkgPath = path.resolve(process.env.HOME || process.env.USERPROFILE, pkg);
 			installer.install(null, pkgPath, function(err, value) {
@@ -63,6 +65,36 @@ describe ("installer", function() {
 			});
 		});
 	});
-	
+
+	describe ("#remove", function() {
+		this.timeout(5000);
+
+		it ("should remove a package", function(done) {
+			async.waterfall([
+				installer.remove.bind(null, null, id),
+				function(result, next) {
+					next();
+				},
+				installer.list.bind(null, null),
+				function(pkgs, next) {
+					log.verbose("test installer#remove", "pkgs:", pkgs);
+					var found = pkgs.filter(function(p) {
+						return p && (p.id === id);
+					})[0];
+					log.verbose("test installer#remove", "found:", found);
+					should.not.exist(found, 'package is expected to be removed now');
+					next();
+				}
+			], done);
+		});
+
+		it ("should fail to remove a non existing package", function(done) {
+			installer.remove(null, 'com.apple.android', function(err) {
+				should.exist(err);
+				done();
+			});
+		});
+	});
+
 });
 
