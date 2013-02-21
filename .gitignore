@@ -1,5 +1,6 @@
 node_modules/.bin
 node_modules/async
+node_modules/bufferstream
 node_modules/fstream
 node_modules/mkdirp
 node_modules/mocha

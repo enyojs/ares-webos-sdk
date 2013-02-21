@@ -184,6 +184,14 @@
     "temp": {
       "version": "0.4.0"
     },
+    "rimraf": {
+      "version": "2.1.4",
+      "dependencies": {
+        "graceful-fs": {
+          "version": "1.2.0"
+        }
+      }
+    },
     "tar": {
       "version": "0.1.16",
       "from": "git+http://github.com/dod38fr/node-tar.git",
@@ -207,14 +215,6 @@
         }
       }
     },
-    "rimraf": {
-      "version": "2.1.4",
-      "dependencies": {
-        "graceful-fs": {
-          "version": "1.2.0"
-        }
-      }
-    },
     "ssh2": {
       "version": "0.1.12"
     },
@@ -231,6 +231,14 @@
       "dependencies": {
         "abbrev": {
           "version": "1.0.4"
+        }
+      }
+    },
+    "bufferstream": {
+      "version": "0.5.1",
+      "dependencies": {
+        "buffertools": {
+          "version": "1.1.0"
         }
       }
     },
@@ -382,7 +390,7 @@
       }
     },
     "should": {
-      "version": "1.2.1"
+      "version": "1.2.2"
     },
     "stream-buffers": {
       "version": "0.2.4"

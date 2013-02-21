@@ -11,11 +11,13 @@ Install
 
 * In order to hack on `nodejs-module-webos-ipkg`, clone from [GitHub](https://github.com/enyojs/nodejs-module-webos-ipkg), then run `npm install`.
 * In order to use `nodejs-module-webos-ipkg` in your own modules, without actually working on it, then run `npm install git@github.com:enyojs/nodejs-module-webos-ipkg.git#0.0.1` where `0.0.1` is the version you want to use (_not yet working_).
+* On Mac OS X, you need to install Xcode and Xcode Command Line Tools (Xcode -> Preferences -> Downloads -> Components)
 
 Test
 ----
 
-3. Run the module test suite
+3. Start the emulator
+4. Run the `novacom` interface tester
 
 		  novacom
 		    #put
@@ -32,6 +34,30 @@ Test
 		
 		
 		  6 tests complete (11 seconds)
+
+5. Run the `luna` interface tester
+
+        $ test/luna.spec.js
+          luna
+            #send
+              ✓ should fail to invoke non-existing service 
+              ✓ should list luna statistics (51ms)
+        
+          2 tests complete (132 ms)
+
+        $ test/novacom.spec.js
+
+6. Run the `sdk` interface tester (_**Note:** you need a specific package in you home directory_).
+
+        $ test/sdk.spec.js
+        
+          installer
+            #install
+              ✓ should install a package (2808ms)
+            #list
+              ✓ should list installed packages (141ms)
+        
+          2 tests complete (3 seconds)
 
 Setup
 -----
@@ -111,5 +137,16 @@ Setup
 		root@qemux86:/var/home/root# 
 
 
+## Reference
 
+### Emulator
 
+Whether there are one or several Emulator images, TCP Ports Redirections remain the same:
+
+| Name | Host Port | Guest Port | Role |
+| palm.emulator.debugger | 5858 | 5858 | **TBC** |
+| palm.emulator.hostmode | 5880 | 8080 | **TBC** |
+| palm.emulator.inspector | 9991 | 9991 | **TBC** |
+| palm.emulator.ls2.private | 5512 | 4412 | **TBC** |
+| palm.emulator.ls2.public | 5511 | 4411 | **TBC** |
+| palm.emulator.ssh | 5522 | 22 | **TBC** |
