@@ -1,3 +1,5 @@
+# webOS Command Line Tools
+
 ### Setup
 
 There is not yet a packaged (installable) version.  
@@ -19,7 +21,7 @@ or
 
 ### Warnings
 
-Concerning palm-package.js:  
+Concerning ares-package.js:  
 
 * Currently uses the tar and ar commands provided by the operating system.  
 Only tested on Mac OS X.
@@ -38,15 +40,15 @@ in the index.html.
 
 ### Repositories
 
-When delivered as part of an SDK, palm-generate.js should refer to repositories brought on the local file system by the SDK.
+When delivered as part of an SDK, ares-generate.js should refer to repositories brought on the local file system by the SDK.
 	
 This is not the case for the time being.   
-palm-generate.js refers a ***temporary unofficial*** repository located at  [project-templates.json](https://raw.github.com/yves-del-medico/other-templates/master/project-templates.json).
+ares-generate.js refers a ***temporary unofficial*** repository located at  [project-templates.json](https://raw.github.com/yves-del-medico/other-templates/master/project-templates.json).
 
 ### Run
 
-	$ palm-generate.js -l
-	$ palm-generate.js -t bootplate-2.1.1-owo -p id=com.myapp -p version=1.2.3 -p title=MyApp ../MyApp
+	$ ares-generate.js -l
+	$ ares-generate.js -t bootplate-2.1.1-owo -p id=com.myapp -p version=1.2.3 -p title=MyApp ../MyApp
 
 	$ pushd ../MyApp
 	$ chmod +x tools/deploy.sh
@@ -54,7 +56,7 @@ palm-generate.js refers a ***temporary unofficial*** repository located at  [pro
 	$ cp appinfo.json framework_config.json deploy/MyApp
 	$ popd
 
-	$ palm-package.js ../MyApp/deploy/MyApp
+	$ ares-package.js ../MyApp/deploy/MyApp
 	
 
 ### Jenkins build
@@ -69,13 +71,13 @@ Jenkins build should generate a tarball that contains:
 If you do not have node installed but just have the binaries from e.g. [node-v0.8.19-darwin-x64.tar.gz](http://nodejs.org/dist/v0.8.19/node-v0.8.19-darwin-x64.tar.gz), you can still generate, deploy and package.
 
 	$ export NODE_PATH=(path to downloaded node binary e.g. /Users/andrewrich/Downloads/node-v0.8.19-darwin-x64/bin)
-	$ PATH=$PATH:$NODE_PATH node palm-generate.js -l
-	$ PATH=$PATH:$NODE_PATH node palm-generate.js -t bootplate-2.1.1-owo -p id=com.myapp -p version=1.2.3 -p title=MyApp ../MyApp
+	$ PATH=$PATH:$NODE_PATH node ares-generate.js -l
+	$ PATH=$PATH:$NODE_PATH node ares-generate.js -t bootplate-2.1.1-owo -p id=com.myapp -p version=1.2.3 -p title=MyApp ../MyApp
 
 	$ pushd ../MyApp
 	$ PATH=$PATH:$NODE_PATH node enyo/tools/deploy.js
 	$ cp appinfo.json framework_config.json deploy/MyApp
 	$ popd
 
-	$ PATH=$PATH:$NODE_PATH node palm-package.js ../MyApp/deploy/MyApp
+	$ PATH=$PATH:$NODE_PATH node ares-package.js ../MyApp/deploy/MyApp
 	
