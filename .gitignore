@@ -1,4 +1,7 @@
+node_modules/.bin/nopt
 node_modules/async
+node_modules/nopt
+node_modules/npmlog
 node_modules/optimist
 node_modules/npm
 node_modules/npmlog
