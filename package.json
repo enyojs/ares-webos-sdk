@@ -1,23 +1,27 @@
 {
-  "name": "webos-sdk-commands",
-  "version": "0.0.1",
-  "dependencies": {
-    "nodejs-module-webos-ipkg": "0.0.1",
-    "async": "0.1.22",
-    "optimist": "0.3.5"
-  },
-  "bundledDependencies": [
-    "async",
-    "optimist",
-    "nodejs-module-webos-ipkg"
-  ],
-  "scripts" : {
-	"install" : "cd node_modules/nodejs-module-webos-ipkg ; npm install"
-  },
-  "files": [
-    "node",
-    "lib",
-    "ares-generate.sh",
-    "ares-package.sh"
-  ]
+	"name": "webos-sdk-commands",
+	"version": "0.0.1",
+	"dependencies": {
+		"nodejs-module-webos-ipkg": "0.0.1",
+		"async": "0.1.22",
+		"optimist": "0.3.5",
+		"nopt": "2.1.1",
+		"npmlog": "0.0.2"
+	},
+	"bundledDependencies": [
+		"async",
+		"optimist",
+		"nopt",
+		"npmlog",
+		"nodejs-module-webos-ipkg"
+	],
+	"scripts" : {
+		"install" : "cd node_modules/nodejs-module-webos-ipkg ; npm install"
+	},
+	"files": [
+		"node",
+		"lib",
+		"ares-generate.sh",
+		"ares-package.sh"
+	]
 }
