@@ -19,7 +19,7 @@ export NODE_PATH="$ARES_DIR/node/bin"
 pushd $1
 if [ -e tools/deploy.sh ] ; then
   chmod +x tools/deploy.sh
-  PATH=$PATH:$NODE_PATH ./tools/deploy.sh
+  PATH=$NODE_PATH:$PATH ./tools/deploy.sh
   APPDIR=`basename $PWD`
   cp -f *.json deploy/$APPDIR/
 fi
