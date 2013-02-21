@@ -1,3 +1,5 @@
+node_modules/.bin/nopt
 node_modules/async
+node_modules/nopt
 node_modules/optimist
 node/
