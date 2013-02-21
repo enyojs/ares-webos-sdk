@@ -187,19 +187,26 @@
         "temp": {
           "version": "0.4.0"
         },
-        "archiver": {
-          "version": "0.3.0",
+        "tar": {
+          "version": "0.1.16",
+          "from": "git+http://github.com/dod38fr/node-tar.git",
           "dependencies": {
-            "lodash": {
-              "version": "0.10.0"
+            "inherits": {
+              "version": "1.0.0"
             },
-            "rimraf": {
-              "version": "2.0.3",
-              "dependencies": {
-                "graceful-fs": {
-                  "version": "1.1.14"
-                }
-              }
+            "block-stream": {
+              "version": "0.0.6"
+            }
+          }
+        },
+        "fstream": {
+          "version": "0.1.22",
+          "dependencies": {
+            "graceful-fs": {
+              "version": "1.2.0"
+            },
+            "inherits": {
+              "version": "1.0.0"
             }
           }
         },
