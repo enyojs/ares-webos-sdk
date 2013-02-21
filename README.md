@@ -31,6 +31,16 @@ You need to get the source, using the procedure below.
 
 	$ ares-package.js ../MyApp/deploy/MyApp
 
+### ares-install
+	
+	$ ares-install --list
+	$ ares-install --install com.myapp_1.0.0_all.ipk
+	$ ares-install --remove com.myapp
+
+`--install` is the default:
+
+	$ ares-install com.myapp_1.0.0_all.ipk
+
 ## Caveats & Notes
 
 ### ares-package.js
