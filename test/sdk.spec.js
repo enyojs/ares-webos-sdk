@@ -47,16 +47,24 @@ describe ("installer", function() {
 				done(err);
 			});
 		});
+
+		it ("should fail to install a non-existing package", function(done) {
+			installer.install(null, '/dev/null/toto', function(err, value) {
+				log.verbose("installer#install", "err:", err);
+				should.exist(err);
+				done();
+			});
+		});
 	});
 
 	describe ("#list", function() {
 		it ("should list installed packages", function(done) {
-			installer.list(null, function(err, packages) {
+			installer.list(null, function(err, pkgs) {
 				log.verbose("test installer#list", "err:", err);
 				should.not.exist(err);
-				log.info("test installer#list", "packages:", packages);
-				should.exist(packages);
-				var found = packages.filter(function(p) {
+				log.info("test installer#list", "packages:", pkgs);
+				should.exist(pkgs);
+				var found = pkgs.filter(function(p) {
 					return p && (p.id === id);
 				})[0];
 				log.info("test installer#list", "found:", found);
