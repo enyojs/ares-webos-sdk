@@ -13,6 +13,8 @@
 		"tar": "git+http://github.com/dod38fr/node-tar.git",
 		"fstream": "0.1.22",
 		"graceful-fs": "1.2.0",
+		"combined-stream": "0.0.4",
+		"rimraf": "2.1.4",
 		"ssh2": "0.1.12",
 		"npmlog": "0.0.2",
 		"nopt": "2.1.1",
