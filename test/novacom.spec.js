@@ -150,6 +150,26 @@ describe("novacom", function() {
 		beforeEach(openSession);
 		afterEach(closeSession);
 
+		it("should fail to run with an invalid stdout", function(done) {
+			var es = mkWritableStream();
+			session.run('/bin/ls /', null /*stdin*/, new Error('fake stdout'), es /*stderr*/, function(err) {
+				es.end();
+				log.verbose("run()", "done err=" + err);
+				should.exist(err);
+				done();
+			});
+		});
+
+		it("should fail to run with an invalid stderr", function(done) {
+			var os = mkWritableStream();
+			session.run('/bin/ls /', null /*stdin*/, os /*stdout*/, new Error('fake stdout'), function(err) {
+				os.end();
+				log.verbose("run()", "done err=" + err);
+				should.exist(err);
+				done();
+			});
+		});
+
 		it("should fail to run a non-existing command", function(done) {
 			var os = mkWritableStream();
 			var es = mkWritableStream();
@@ -196,6 +216,21 @@ describe("novacom", function() {
 				es.end();
 				log.verbose("run()", "done err=" + err);
 				should.exist(err);
+				done();
+			});
+		});
+
+		it("should support 'Function' stdout", function(done) {
+			var is = mkReadableStream(sampleText);
+			session.run('/bin/cat', /*stdin*/ is, /*stdout*/ function(data) {
+				log.verbose("run()", "stdout data=" + data.toString());
+				should.exist(data);
+				data.should.be.instanceOf(Buffer);
+				var str = data.toString();
+				str.should.equal(sampleText);
+			}, /*stderr*/ null, /*next*/ function(err) {
+				log.verbose("run()", "next err=" + err);
+				should.not.exist(err);
 				done();
 			});
 		});
