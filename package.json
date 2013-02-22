@@ -12,6 +12,7 @@
 		"rimraf": ">=2.1.4",
 		"tar": "git+http://github.com/dod38fr/node-tar.git",
 		"fstream": "0.1.22",
+		"graceful-fs": "1.2.0",
 		"ssh2": "0.1.12",
 		"npmlog": "0.0.2",
 		"nopt": "2.1.1",

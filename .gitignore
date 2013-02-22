@@ -1,6 +1,7 @@
 node_modules/.bin
 node_modules/async
 node_modules/fstream
+node_modules/graceful-fs
 node_modules/mkdirp
 node_modules/mocha
 node_modules/nopt
