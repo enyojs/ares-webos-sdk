@@ -8,8 +8,7 @@ var path = require('path'),
     nopt = require('nopt'),
     async = require('async'),
     should = require('should'),
-    packager = require('./../lib/packager'),
-    installer = require('./../lib/installer');
+    sdk = require('./../lib/ipkg-tools');
 
 /**********************************************************************/
 
@@ -31,16 +30,18 @@ log.level = argv.level || 'warn';
 
 /**********************************************************************/
 
+// FIXME: rather use a package that comes from #generate
+var id = "com.ydm.tipcalc", pkg = "com.ydm.tipcalc_1.0.0_all.ipk";
+var pkgPath = path.resolve(process.env.HOME || process.env.USERPROFILE, pkg);
+
+var installer = sdk.installer;
+
 describe ("installer", function() {
 	
-	// FIXME: rather use a package that comes from #generate
-	var id = "com.ydm.tipcalc", pkg = "com.ydm.tipcalc_1.0.0_all.ipk";
-
 	describe ("#install", function() {
 		this.timeout(5000);
 
 		it ("should install a package", function(done) {
-			var pkgPath = path.resolve(process.env.HOME || process.env.USERPROFILE, pkg);
 			installer.install(null, pkgPath, function(err, value) {
 				log.verbose("installer#install", "err:", err);
 				should.not.exist(err);
@@ -104,5 +105,30 @@ describe ("installer", function() {
 		});
 	});
 
+});
+
+var launcher = sdk.launcher;
+
+describe ("launcher", function() {
+	
+	describe ("#launch", function() {
+
+		it ("should install & launch an application", function(done) {
+			this.timeout(10000);
+			async.series([
+				installer.install.bind(null, null, pkgPath),
+				launcher.launch.bind(null, null, id, null /*params*/),
+				installer.remove.bind(null, null, id)
+			], done);
+		});
+
+		it ("should fail to launch a non existing package", function(done) {
+			this.timeout(5000);
+			launcher.launch(null, 'com.apple.android', null /*params*/, function(err) {
+				should.exist(err);
+				done();
+			});
+		});
+	});
 });
 
