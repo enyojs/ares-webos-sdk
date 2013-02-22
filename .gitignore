@@ -15,3 +15,4 @@ node_modules/ssh2
 node_modules/stream-buffers
 node_modules/tar
 node_modules/temp
+node_modules/combined-stream
