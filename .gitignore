@@ -5,6 +5,7 @@ node_modules/fstream
 node_modules/mkdirp
 node_modules/mocha
 node_modules/nopt
+node_modules/npm
 node_modules/npmlog
 node_modules/request
 node_modules/rimraf
@@ -14,4 +15,3 @@ node_modules/ssh2
 node_modules/stream-buffers
 node_modules/tar
 node_modules/temp
-node_modules/unzip

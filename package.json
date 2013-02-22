@@ -15,7 +15,8 @@
 		"ssh2": "0.1.12",
 		"npmlog": "0.0.2",
 		"nopt": "2.1.1",
-		"bufferstream": ">=0.5.1"
+		"bufferstream": ">=0.5.1",
+		"npm": ">=1.2.12"
 	},
 	"devDependencies": {
 		"mocha": ">=1.8.1",
@@ -24,6 +25,7 @@
 		"temp": "0.4.0"
 	},
 	"scripts": {
-		"test": "node_modules/.bin/mocha test/novacom.spec.js"
+		"test": "node_modules/.bin/mocha test/novacom.spec.js",
+		"install" : "node scripts/install-script.js"
 	}
 }
