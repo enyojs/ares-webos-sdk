@@ -37,7 +37,7 @@ describe ("installer", function() {
 	var id = "com.ydm.tipcalc", pkg = "com.ydm.tipcalc_1.0.0_all.ipk";
 
 	describe ("#install", function() {
-		this.timeout(5000);
+		this.timeout(10000);
 
 		it ("should install a package", function(done) {
 			var pkgPath = path.resolve(process.env.HOME || process.env.USERPROFILE, pkg);
