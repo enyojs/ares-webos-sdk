@@ -13,6 +13,24 @@ You need to get the source, using the procedure below.
 
 		$ cd webos-sdk-commands
 		$ npm install
+		
+## Path setting
+
+The commands ares-* can be invoked from anywhere in the file system provided the PATH
+has been set correctly.
+
+On Linux and Mac OS X:
+
+	$ export PATH=$PATH:<webos-sdk-commands-full-path>
+	For exanple: export PATH=$PATH:/Users/ares/GIT/webos-sdk-commands
+ 
+On windows (cmd.ex):
+
+	> SET PATH=%PATH%;<webos-sdk-commands-full-path>
+	For example: > SET PATH=%PATH%;C:\Users\ares\GIT\webos-sdk-commands
+	
+NOTE: On Windows, you can also use a bash enviromment.  
+For example: [Git for Windows](http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git)) which provides a bash shell as on Linux.
 
 ## Usage
 
