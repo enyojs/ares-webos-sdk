@@ -15,7 +15,7 @@
               "version": "2.1.4"
             },
             "mkdirp": {
-              "version": "0.3.4"
+              "version": "0.3.5"
             },
             "graceful-fs": {
               "version": "1.2.0"
@@ -128,7 +128,7 @@
               }
             },
             "mkdirp": {
-              "version": "0.3.4"
+              "version": "0.3.5"
             },
             "difflet": {
               "version": "0.2.3",
@@ -185,33 +185,39 @@
       "version": "0.4.0"
     },
     "rimraf": {
-      "version": "2.1.4",
-      "dependencies": {
-        "graceful-fs": {
-          "version": "1.2.0"
-        }
-      }
+      "version": "2.1.4"
     },
     "tar": {
       "version": "0.1.16",
-      "from": "git+http://github.com/dod38fr/node-tar.git",
+      "from": "git+http://github.com/dod38fr/node-tar.git#b4c1d2340139b9532d504f7b4de2f2c4f1adb7f2",
       "dependencies": {
         "inherits": {
-          "version": "1.0.0"
+          "version": "1.0.0",
+          "from": "https://registry.npmjs.org/inherits/-/inherits-1.0.0.tgz"
         },
         "block-stream": {
-          "version": "0.0.6"
+          "version": "0.0.6",
+          "from": "https://registry.npmjs.org/block-stream/-/block-stream-0.0.6.tgz"
         }
       }
     },
     "fstream": {
       "version": "0.1.22",
       "dependencies": {
-        "graceful-fs": {
-          "version": "1.2.0"
-        },
         "inherits": {
-          "version": "1.0.0"
+          "version": "1.0.0",
+          "from": "https://registry.npmjs.org/inherits/-/inherits-1.0.0.tgz"
+        }
+      }
+    },
+    "graceful-fs": {
+      "version": "1.2.0"
+    },
+    "combined-stream": {
+      "version": "0.0.4",
+      "dependencies": {
+        "delayed-stream": {
+          "version": "0.0.5"
         }
       }
     },
@@ -234,16 +240,9 @@
         }
       }
     },
-    "bufferstream": {
-      "version": "0.5.1",
-      "dependencies": {
-        "buffertools": {
-          "version": "1.1.0"
-        }
-      }
-    },
     "npm": {
       "version": "1.2.12",
+      "from": "https://registry.npmjs.org/npm/-/npm-1.2.12.tgz",
       "dependencies": {
         "semver": {
           "version": "1.1.3"
@@ -389,11 +388,12 @@
         }
       }
     },
-    "should": {
-      "version": "1.2.2"
-    },
     "stream-buffers": {
       "version": "0.2.4"
+    },
+    "should": {
+      "version": "1.2.2",
+      "from": "https://registry.npmjs.org/should/-/should-1.2.2.tgz"
     },
     "mocha": {
       "version": "1.8.1",

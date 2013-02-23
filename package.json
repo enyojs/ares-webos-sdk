@@ -12,16 +12,18 @@
 		"rimraf": ">=2.1.4",
 		"tar": "git+http://github.com/dod38fr/node-tar.git",
 		"fstream": "0.1.22",
+		"graceful-fs": "1.2.0",
+		"combined-stream": "0.0.4",
+		"rimraf": "2.1.4",
 		"ssh2": "0.1.12",
 		"npmlog": "0.0.2",
 		"nopt": "2.1.1",
-		"bufferstream": ">=0.5.1",
-		"npm": ">=1.2.12"
+		"npm": ">=1.2.12",
+		"stream-buffers": "0.2.4"
 	},
 	"devDependencies": {
 		"mocha": ">=1.8.1",
 		"should": ">=1.2.1",
-		"stream-buffers": "0.2.4",
 		"temp": "0.4.0"
 	},
 	"scripts": {
