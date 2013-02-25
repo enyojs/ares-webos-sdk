@@ -27,7 +27,11 @@
 		"ares-generate.sh",
 		"ares-package.sh",
 		"ares-install.sh",
-		"ares-lauch.sh",
+		"ares-launch.sh",
+		"ares-generate.bat",
+		"ares-package.bat",
+		"ares-install.bat",
+		"ares-launch.bat",
 		"DEMO.md",
 		"ares-ide.sh"
 	]
