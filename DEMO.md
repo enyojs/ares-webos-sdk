@@ -6,17 +6,13 @@ This is currently working on Mac OS X only.
 
 [webos-sdk-commands-0.0.2.tgz](http://cloudhudson.palm.com/view/enyo/job/Enyo-package-ares-tools/lastSuccessfulBuild/artifact/webos-sdk-commands/webos-sdk-commands-0.0.2.tgz)
 
-
 `$ tar -xzf webos-sdk-commands-0.0.2.tgz`
 
-
 #### Set the PATH####
-
 
 `$ export PATH=$PATH:<full-path-to-webos-sdk-commands-version>       ` 
 	
 ####Generate a template app####
-
 
 `$ cd <where-ever-you-want>`  
 `$ ares-generate.sh -l`  
@@ -38,9 +34,9 @@ Creating package com.myapp_0.0.1_all.ipk in /Users/ares
 ####Install and launch the template app####
 
 `$ ares-install.sh com.myapp_0.0.1_all.ipk  `  
-installing ………………  
+Installing package com.app_0.0.1_all.ipk  
 `$ ares-launch.sh com.myapp`  
-launching ………… 
+Launching application com.app   
 
 ####Launch Ares in default Web browser####
 
