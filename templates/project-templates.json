@@ -1,0 +1,18 @@
+[
+  {
+    "id": "bootplate-2.1.1-owo",
+    "zipfiles": [
+      {
+        "url": "http://enyojs.com/archive/bootplate-2.1.1.zip",
+        "prefixToRemove": "bootplate",
+        "excluded": [
+          "bootplate/api"
+        ]
+      },
+      {
+        "url": "https://raw.github.com/yves-del-medico/other-templates/master/webos-app-config.zip"
+      }
+    ],
+    "description": "Enyo bootplate 2.1.1"
+  }
+]

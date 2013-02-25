@@ -22,11 +22,13 @@
 	"files": [
 		"node",
 		"lib",
-    "scripts",
+		"scripts",
+		"templates",
 		"ares-generate.sh",
-    	"ares-package.sh",
-    	"DEMO.md",
-    	"ares-deploy.sh",
-    	"ares-ide.sh"
+		"ares-package.sh",
+		"ares-install.sh",
+		"ares-lauch.sh",
+		"DEMO.md",
+		"ares-ide.sh"
 	]
 }
