@@ -4,64 +4,45 @@ This is currently working on Mac OS X only.
 
 ####Download and extract the latest tarball from Jenkins####
 
-[webos-sdk-commands-0.0.1.tgz](http://cloudhudson.palm.com/view/enyo/job/Enyo-package-ares-tools/lastSuccessfulBuild/artifact/webos-sdk-commands/webos-sdk-commands-0.0.1.tgz)
+[webos-sdk-commands-0.0.2.tgz](http://cloudhudson.palm.com/view/enyo/job/Enyo-package-ares-tools/lastSuccessfulBuild/artifact/webos-sdk-commands/webos-sdk-commands-0.0.2.tgz)
 
-```bash
-$ tar -xzf webos-sdk-commands-0.0.1.tgz
-```
+
+`$ tar -xzf webos-sdk-commands-0.0.2.tgz`
+
+
+#### Set the PATH####
+
+
+`$ export PATH=$PATH:<full-path-to-webos-sdk-commands-version>       ` 
 	
 ####Generate a template app####
 
-```bash
-$ cd webos-sdk-commands-0.0.1
-$ ./ares-generate.sh -l
-bootplate-2.1.1-owo	Enyo bootplate 2.1.1
-$ ./ares-generate.sh -t bootplate-2.1.1-owo ../MyApp
-generating bootplate-2.1.1-owo in /Users/andrewrich/Downloads/MyApp	
-```
 
-####Deploy/minify the template app####
+`$ cd <where-ever-you-want>`  
+`$ ares-generate.sh -l`  
+bootplate-2.1.1-owo	Enyo bootplate 2.1.1  
+`$ ares-generate.sh -t bootplate-2.1.1-owo -p id=com.myapp -p title=MyApp MyApp`  
+Generating bootplate-2.1.1-owo in /Users/ares/MyApp
 
-```bash
-$ ./ares-deploy.sh ../MyApp 
-~/Downloads/MyApp ~/Downloads/webos-sdk-commands-0.0.1
-enyo/tools/minify.sh args: 
-Minify-ing Enyo...
-Minify-ing the application...
-Success:  the deployable application is available in:  /Users/andrewrich/Downloads/MyApp/deploy/MyApp
-~/Downloads/webos-sdk-commands-0.0.1
-```
 
 ####Package the template app####
 
-```bash
-$ ./ares-package.sh ../MyApp/deploy/MyApp
-creating package com.yourdomain.enyo-app_0.0.1_all.ipk in /Users/andrewrich/Downloads/webos-sdk-commands-0.0.1
-```
+`$ ares-package.sh MyApp`  
+Minify-ing Enyo...  
+Minify-ing the application...  
+Success:  the deployable application is available in:  /Users/ares/MyApp/deploy/MyApp  
+Packaging minified output: /Users/ares/MyApp/deploy/MyApp  
+Creating package com.myapp_0.0.1_all.ipk in /Users/ares
+
 
 ####Install and launch the template app####
 
-(Assuming legacy Palm tools installed and a running emulator or connected device.)
-
-```bash
-$ palm-install com.yourdomain.enyo-app_0.0.1_all.ipk 
-installing package com.yourdomain.enyo-app_0.0.1_all.ipk on device "emulator" {a8de72353f9a1b2e7fa075075d7ae1862db43cc6} tcp 51810
-$ palm-launch com.yourdomain.enyo-app
-launching application com.yourdomain.enyo-app on device "emulator" {a8de72353f9a1b2e7fa075075d7ae1862db43cc6} tcp 51810
-```
+`$ ares-install.sh com.myapp_0.0.1_all.ipk  `  
+installing ………………  
+`$ ares-launch.sh com.myapp`  
+launching ………… 
 
 ####Launch Ares in default Web browser####
 
-```bash
-$ ./ares-ide.sh 
-> Service['home']: executing 'node hermes/fsLocal.js --pathname /files --port 0 --root /Users/andrewrich'
-> Service['dropbox']: executing 'node hermes/fsDropbox.js -P /files -p 0'
-> Service['phonegap']: executing 'node hermes/bdPhoneGap.js -P /phonegap -p 0'
-> Service['openwebos']: executing 'node hermes/bdOpenwebOS.js -P /openwebos -p 0 -v'
-Press CTRL + C to shutdown
-[...]
-^CTerminating sub-processes...
-Exiting...
-*** Service['phonegap']: abnormal exit (code=1)
-*** Exiting...
-```
+`$ ares-ide.sh`  
+ERRROR ……………….
