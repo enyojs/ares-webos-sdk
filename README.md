@@ -24,32 +24,29 @@ On Linux and Mac OS X:
 	$ export PATH=$PATH:<webos-sdk-commands-full-path>
 	For exanple: export PATH=$PATH:/Users/ares/GIT/webos-sdk-commands
  
-On windows (cmd.ex):
+On windows (cmd.exe):
 
 	> SET PATH=%PATH%;<webos-sdk-commands-full-path>
 	For example: > SET PATH=%PATH%;C:\Users\ares\GIT\webos-sdk-commands
 	
 NOTE: On Windows, you can also use a bash enviromment.  
-For example: [Git for Windows](http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git)) which provides a bash shell as on Linux.
+For example: [Git for Windows](http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git) which provides a bash shell as on Linux.
 
 ## Usage
 
-### ares-generate
+### ares-generate (.sh|.bat)
 
-	$ ares-generate.js -l
-	$ ares-generate.js -t bootplate-2.1.1-owo -p id=com.myapp -p version=1.2.3 -p title=MyApp ../MyApp
+	$ ares-generate -l
+	$ ares-generate -t bootplate-2.1.1-owo -p id=com.myapp -p version=1.2.3 -p title=MyApp MyApp
 
-### ares-package
+### ares-package (.sh|.bat)
 
-	$ pushd ../MyApp
-	$ chmod +x tools/deploy.sh
-	$ ./tools/deploy.sh
-	$ cp appinfo.json framework_config.json deploy/MyApp
-	$ popd
+	$ ares-package MyApp
+	
+	NB: ares-package will minify the application if possible.
+	ares-package will also copy appinfo.json and framework_config.json after the minification
 
-	$ ares-package.js ../MyApp/deploy/MyApp
-
-### ares-install
+### ares-install (.sh|.bat)
 	
 	$ ares-install --list
 	$ ares-install --install com.myapp_1.0.0_all.ipk
@@ -58,25 +55,13 @@ For example: [Git for Windows](http://code.google.com/p/msysgit/downloads/list?q
 `--install` is the default:
 
 	$ ares-install com.myapp_1.0.0_all.ipk
+	
+### ares-launch (.sh|.bat)
+	
+	$ ares-launch com.myapp
 
-## Caveats & Notes
+## Notes
 
-### ares-package.js
-
-* Currently uses the tar and ar commands provided by the operating system.  
-Only tested on Mac OS X.
-* The minification is done if possible
-* The files appinfo.json and framework_config.json are automatically copied after the minification
-***NOTE:*** This should probably added in the deploy.sh of enyo
-* The generated ipk is installable but the app will not start as bootplate.zip does not bring the line   
-	"window.PalmSystem && window.PalmSystem.stageReady();"  
-in the index.html.  
-***NOTE:*** Several solutions (with no order regarding feasibility, …):  
-	* The .zip file brougth by the sdk should inlude that line.  
-	  What about project created in Ares from the original bootplate.zip ?
-	* It might be possible to inlude this line thank to the substitutions available in [nodejs-module-webos-ipkg](https://github.com/enyojs/nodejs-module-webos-ipkg)
-	* This line could be included into enyo
-	* Leave that to the user
 
 ### Repositories
 
@@ -84,8 +69,6 @@ When delivered as part of an SDK, ares-generate.js should refer to repositories 
 	
 This is not the case for the time being.   
 ares-generate.js refers a ***temporary unofficial*** repository located at  [project-templates.json](https://raw.github.com/yves-del-medico/other-templates/master/project-templates.json).
-
-	$ palm-package.js ../MyApp
 	
 
 ### Run (without node installed)
@@ -103,3 +86,25 @@ If you do not have node installed but just have the binaries from e.g. [node-v0.
 
 	$ PATH=$PATH:$NODE_PATH node ares-package.js ../MyApp/deploy/MyApp
 	
+#### Using ares-install in VirtualBox enviromment
+
+To install a package from a Windows system running into a VM into a webOS emulator also running into a VM, we need some ssh tunnelling:
+
+* Enable ssh access from the VMs (Windows, Ubuntu, webOS) to the host computer
+	* On Mac: enable "Remote login" in "System preferences" -> "Sharing"
+	* Setup your private key in HOME/.ssh in your VMs and the host computer
+	* Test from the VMs:        NB: The IP may change depending of your configuration  
+		`$ ssh <username>@10.0.2.2`
+* Before using ares-install from your VM (let set windows), execute the following command  
+	`$  ssh –L5522:localhost:5522 <username>@10.0.2.2`  
+* Then execute the ares-install or ares-launch commands as if the webOS emulator was running as a VM inside your Windows VM  
+	`$ ares-install com.app_0.0.1_all.ipk`  
+NB: You will need to copy your 'webos' private key in your Windows VM
+
+
+
+
+
+
+
+
