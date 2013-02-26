@@ -27,7 +27,7 @@
 		"temp": "0.4.0"
 	},
 	"scripts": {
-		"test": "node_modules/.bin/mocha test/novacom.spec.js",
+		"test": "node_modules/.bin/mocha test/*.spec.js",
 		"install" : "node scripts/install-script.js"
 	}
 }
