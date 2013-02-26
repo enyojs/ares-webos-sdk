@@ -41,4 +41,8 @@ Launching application com.app
 ####Launch Ares in default Web browser####
 
 `$ ares-ide.sh`  
-ERRROR ……………….
+\> Service['home']: executing 'node hermes/fsLocal.js --pathname /files --port 0 --root …'  
+\> Service['dropbox']: executing 'node hermes/fsDropbox.js -P /files -p 0'  
+\> Service['phonegap']: executing 'node hermes/bdPhoneGap.js -P /phonegap -p 0'  
+\> Service['openwebos']: executing 'node hermes/bdOpenwebOS.js -P /openwebos -p 0 -v'  
+Press CTRL + C to shutdown
