@@ -2,6 +2,12 @@
 
 This is currently working on Mac OS X only.
 
+#### SSH key setup
+
+***`NOTE`***: This step is mandatory to succesfully run ares-install.sh and ares-launch.sh.
+  
+Please refer to SSH-KEY-SETUP.md for intructions.
+
 ####Download and extract the latest tarball from Jenkins####
 
 [webos-sdk-commands-0.0.2.tgz](http://cloudhudson.palm.com/view/enyo/job/Enyo-package-ares-tools/lastSuccessfulBuild/artifact/webos-sdk-commands/webos-sdk-commands-0.0.2.tgz)

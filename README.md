@@ -14,6 +14,12 @@ You need to get the source, using the procedure below.
 		$ cd webos-sdk-commands
 		$ npm install
 		
+## SSH key setup
+
+***`NOTE`***: This step is mandatory to succesfully run ares-install and ares-launch.
+  
+Please refer to SSH-KEY-SETUP.md for intructions.
+
 ## Path setting
 
 The commands ares-* can be invoked from anywhere in the file system provided the PATH
