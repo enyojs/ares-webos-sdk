@@ -1,0 +1,5 @@
+node_modules/.bin
+node_modules/express
+node_modules/optimist
+node_modules/rimraf
+node_modules/temp

@@ -1,0 +1,17 @@
+		{
+			"active": true,
+			"id":"openwebos",
+			"name":"Open webOS Build",
+			"type": "plugin",
+			"provider": "other",
+			"command":"@NODE@", "params":[
+				"node_modules/plugin-ares-owo-build/lib/main.js", "-P", "/owo-build", "-p", "0"
+			],
+			"plugin": {
+				"browsercode": "../node_modules/plugin-ares-owo-build/source/package.js",
+				"entrypoint": "OpenWebosBuild"
+			},
+			"useJsonp":false,
+			"verbose": true,
+			"respawn": false
+		}
