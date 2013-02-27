@@ -63,12 +63,17 @@ For example: [Git for Windows](http://code.google.com/p/msysgit/downloads/list?q
 ## Notes
 
 
-### Repositories
+### Jenkins build
 
-When delivered as part of an SDK, ares-generate.js should refer to repositories brought on the local file system by the SDK.
-	
-This is not the case for the time being.   
-ares-generate.js refers a ***temporary unofficial*** repository located at  [project-templates.json](https://raw.github.com/yves-del-medico/other-templates/master/project-templates.json).
+The jenkins build should do the following:
+
+* clone the webos-sdk-commands repo as explained above
+* extract the node tar.gz under the directorie node
+* download the files specified in the property "alternateUrl" in "templates/project-templates.json" and save them under filename specified in the property "url" in the directory "templates".
+* execute `npm pack`
+* untar the result of npm pack
+* rename package into xxxxxx
+* generate the final tar file.
 	
 
 ### Run (without node installed)
