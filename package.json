@@ -1,0 +1,6 @@
+{
+  "name": "plugin-ares-owo-build",
+  "description": "Ares plugin",
+  "main": "./index",
+  "version": "0.0.1"
+}
