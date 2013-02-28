@@ -33,6 +33,7 @@
 		"ares-install.bat",
 		"ares-launch.bat",
 		"DEMO.md",
+		"SSH-KEY-SETUP.md",
 		"ares-ide.sh"
 	]
 }
