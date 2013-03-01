@@ -14,7 +14,7 @@ You need to get the source, using the procedure below.
 		$ cd webos-sdk-commands
 		$ npm install
 		
-## SSH key setup
+## SSH setup on host and emulator
 
 ***`NOTE`***: This step is mandatory to succesfully run ares-install and ares-launch.
   
@@ -39,6 +39,8 @@ NOTE: On Windows, you can also use a bash enviromment.
 For example: [Git for Windows](http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git) which provides a bash shell as on Linux.
 
 ## Usage
+
+Warning: http proxy is not supported.
 
 ### ares-generate (.sh|.bat)
 
