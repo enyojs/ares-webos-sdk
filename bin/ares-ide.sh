@@ -4,7 +4,7 @@
 ARES_DIR=$(cd `dirname $0` && pwd)
 
 # path to included node
-export NODE_PATH="$ARES_DIR/node/bin"
+export NODE_PATH="$ARES_DIR/../node/bin"
 
 # launch ares IDE
 cd $ARES_DIR/ares-project

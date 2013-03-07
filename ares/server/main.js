@@ -11,7 +11,7 @@ var fs = require("fs"),
     async = require("async"),
     mkdirp = require("mkdirp"),
     optimist = require('optimist'),
-    tools = require('nodejs-module-webos-ipkg'),
+    tools = require('../../lib/ipkg-tools'),
     rimraf = require("rimraf"),
     CombinedStream = require('combined-stream');
 

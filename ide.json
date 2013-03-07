@@ -1,3 +1,5 @@
+{
+	"services": [
 		{
 			"active": true,
 			"id":"openwebos",
@@ -6,13 +8,15 @@
 			"mode": "plugin",
 			"provider": "other",
 			"command":"@NODE@", "params":[
-				"node_modules/plugin-ares-owo-build/lib/main.js", "-P", "/owo-build", "-p", "0"
+				"@INSTALLDIR@/node_modules/nodejs-module-webos-ipkg/ares/server/main.js", "-P", "/owo-build", "-p", "0"
 			],
 			"plugin": {
-				"browsercode": "../node_modules/plugin-ares-owo-build/source/package.js",
+				"browsercode": "../node_modules/nodejs-module-webos-ipkg/ares/client/package.js",
 				"entrypoint": "OpenWebosBuild"
 			},
 			"useJsonp":false,
 			"verbose": false,
 			"respawn": false
 		}
+	]
+}
