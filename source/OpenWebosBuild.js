@@ -102,6 +102,7 @@ enyo.kind({
 		var request = project.filesystem.getFile(id);
 		request.response(this, function(inEvent, inData) {
 			// Got a file content: add it to the multipart/form-data
+			if (this.debug) this.log("Fetched " + name + " size: " + inData.content.length + " bytes");
 			var blob = new enyo.Blob([inData.content || ""], {type: "application/octet-stream"});
 			// 'file' is the form field name, mutually agreed with the Hermes server
 			formData.append('file', blob, name);
