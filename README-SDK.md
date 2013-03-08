@@ -7,11 +7,11 @@ You need to get the source, using the procedure below.
 
 1. Clone the repository from GitHub
 
-		$ git clone --recursive https://github.com/enyojs/webos-sdk-commands.git
+		$ git clone --recursive https://github.com/enyojs/nodejs-module-webos-ipkg.git
 
 2. Install the dependencies
 
-		$ cd webos-sdk-commands
+		$ cd nodejs-module-webos-ipkg
 		$ npm install
 		
 ## SSH setup on host and emulator
@@ -27,20 +27,20 @@ has been set correctly.
 
 On Linux and Mac OS X:
 
-	$ export PATH=$PATH:<webos-sdk-commands-full-path>
-	For exanple: export PATH=$PATH:/Users/ares/GIT/webos-sdk-commands
+	$ export PATH=$PATH:<webos-sdk-commands-full-path>/bin
+	For exanple: export PATH=$PATH:/Users/ares/GIT/nodejs-module-webos-ipkg/bin
  
 On windows (cmd.exe):
 
-	> SET PATH=%PATH%;<webos-sdk-commands-full-path>
-	For example: > SET PATH=%PATH%;C:\Users\ares\GIT\webos-sdk-commands
+	> SET PATH=%PATH%;<webos-sdk-commands-full-path>/bin
+	For example: > SET PATH=%PATH%;C:\Users\ares\GIT\nodejs-module-webos-ipkg/bin
 	
 NOTE: On Windows, you can also use a bash enviromment.  
 For example: [Git for Windows](http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git) which provides a bash shell as on Linux.
 
 ## Usage
 
-Warning: http proxy is not supported.
+Warning: http proxy is not yet supported.
 
 ### ares-generate (.sh|.bat)
 
