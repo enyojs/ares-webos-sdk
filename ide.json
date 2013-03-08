@@ -14,6 +14,10 @@
 				"browsercode": "../node_modules/nodejs-module-webos-ipkg/ares/client/package.js",
 				"entrypoint": "OpenWebosBuild"
 			},
+			"project-template-repositories": [{
+				"id": "owo",
+				"url": "https://raw.github.com/yves-del-medico/other-templates/master/project-templates.json"
+            }],
 			"useJsonp":false,
 			"verbose": false,
 			"respawn": false
