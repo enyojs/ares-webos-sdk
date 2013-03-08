@@ -19,6 +19,7 @@ Test
 3. Start the emulator
 4. Run the `novacom` interface tester
 
+		$ test/novacom.spec.js 
 		  novacom
 		    #put
 		      ✓ should write a file on the device (1049ms)
