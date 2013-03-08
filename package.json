@@ -30,5 +30,38 @@
   "scripts": {
     "test": "node_modules/.bin/mocha test/*.spec.js",
     "install": "node scripts/install-script.js"
-  }
+  },
+  "bundledDependencies": [
+    "shelljs",
+    "unzip",
+    "request",
+    "async",
+    "mkdirp",
+    "temp",
+    "rimraf",
+    "tar",
+    "fstream",
+    "graceful-fs",
+    "combined-stream",
+    "ssh2",
+    "npmlog",
+    "nopt",
+    "npm",
+    "stream-buffers",
+    "express",
+    "optimist"
+  ],
+    "files": [
+    "DEMO.md",
+    "README-SDK.md",
+    "README.md",
+    "SSH-KEY-SETUP.md",
+    "ares",
+    "bin",
+    "ide.json",
+    "lib",
+    "scripts",
+    "templates",
+    "test"
+  ]
 }
