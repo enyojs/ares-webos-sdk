@@ -1,14 +1,14 @@
 @REM don't watch the sausage being made
 @ECHO OFF
 
-REM the folder this script is in (*/bootplate/tools)
-SET ARES_DIR=%~DP0
+REM the folder this script is in
+SET BIN_DIR=%~DP0
 
 REM node script we are going to run
-SET JS_SCRIPT=%ARES_DIR%\lib\ares-install.js
+SET JS_SCRIPT=%BIN_DIR%\..\lib\ares-install.js
 
-REM node location
-SET NODE=node.exe
+REM path to included node
+PATH=%BIN_DIR%..\node;%PATH%
 
 REM use node to invoke js script with imported parameters
-%NODE% "%JS_SCRIPT%" %*
+node.exe "%JS_SCRIPT%" %*
