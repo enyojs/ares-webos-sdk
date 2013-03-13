@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # the folder this script is in
-ARES_DIR=$(cd `dirname $0` && pwd)
+BIN_DIR=$(cd `dirname $0` && pwd)
+
+# node script we are going to run
+SCRIPT="$BIN_DIR/../../ide.js"
 
 # path to included node
-export NODE_PATH="$ARES_DIR/../node/bin"
+export NODE_PATH="$BIN_DIR/../node/bin"
 
-# launch ares IDE
-cd $ARES_DIR/ares-project
-PATH=$NODE_PATH:$PATH node ide.js -b $@
+# run node script with imported params
+PATH=$NODE_PATH:$PATH node $SCRIPT -b $@
