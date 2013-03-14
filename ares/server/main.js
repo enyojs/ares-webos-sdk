@@ -202,6 +202,8 @@ function BdOpenwebOS(config, next) {
 		var packageStream = fs.createWriteStream(req.appDir.packageFile);
 		request(packageUrl).pipe(packageStream);
 
+		// TODO: Handle error cases
+
 		packageStream.on('close', function() {
 			console.log('fetchPackage: on close');
 			next();

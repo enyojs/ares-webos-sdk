@@ -42,6 +42,7 @@ enyo.kind({
 		if (this.debug) { this.log("Starting OWO build: " + this.url + '/build'); }
 
 		// TODO: move to async
+		this.project = project;		// TODO: must go into a context object per build request
 
 		this.getFileList(project, next);
 	},
@@ -53,8 +54,6 @@ enyo.kind({
 	 */
 	getFileList: function(project, next) {
 		if (this.debug) this.log("...");
-
-		this.project = project;		// TODO: must go into a context object
 
 		var req, fileList = [];
 		req = project.filesystem.propfind(project.folderId, -1 /*infinity*/);
@@ -182,7 +181,7 @@ enyo.kind({
 		req.response(this, function(inSender, inData) {
 			if (this.debug) this.log("response received ", inData);
 			var config = this.project.filesystem.config;
-			var url = config.origin + config.pathname + '/file/' + inData[0].path;			// TODO: YDM: shortcut to be refined
+			var url = config.origin + config.pathname + '/file' + inData[0].path;			// TODO: YDM: shortcut to be refined
 
 			this.install(url, next);
 		});
@@ -202,7 +201,7 @@ enyo.kind({
 			postBody: data
 		});
 		req.response(this, function(inSender, inData) {
-			var config = this.project.config;
+			var config = this.project.config;					// TODO: app id must come from appinfo.json
 			this.launch(config.data.id, next);
 		});
 		req.error(this, function(inSender, inError) {
