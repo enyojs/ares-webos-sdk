@@ -1,9 +1,9 @@
 enyo.kind({
 	name: "OpenWebosBuild",
 	kind: "enyo.Component",
-	debug: true,
+	debug: false,
 	events: {
-		onBuildStarted: ""
+		onShowWaitPopup: ""
 	},
 	create: function() {
 		this.inherited(arguments);
@@ -42,6 +42,7 @@ enyo.kind({
 		if (this.debug) { this.log("Starting OWO build: " + this.url + '/build'); }
 
 		// TODO: move to async
+		this.project = project;		// TODO: must go into a context object per build request
 
 		this.getFileList(project, next);
 	},
@@ -54,12 +55,10 @@ enyo.kind({
 	getFileList: function(project, next) {
 		if (this.debug) this.log("...");
 
-		this.project = project;		// TODO: must go into a context object
-
 		var req, fileList = [];
 		req = project.filesystem.propfind(project.folderId, -1 /*infinity*/);
 		req.response(this, function(inEvent, inData) {
-			this.doBuildStarted({project: project});
+			this.doShowWaitPopup({msg: $L("Building webOS package")});
 			if (this.debug) enyo.log("Got the list of files", inData);
 			// Extract the list into an array
 			this.buildFileList(inData.children, fileList);
@@ -150,8 +149,6 @@ enyo.kind({
 	submitBuildRequest: function(project, formData, next) {
 		if (this.debug) this.log("...");
 
-		setTimeout(function() {      // TODO: TBR
-
 		// Ask Hermes PhoneGap Build service to minify and zip the project
 		var req = new enyo.Ajax({
 			url: this.url + '/op/build',
@@ -176,9 +173,6 @@ enyo.kind({
 			next(new Error("Unable to build application:" + inError), details);
 		});
 		req.go();
-
-
-	}.bind(this), 10000);			// TODO: TBR
 	},
 	storeIpk: function(inData, next) {
 		if (this.debug) this.log("ctype: ", inData.ctype, " bytes: " + inData.content.length);
@@ -186,12 +180,55 @@ enyo.kind({
 		var req = this.project.filesystem.createFiles(this.project.folderId, {content: inData.content, ctype: inData.ctype});
 		req.response(this, function(inSender, inData) {
 			if (this.debug) this.log("response received ", inData);
-			next();
+			var config = this.project.filesystem.config;
+			var url = config.origin + config.pathname + '/file' + inData[0].path;			// TODO: YDM: shortcut to be refined
+
+			this.install(url, next);
 		});
 		req.error(this, function(inSender, inError) {
 			next(new Error("Unable to store ipk: " + inError));
 		});
+	},
+	install: function(packageUrl, next) {
+		if (this.debug) this.log('installing ' + packageUrl);
+		this.doShowWaitPopup({msg: $L("Installing webOS package")});
+
+		var data = "package=" + encodeURIComponent(packageUrl);
+		var req = new enyo.Ajax({
+			url: this.url + '/op/install',
+			method: 'POST',
+			handleAs: 'text',
+			postBody: data
+		});
+		req.response(this, function(inSender, inData) {
+			var config = this.project.config;					// TODO: app id must come from appinfo.json
+			this.launch(config.data.id, next);
+		});
+		req.error(this, function(inSender, inError) {
+			next("Unable to install application:");
+		});
+		req.go();
+	},
+	launch: function(id, next) {
+		if (this.debug) this.log('launching ' + id);
+		this.doShowWaitPopup({msg: $L("Starting webOS application")});
+
+		var data = "id=" + encodeURIComponent(id);
+		var req = new enyo.Ajax({
+			url: this.url + '/op/launch',
+			method: 'POST',
+			handleAs: 'text',
+			postBody: data
+		});
+		req.response(this, function(inSender, inData) {
+			next();
+		});
+		req.error(this, function(inSender, inError) {
+			next("Unable to launch application:");
+		});
+		req.go();
 	}
 });
 
-ServiceRegistry.instance.pluginReady("openwebos", new OpenWebosBuild());
+var builder = Ares.instance.createComponent({kind: "OpenWebosBuild"});
+ServiceRegistry.instance.pluginReady("openwebos", builder);

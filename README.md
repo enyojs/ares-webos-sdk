@@ -10,7 +10,14 @@ Install
 -------
 
 * In order to hack on `nodejs-module-webos-ipkg`, clone from [GitHub](https://github.com/enyojs/nodejs-module-webos-ipkg), then run `npm install`.
-* In order to use `nodejs-module-webos-ipkg` in your own modules, without actually working on it, then run `npm install git@github.com:enyojs/nodejs-module-webos-ipkg.git#0.0.1` where `0.0.1` is the version you want to use (_not yet working_).
+* In order to use a development tree of `nodejs-module-webos-ipkg` from within your own project (eg. from the Ares IDE), manually add this modules under the source-code Ares using NPM:
+
+		$ cd /path/to/nodejs-module-webos-ipkg
+		$ npm install
+		$ cd /path/to/ares-ide
+		$ npm install ../relative/path/to/nodejs-module-webos-ipkg
+
+* In order to use a specific version of `nodejs-module-webos-ipkg` in your own modules (eg. from the Ares IDE), without actually working on it, then run `npm install git@github.com:enyojs/nodejs-module-webos-ipkg.git#0.0.1` where `0.0.1` is the version you want to use (_not yet working_).
 * On Mac OS X, you need to install Xcode and Xcode Command Line Tools (Xcode -> Preferences -> Downloads -> Components)
 
 Test

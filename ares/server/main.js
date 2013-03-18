@@ -11,6 +11,7 @@ var fs = require("fs"),
     async = require("async"),
     mkdirp = require("mkdirp"),
     optimist = require('optimist'),
+    request = require('request'),
     tools = require('../../lib/ipkg-tools'),
     rimraf = require("rimraf"),
     CombinedStream = require('combined-stream');
@@ -123,6 +124,35 @@ function BdOpenwebOS(config, next) {
 		});
 	});
 
+	app.post(makeExpressRoute('/op/install'), function(req, res, next) {
+		async.series([
+			prepare.bind(this, req, res),
+			fetchPackage.bind(this, req, res),
+			install.bind(this, req, res),
+			answerOk.bind(this, req, res),
+			cleanup.bind(this, req, res)
+		], function (err, results) {
+			if (err) {
+				// cleanup & run express's next() : the errorHandler
+				cleanup.bind(this)(req, res, next.bind(this, err));
+				return;
+			}
+		});
+	});
+
+	app.post(makeExpressRoute('/op/launch'), function(req, res, next) {
+		async.series([
+			launch.bind(this, req, res),
+			answerOk.bind(this, req, res)
+		], function (err, results) {
+			if (err) {
+				// cleanup & run express's next() : the errorHandler
+				next(err);
+				return;
+			}
+		});
+	});
+
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
 	// is bound
@@ -136,6 +166,54 @@ function BdOpenwebOS(config, next) {
 			pathname: config.pathname
 		});
 	});
+
+	function install(req, res, next) {
+		console.log("install(): ", req.appDir.packageFile);
+
+		tools.installer.install({verbose: true}, req.appDir.packageFile, function(err, result) {
+			console.log("install() DONE: ", err, result);
+			if (err) {
+				next(err);
+				return;
+			}
+			next();
+		});
+	}
+
+	function launch(req, res, next) {
+		console.log("launch(): ", req.body.id);
+
+		tools.launcher.launch({verbose: true}, req.body.id, null, function(err, result) {
+			console.log("launch() DONE: ", err, result);
+			if (err) {
+				next(err);
+				return;
+			}
+			next();
+		});
+	}
+
+	function fetchPackage(req, res, next) {
+		var packageUrl = req.body.package;
+		console.log("fetch(): ", packageUrl);
+
+		req.appDir.packageFile = path.join(req.appDir.root, 'package.ipk');
+
+		var packageStream = fs.createWriteStream(req.appDir.packageFile);
+		request(packageUrl).pipe(packageStream);
+
+		// TODO: Handle error cases
+
+		packageStream.on('close', function() {
+			console.log('fetchPackage: on close');
+			next();
+		});
+	}
+
+	function answerOk(req, res, next) {
+		console.log('Answering 200 OK');
+		res.status(200).send();
+	}
 
 	function prepare(req, res, next) {
 		var appTempDir = temp.path({prefix: 'com.palm.ares.hermes.owo.'}) + '.d';
