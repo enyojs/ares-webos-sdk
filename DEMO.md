@@ -1,22 +1,28 @@
 ### Demo
 
-This is currently working on Mac OS X only.
-
 #### SSH key setup
 
 ***`NOTE`***: This step is mandatory to succesfully run ares-install.sh and ares-launch.sh.
   
-Please refer to SSH-KEY-SETUP.md for intructions.
+Please refer to [SSH-KEY-SETUP.md](SSH-KEY-SETUP.md) for intructions.
 
 ####Download and extract the latest tarball from Jenkins####
 
-[webos-sdk-commands-0.0.x.tgz](http://cloudhudson.palm.com/view/enyo/job/Enyo-package-ares-tools/lastSuccessfulBuild/artifact/webos-sdk-commands/webos-sdk-commands-0.0.x.tgz)
+* Go to: [Enyo-package-ares-SDK-xplat](https://gecko.palm.com/jenkins/view/Enyo/job/Enyo-package-ares-SDK-xplat/)
+* Download the apporiate package for your platform (Mac, Windows, Linux).  Note, the "ide" packages contain both Ares and the command line interface (CLI) tools.  The "cli" package contains only the CLI tools.
+* Unzip/untar the package onto your machine, e.g.:  
 
-`$ tar -xzf webos-sdk-commands-0.0.x.tgz`
+	`$ tar -xzf ares-webos-ide-mac.tgz`
 
 #### Set the PATH####
 
-`$ export PATH=$PATH:<full-path-to-webos-sdk-commands-version>/bin       ` 
+* For the "ide" package:
+
+	`$ export PATH=$PATH:<full-path-to-ares-ide>/nodejs-module-webos-ipkg/bin`
+
+* For the "cli" package:
+
+	`$ export PATH=$PATH:<full-path-to-nodejs-module-webos-ipkg>/bin`
 	
 ####Generate a template app####
 
