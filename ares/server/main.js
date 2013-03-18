@@ -252,10 +252,34 @@ function BdOpenwebOS(config, next) {
 				if (err) {
 					cb(err);
 				} else {
-					fs.rename(file.path, path.join(req.appDir.source, file.name), function(err) {
-						console.log("store(): Stored: ", file.name);
-						cb(err);
-					});
+					if (file.type.match(/x-encoding=base64/)) {
+						fs.readFile(file.path, function(err, data) {
+							if (err) {
+								console.log("transcoding: error" + file.path, err);
+								cb(err);
+								return;
+							}
+							try {
+								var fpath = file.path;
+								delete file.path;
+								fs.unlink(fpath, function(err) { /* Nothing to do */ });
+
+								var filedata = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
+								fs.writeFile(path.join(req.appDir.source, file.name), filedata, function(err) {
+									// console.log("store from base64(): Stored: ", file.name);
+									cb(err);
+								});
+							} catch(transcodeError) {
+								console.log("transcoding error: " + file.path, transcodeError);
+								cb(transcodeError);
+							}
+						}.bind(this));
+					} else {
+						fs.rename(file.path, path.join(req.appDir.source, file.name), function(err) {
+							// console.log("store(): Stored: ", file.name);
+							cb(err);
+						});
+					}
 				}
 			});
 		}, next);
