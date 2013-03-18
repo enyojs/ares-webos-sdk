@@ -16,27 +16,6 @@ enyo.kind({
 			this.url = this.config.origin + this.config.pathname;
 			if (this.debug) this.log("url:", this.url);
 		}
-
-		// Get the 'generate' service url
-		var genSrv = ServiceRegistry.instance.resolveServiceId('prj-toolkit');
-		if (genSrv) {
-			this.genSrvUrl = genSrv.url;
-
-			// Populate the repositories on nodejs
-			enyo.forEach(config['project-template-repositories'], function(repository) {
-				this.createRepo(repository);		// TODO: handle the answer
-			}, this);
-		}
-	},
-	createRepo: function(repo) {
-		if (this.debug) this.log();
-		var data = "url=" + encodeURIComponent(repo.url);
-		var req = new enyo.Ajax({
-			url: this.genSrvUrl + '/template-repos/' + repo.id,
-			method: 'POST',
-			postBody: data
-		});
-		return req.go();
 	},
 	build: function(project, next) {
 		if (this.debug) { this.log("Starting OWO build: " + this.url + '/build'); }
