@@ -34,5 +34,23 @@
       }
     ],
     "description": "Enyo bootplate 2.2.0"
+  },
+  {
+    "id": "bootplate-nightly-owo",
+    "zipfiles": [
+      {
+        "url": "bootplate-latest.zip",
+        "alternateUrl": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
+        "prefixToRemove": "bootplate",
+        "excluded": [
+          "bootplate/api"
+        ]
+      },
+      {
+        "url": "webos-app-config.zip",
+        "alternateUrl": "http://enyojs.com/webos/webos-app-config.zip"
+      }
+    ],
+    "description": "Enyo bootplate for webOS - Nightly"
   }
 ]
