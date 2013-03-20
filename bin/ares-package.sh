@@ -7,9 +7,7 @@ BIN_DIR=$(cd `dirname $0` && pwd)
 SCRIPT="$BIN_DIR/../lib/ares-package.js"
 
 # path to included node
-NODE_BASE=$BIN_DIR/../node
-NODE_BIN="$NODE_BASE/bin"
-export NODE_PATH="$NODE_BASE/lib"
+export NODE_PATH="$BIN_DIR/../node/bin"
 
 # run node script with imported params
-PATH=$NODE_BIN:$PATH node $SCRIPT -b $@
+PATH=$NODE_PATH:$PATH node $SCRIPT $@
