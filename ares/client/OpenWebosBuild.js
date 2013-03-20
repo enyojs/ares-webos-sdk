@@ -137,5 +137,6 @@ enyo.kind({
 	}
 });
 
-var builder = new OpenWebosBuild();
-ServiceRegistry.instance.pluginReady("openwebos", builder);
+// Provide to ServiceRegistry the information to instanciate the service client implemtation
+ServiceRegistry.instance.pluginReady("openwebos", {kind: "OpenWebosBuild"});
+
