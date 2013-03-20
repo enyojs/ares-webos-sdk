@@ -1,7 +1,7 @@
 {
 	"services": [
 		{
-			"active": false,
+			"active": true,
 			"id":"openwebos",
 			"name":"Open webOS Build",
 			"type": ["build"],

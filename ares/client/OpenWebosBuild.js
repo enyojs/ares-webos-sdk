@@ -10,7 +10,7 @@ enyo.kind({
 	},
 	setConfig: function(config) {
 		this.config = config;
-		this.log(config);
+		if (this.debug) this.log(config);
 
 		if (this.config.origin && this.config.pathname) {
 			this.url = this.config.origin + this.config.pathname;
