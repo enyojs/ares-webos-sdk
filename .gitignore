@@ -19,3 +19,5 @@ node_modules/combined-stream
 node_modules/express
 node_modules/optimist
 node
+
+.DS_Store
