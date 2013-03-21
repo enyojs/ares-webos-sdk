@@ -9,7 +9,11 @@ A module for nodejs that allows to generate, package, install, run and debug Ope
 Install
 -------
 
-* In order to hack on `nodejs-module-webos-ipkg`, clone from [GitHub](https://github.com/enyojs/nodejs-module-webos-ipkg), then run `npm install`.
+* In order to hack on `nodejs-module-webos-ipkg`:
+
+		$ git clone --recursive https://github.com/enyojs/nodejs-module-webos-ipkg
+		$ npm install
+
 * In order to use a development tree of `nodejs-module-webos-ipkg` from within your own project (eg. from the Ares IDE), manually add this modules under the source-code Ares using NPM:
 
 		$ cd /path/to/nodejs-module-webos-ipkg

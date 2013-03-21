@@ -10,14 +10,13 @@
     "mkdirp": "~0.3.4",
     "temp": "~0.4.0",
     "rimraf": "2.1.4",
-    "tar": "git+http://github.com/dod38fr/node-tar.git",
+    "tar": "0.1.17",
     "fstream": "0.1.22",
     "graceful-fs": "1.2.0",
     "combined-stream": "0.0.4",
     "ssh2": "0.1.12",
     "npmlog": "0.0.2",
     "nopt": "2.1.1",
-    "npm": ">=1.2.12",
     "stream-buffers": "0.2.4",
     "express": "~2.5.8",
     "optimist": "~0.3.5"
@@ -29,7 +28,7 @@
   },
   "scripts": {
     "test": "node_modules/.bin/mocha test/*.spec.js",
-    "install": "node scripts/install-script.js"
+    "install" : "node ./scripts/sub-npm.js"
   },
   "bundledDependencies": [
     "shelljs",
@@ -46,7 +45,6 @@
     "ssh2",
     "npmlog",
     "nopt",
-    "npm",
     "stream-buffers",
     "express",
     "optimist"
