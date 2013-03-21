@@ -104,7 +104,7 @@ Setup
 
 ### Open webOS
 
-1. Install an Open webOS emualator image & start it
+1. Install an Open webOS emulator image & start it
 2. Install the SSH public key.  Each of the command below will ask for the `root` password.
 
 		$ ssh -p 6622 root@localhost mkdir .ssh
@@ -121,7 +121,7 @@ Setup
 
 ### webOS 3.0.5
 
-**Note:** webOS 3.0.5 is running an old verion of the light-weight `dropbear` SSH server that may cause failure of the test suite, although every remote commands succeed.
+**Note:** webOS 3.0.5 is running an old version of the light-weight `dropbear` SSH server that may cause failure of the test suite, although every remote commands succeed.
 
 1. Install the webOS 3.0.5 SDK
 2. Start the webOS emulator:
@@ -148,6 +148,11 @@ Setup
 		$ ssh -i ~/.ssh/webos -p 5522 root@localhost
 		root@qemux86:/var/home/root# 
 
+### SSH plumbing
+
+In case your webOS SDK (and/or Ares IDE) are both running in VirtualBox guests, you need to tunnel the port 5522 from the IDE guest to the emulator guest (replace `kowalskif` )
+
+	$ ssh -L5522:localhost:5522 kowalskif@10.0.2.2
 
 ## Reference
 
