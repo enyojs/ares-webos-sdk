@@ -438,8 +438,6 @@ if (path.basename(process.argv[1]) === basename) {
 		if (process.send) process.send(service);
 	});
 
-	process.on('SIGINT', obj.onExit.bind(obj));
-	process.on('exit', obj.onExit.bind(obj));
 } else {
 
 	// ... otherwise hook into commonJS module systems
