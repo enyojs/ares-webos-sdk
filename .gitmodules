@@ -1,6 +1,6 @@
 [submodule "node_modules/unzip"]
 	path = node_modules/unzip
-	url = ../node-unzip.git
+	url = ../../enyojs/node-unzip.git
 [submodule "node_modules/tar"]
 	path = node_modules/tar
-	url = ../node-tar.git
+	url = ../../enyojs/node-tar.git
