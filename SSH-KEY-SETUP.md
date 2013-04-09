@@ -56,3 +56,18 @@ SSH key setup
 
 		$ ssh -i ~/.ssh/webos -p 5522 root@localhost
 		root@qemux86:/var/home/root# 
+
+### Open webOS
+
+1. Install an Open webOS emulator image & start it
+2. Install the SSH public key.  Each of the command below will ask for the `root` password.
+
+		$ ssh -p 6622 root@localhost mkdir .ssh
+		$ ssh -p 6622 root@localhost chmod 700 .ssh
+		$ cat ~/.ssh/webos.pub | ssh -p 6622 root@localhost "cat > .ssh/authorized_keys"
+		$ ssh -p 6622 root@localhost chmod 700 .ssh/authorized_keys
+
+3. Test that key-based authentication works fine (password should not be needed at this step).
+
+		$ ssh -p 6622 -i ~/.ssh/webos root@localhost
+		root@qemux86:~# 
