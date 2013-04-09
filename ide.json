@@ -4,23 +4,25 @@
 			"active": true,
 			"id":"openwebos",
 			"name":"Open webOS Build",
-			"type": "build",
-			"mode": "plugin",
-			"provider": "other",
+			"type": ["build"],
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/node_modules/nodejs-module-webos-ipkg/ares/server/main.js", "-P", "/owo-build", "-p", "0"
 			],
-			"plugin": {
-				"browsercode": "../node_modules/nodejs-module-webos-ipkg/ares/client/package.js",
-				"entrypoint": "OpenWebosBuild"
-			},
-			"project-template-repositories": [{
-				"id": "owo",
-				"url": "https://raw.github.com/yves-del-medico/other-templates/master/project-templates.json"
-            }],
+			"pluginUrl": "../node_modules/nodejs-module-webos-ipkg/ares/client/package.js",
 			"useJsonp":false,
 			"verbose": false,
 			"respawn": false
+		},
+		{
+			"id": "genZip",
+			"projectTemplateRepositories": {
+				"bootplate": {
+				},
+				"owo": {
+					"url": "http://enyojs.com/webos/project-templates.json",
+					"description": "Open webOS Templates"
+				}
+	        }
 		}
 	]
 }
