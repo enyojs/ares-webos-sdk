@@ -4,7 +4,10 @@ nodejs-module-webos-ipkg
 Summary
 -------
 
-A module for nodejs that allows to generate, package, install, run and debug Open webOS applications.
+A module that provides:
+
+* command line to generate, package, install, run and debug Open webOS applications.
+* an Ares plugin generate, package, install, run and debug Open webOS applications from Ares IDE.
 
 Install
 -------
@@ -12,6 +15,7 @@ Install
 * In order to hack on `nodejs-module-webos-ipkg`:
 
 		$ git clone --recursive https://github.com/enyojs/nodejs-module-webos-ipkg
+		$ cd nodejs-module-webos-ipkg
 		$ npm install
 
 * In order to use a development tree of `nodejs-module-webos-ipkg` from within your own project (eg. from the Ares IDE), manually add this modules under the source-code Ares using NPM:
@@ -23,6 +27,110 @@ Install
 
 * In order to use a specific version of `nodejs-module-webos-ipkg` in your own modules (eg. from the Ares IDE), without actually working on it, then run `npm install git@github.com:enyojs/nodejs-module-webos-ipkg.git#0.0.1` where `0.0.1` is the version you want to use (_not yet working_).
 * On Mac OS X, you need to install Xcode and Xcode Command Line Tools (Xcode -> Preferences -> Downloads -> Components)
+
+Setup
+-----
+
+### Ssh settings
+
+Please refer to [SSH-KEY-SETUP.md](SSH-KEY-SETUP.md) for intructions.
+
+### SSH plumbing to use ares-install from VirtualBox enviromment
+
+In case your webOS SDK (and/or Ares IDE) are both running in VirtualBox guests, you need to tunnel the port 5522 from the IDE guest to the emulator guest (replace `<username>` )
+
+	$ ssh -L5522:localhost:5522 <username>@10.0.2.2
+	
+### Path setting (needed only for command line)
+
+The commands ares-* can be invoked from anywhere in the file system provided the PATH
+has been set correctly.
+
+On Linux and Mac OS X:
+
+	$ export PATH=$PATH:<webos-sdk-commands-full-path>/bin
+	For exanple: export PATH=$PATH:/Users/ares/GIT/nodejs-module-webos-ipkg/bin
+ 
+On windows (cmd.exe):
+
+	> SET PATH=%PATH%;<webos-sdk-commands-full-path>/bin
+	For example: > SET PATH=%PATH%;C:\Users\ares\GIT\nodejs-module-webos-ipkg/bin
+	
+NOTE: On Windows, you can also use a bash enviromment.  
+For example: [Git for Windows](http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git) which provides a bash shell as on Linux.
+
+Command line usage
+------------------
+
+Warning: http proxy is not yet supported.
+
+### ares-generate (.sh|.bat)
+
+	$ ares-generate -l
+	$ ares-generate -t bootplate-2.1.1-owo -p id=com.myapp -p version=1.2.3 -p title=MyApp MyApp
+
+### ares-package (.sh|.bat)
+
+	$ ares-package MyApp
+	
+	NB: ares-package will minify the application if possible.
+	ares-package will also copy appinfo.json and framework_config.json after the minification
+
+### ares-install (.sh|.bat)
+	
+	$ ares-install --list
+	$ ares-install --install com.myapp_1.0.0_all.ipk
+	$ ares-install --remove com.myapp
+
+`--install` is the default:
+
+	$ ares-install com.myapp_1.0.0_all.ipk
+	
+### ares-launch (.sh|.bat)
+	
+	$ ares-launch com.myapp
+	
+	
+Project template configuration
+------------------------------
+
+There are two diferent project template configuration.
+
+* for the command line ares-generate
+* for the Ares IDE
+
+### Project template configuration for ares-generate
+
+The project templates used by the command line `ares-generate` are defined in the file `templates/project-templates.json`.
+
+Additional templates could:
+
+* be added directly into the file 'templates/project-templates.json'
+* be added thru command line option '--repo <filename>'
+* be added directly in the code of ares-generate.  
+For that, go in 'lib/ares-generate.js' in the property 'this.repositories'.  
+The entries of 'this.repositories' can either be local files under the 'templates' directory or files accessible thru http.
+
+### Project template configuration for Ares IDE
+
+This module "nodejs-module-webos-ipkg" brings some additional project templates for `webOS` and override some project template definition brought by the Ares IDE.
+
+This is done by the "genZip" entry of the file "ide.json" stored in the main directory of this module.
+
+See [Project template configuration](../../hermes/README.md#project-template-config) in ares-project for more information.
+
+Source code organization
+------------------------
+
+The source code of this module is organized as follow:
+
+* `ares/client`: This is a browser side code of the webOS Ares plugin loaded in the Ares IDE. This part is written in enyo.
+* `ares/server`: This is a server side code of the webOS Ares plugin loaded in the Ares IDE. This part is in javascript running into a nodejs server.
+* `bin`: This directory contains the .sh and .bat wrappers for the ares-* commands
+* `lib`: This directory contains the javascript code used by the server side Ares plugin and the ares-* commands.
+* `scripts`: This directory contains script(s) used during 'npm install' to 'npm install' node modules integrated as git submodules.
+* `templates`: This directory contains project template definitions
+* `test`: This directory contains various tests for that module.
 
 Test
 ----
@@ -71,90 +179,9 @@ Test
         
           2 tests complete (3 seconds)
 
-Setup
------
 
-**NOTE:** Until now, there is no SSH key distribution system.  This section explains manual generation & installation.
-
-### Generic instructions
-
-1. Generate the SSH keypair using Open-SSH
-
-		$ ssh-keygen -f ~/.ssh/webos -C root@webos-emulator
-		
-		Generating public/private rsa key pair.
-		Enter passphrase (empty for no passphrase): 
-		Enter same passphrase again: 
-		Your identification has been saved in webos.
-		Your public key has been saved in webos.pub.
-		The key fingerprint is:
-		75:84:3b:f9:c0:f1:30:74:9d:f4:b2:ac:82:ec:cb:6e root@localhost:5522
-		The key's randomart image is:
-		+--[ RSA 2048]----+
-		|         ...oo.. |
-		|          =o  o. |
-		|         ..B. . .|
-		|         .*... o |
-		|        S  +  o  |
-		|       . .  ..   |
-		|        o . .    |
-		|       oE  .     |
-		|       o=.       |
-		+-----------------+
-
-### Open webOS
-
-1. Install an Open webOS emulator image & start it
-2. Install the SSH public key.  Each of the command below will ask for the `root` password.
-
-		$ ssh -p 6622 root@localhost mkdir .ssh
-		$ ssh -p 6622 root@localhost chmod 700 .ssh
-		$ cat ~/.ssh/webos.pub | ssh -p 6622 root@localhost "cat > .ssh/authorized_keys"
-		$ ssh -p 6622 root@localhost chmod 700 .ssh/authorized_keys
-
-3. Test that key-based authentication works fine (password should not be needed at this step).
-
-		$ ssh -p 6622 -i ~/.ssh/webos root@localhost
-		root@qemux86:~# 
-
-
-
-### webOS 3.0.5
-
-**Note:** webOS 3.0.5 is running an old version of the light-weight `dropbear` SSH server that may cause failure of the test suite, although every remote commands succeed.
-
-1. Install the webOS 3.0.5 SDK
-2. Start the webOS emulator:
-
-	Assuming `/opt/PalmSDK/Current/bin` is in your `PATH`, run:
-	
-		$ palm-emulator --list
-		Available images:
-		SDK 3.0.4.669 (1024x768)
-		SDK 3.0.5.676 (1024x768)
-		$ palm-emulator --no-vbox-check --start "SDK 3.0.5.676 (1024x768)"
-
-3. Install the public key at the proper location of the emulator
-
-	Assuming `/usr/local/bin` is in your `PATH`, run:
-
-		$ novacom run file:///bin/mkdir /home/root/.ssh
-		$ novacom run file:///bin/chmod 700 /home/root/.ssh
-		$ novacom put file:///home/root/.ssh/authorized_keys < ~/.ssh/webos.pub
-		$ novacom run file:///bin/chmod 600 /home/root/.ssh/authorized_keys
-
-3. Test the SSH login
-
-		$ ssh -i ~/.ssh/webos -p 5522 root@localhost
-		root@qemux86:/var/home/root# 
-
-### SSH plumbing
-
-In case your webOS SDK (and/or Ares IDE) are both running in VirtualBox guests, you need to tunnel the port 5522 from the IDE guest to the emulator guest (replace `kowalskif` )
-
-	$ ssh -L5522:localhost:5522 kowalskif@10.0.2.2
-
-## Reference
+Reference
+---------
 
 ### Emulator
 
