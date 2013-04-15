@@ -20,6 +20,12 @@
     "stream-buffers": "0.2.x",
     "express": "3.1.x"
   },
+  "engines": {
+    "node" : "0.8.x >=0.8.21",
+    "npm": "1.2.x"
+  },
+  "engineStrict": true,
+  "os" : [ "darwin", "linux", "win32" ],
   "devDependencies": {
     "mocha": "1.8.x",
     "should": "1.2.x",
