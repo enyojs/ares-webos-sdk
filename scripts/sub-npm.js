@@ -2,6 +2,7 @@ var path = require('path'),
     spawn = require('child_process').spawn;
 
 var submodules = [
+	'node_modules/semver',
 	'node_modules/tar',
 	'node_modules/unzip'
 ];
