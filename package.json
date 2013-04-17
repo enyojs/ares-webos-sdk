@@ -55,6 +55,7 @@
     "ssh2",
     "npmlog",
     "nopt",
+    "semver",
     "stream-buffers",
     "express"
   ],
