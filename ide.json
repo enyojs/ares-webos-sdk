@@ -19,7 +19,7 @@
 				"bootplate": {
 				},
 				"owo": {
-					"url": "http://enyojs.com/webos/project-templates.json",
+					"url": "@INSTALLDIR@/node_modules/nodejs-module-webos-ipkg/templates/project-templates.json",
 					"description": "Open webOS Templates"
 				}
 	        }
