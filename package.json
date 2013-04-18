@@ -1,7 +1,7 @@
 {
   "name": "nodejs-module-webos-ipkg",
   "main": "./lib/ipkg-tools.js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "dependencies": {
     "shelljs": "0.1.x",
     "unzip": "0.1.x",
@@ -17,9 +17,20 @@
     "ssh2": "0.1.x",
     "npmlog": "0.0.x",
     "nopt": "2.1.x",
+    "semver": "1.1.x",
     "stream-buffers": "0.2.x",
     "express": "3.1.x"
   },
+  "engines": {
+    "node": "0.8.x >=0.8.21",
+    "npm": "1.2.x"
+  },
+  "engineStrict": true,
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
   "devDependencies": {
     "mocha": "1.8.x",
     "should": "1.2.x",
@@ -27,7 +38,7 @@
   },
   "scripts": {
     "test": "node_modules/.bin/mocha test/*.spec.js",
-    "install" : "node ./scripts/sub-npm.js"
+    "install": "node ./scripts/sub-npm.js"
   },
   "bundledDependencies": [
     "shelljs",
@@ -44,10 +55,11 @@
     "ssh2",
     "npmlog",
     "nopt",
+    "semver",
     "stream-buffers",
     "express"
   ],
-    "files": [
+  "files": [
     "DEMO.md",
     "README-SDK.md",
     "README.md",
