@@ -112,7 +112,14 @@ enyo.kind({
 			this.launch(config.data.id, next);
 		});
 		req.error(this, function(inSender, inError) {
-			next("Unable to install application:");
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['content-type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
+			}
+			next(new Error("Unable to install application:" + inError), details);
 		});
 		req.go();
 	},
@@ -131,7 +138,14 @@ enyo.kind({
 			next();
 		});
 		req.error(this, function(inSender, inError) {
-			next("Unable to launch application:");
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['content-type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
+			}
+			next(new Error("Unable to launch application:" + inError), details);
 		});
 		req.go();
 	}
