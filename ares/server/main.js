@@ -106,9 +106,14 @@ function BdOpenwebOS(config, next) {
 		], function (err, results) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
-				cleanup.bind(this)(req, res, next.bind(this, err));
-				return;
+				cleanup.bind(this)(req, res, function() {
+					next(err);
+				});
 			}
+			// we do not invoke error-less next() here
+			// because that would try to return 200 with
+			// an empty body, while we have already sent
+			// back the response.
 		});
 	});
 
@@ -122,9 +127,14 @@ function BdOpenwebOS(config, next) {
 		], function (err, results) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
-				cleanup.bind(this)(req, res, next.bind(this, err));
-				return;
+				cleanup.bind(this)(req, res, function() {
+					next(err);
+				});
 			}
+			// we do not invoke error-less next() here
+			// because that would try to return 200 with
+			// an empty body, while we have already sent
+			// back the response.
 		});
 	});
 
@@ -135,9 +145,14 @@ function BdOpenwebOS(config, next) {
 		], function (err, results) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
-				next(err);
-				return;
+				cleanup.bind(this)(req, res, function() {
+					next(err);
+				});
 			}
+			// we do not invoke error-less next() here
+			// because that would try to return 200 with
+			// an empty body, while we have already sent
+			// back the response.
 		});
 	});
 
@@ -160,11 +175,7 @@ function BdOpenwebOS(config, next) {
 
 		tools.installer.install({verbose: true}, req.appDir.packageFile, function(err, result) {
 			console.log("install() DONE: ", err, result);
-			if (err) {
-				next(err);
-				return;
-			}
-			next();
+			next(err);
 		});
 	}
 
@@ -173,11 +184,7 @@ function BdOpenwebOS(config, next) {
 
 		tools.launcher.launch({verbose: true}, req.body.id, null, function(err, result) {
 			console.log("launch() DONE: ", err, result);
-			if (err) {
-				next(err);
-				return;
-			}
-			next();
+			next(err);
 		});
 	}
 
@@ -190,12 +197,8 @@ function BdOpenwebOS(config, next) {
 		var packageStream = fs.createWriteStream(req.appDir.packageFile);
 		request(packageUrl).pipe(packageStream);
 
-		// TODO: Handle error cases
-
-		packageStream.on('close', function() {
-			console.log('fetchPackage: on close');
-			next();
-		});
+		packageStream.on('close', next);
+		packageStream.on('error', next);
 	}
 
 	function answerOk(req, res, next) {
@@ -280,10 +283,10 @@ function BdOpenwebOS(config, next) {
 			console.log("build() DONE: ", err, result);
 			if (err) {
 				next(err);
-				return;
+			} else {
+				req.ipk = result.ipk;
+				next();
 			}
-			req.ipk = result.ipk;
-			next();
 		});
 	}
 
@@ -304,9 +307,9 @@ function BdOpenwebOS(config, next) {
 				if (err) {
 					next('Unable to read ' + filename);
 					nextDataChunk('INVALID CONTENT');
-					return;
+				} else {
+					nextDataChunk(data);
 				}
-				nextDataChunk(data);
 			});
 		});
 
