@@ -93,7 +93,7 @@ function BdOpenwebOS(config, next) {
 
 	// Global error handler
 	function errorHandler(err, req, res, next){
-		console.error("errorHandler(): ", err.stack);
+		log.error("errorHandler()", err.stack);
 		res.status(err.statusCode || 500);
 		res.contentType('txt'); // direct usage of 'text/plain' does not work
 		res.send(err.toString());
@@ -180,19 +180,19 @@ function BdOpenwebOS(config, next) {
 	});
 
 	function install(req, res, next) {
-		console.log("install(): ", req.appDir.packageFile);
+		log.info("install()", req.appDir.packageFile);
 
 		tools.installer.install({verbose: true}, req.appDir.packageFile, function(err, result) {
-			console.log("install() DONE: ", err, result);
+			log.verbose("install()", err, result);
 			next(err);
 		});
 	}
 
 	function launch(req, res, next) {
-		console.log("launch(): ", req.body.id);
+		log.info("launch()", req.body.id);
 
 		tools.launcher.launch({verbose: true}, req.body.id, null, function(err, result) {
-			console.log("launch() DONE: ", err, result);
+			log.verbose("launch()", err, result);
 			next(err);
 		});
 	}
@@ -200,7 +200,7 @@ function BdOpenwebOS(config, next) {
 	function fetchPackage(req, res, next) {
 		try {
 			var packageUrl = req.body.package;
-			console.log("fetch(): ", packageUrl);
+			log.http("fetch()", packageUrl);
 
 			req.appDir.packageFile = path.join(req.appDir.root, 'package.ipk');
 			
@@ -215,7 +215,7 @@ function BdOpenwebOS(config, next) {
 	}
 
 	function answerOk(req, res, next) {
-		console.log('Answering 200 OK');
+		log.verbose("answerOk()", '200 OK');
 		res.status(200).send();
 	}
 
@@ -228,7 +228,7 @@ function BdOpenwebOS(config, next) {
 			deploy: path.join(appTempDir, 'deploy')
 		};
 
-		console.log("prepare(): setting-up " + req.appDir.root);
+		log.verbose("prepare()", "setting-up " + req.appDir.root);
 		async.series([
 			function(done) { mkdirp(req.appDir.root, done); },
 			function(done) { fs.mkdir(req.appDir.source, done); },
@@ -250,16 +250,16 @@ function BdOpenwebOS(config, next) {
 
 		async.forEachSeries(req.files.file, function(file, cb) {
 			var dir = path.join(req.appDir.source, path.dirname(file.name));
-			//console.log("store(): mkdir -p ", dir);
+			log.silly("store()", "mkdir -p ", dir);
 			mkdirp(dir, function(err) {
-				//console.log("store(): mv ", file.path, " ", file.name);
+				log.silly("store()", "mv ", file.path, " ", file.name);
 				if (err) {
 					cb(err);
 				} else {
 					if (file.type.match(/x-encoding=base64/)) {
 						fs.readFile(file.path, function(err, data) {
 							if (err) {
-								console.log("transcoding: error" + file.path, err);
+								log.info("store()", "transcoding: error" + file.path, err);
 								cb(err);
 								return;
 							}
@@ -270,17 +270,17 @@ function BdOpenwebOS(config, next) {
 
 								var filedata = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
 								fs.writeFile(path.join(req.appDir.source, file.name), filedata, function(err) {
-									// console.log("store from base64(): Stored: ", file.name);
+									log.silly("store()", "from base64(): Stored: ", file.name);
 									cb(err);
 								});
 							} catch(transcodeError) {
-								console.log("transcoding error: " + file.path, transcodeError);
+								log.warn("store()", "transcoding error: " + file.path, transcodeError);
 								cb(transcodeError);
 							}
 						}.bind(this));
 					} else {
 						fs.rename(file.path, path.join(req.appDir.source, file.name), function(err) {
-							// console.log("store(): Stored: ", file.name);
+							log.silly("store()", "Stored: ", file.name);
 							cb(err);
 						});
 					}
@@ -290,10 +290,10 @@ function BdOpenwebOS(config, next) {
 	}
 
 	function build(req, res, next) {
-		console.log("build(): ", req.appDir.source, req.appDir.build);
+		log.info("build()", req.appDir.source, req.appDir.build);
 
 		tools.packageApp([req.appDir.source], req.appDir.build, {verbose: true}, function(err, result) {
-			console.log("build() DONE: ", err, result);
+			log.verbose("build()", err, result);
 			if (err) {
 				next(err);
 			} else {
@@ -306,7 +306,7 @@ function BdOpenwebOS(config, next) {
 	function returnBody(req, res, next) {
 		var filename = req.ipk;
 		var stats = fs.statSync(filename);
-		console.log("returnBody(): size: " + stats.size + " bytes", filename);
+		log.verbose("returnBody()", "size: " + stats.size + " bytes", filename);
 
 		// Build the multipart/formdata
 		var combinedStream = CombinedStream.create();
@@ -344,14 +344,15 @@ function BdOpenwebOS(config, next) {
 	}
 
 	function cleanup(req, res, next) {
-		if (performCleanup) {
-			console.log("cleanup(): rm -rf " + req.appDir.root);
+		var dir = req.appDir && req.appDir.root;
+		if (performCleanup && dir) {
+			log.verbose("cleanup()", "rm -rf " + dir);
 			rimraf(req.appDir.root, function(err) {
-				console.log("cleanup(): removed " + req.appDir.root);
+				log.verbose("cleanup()", "removed " + dir);
 				next(err);
 			});
 		} else {
-			console.log("cleanup(): skipping removal of " + req.appDir.root);
+			log.verbose("cleanup()", "skipping removal of " + dir);
 			next();
 		}
 	}
