@@ -3,8 +3,8 @@
 		{
 			"active": true,
 			"id":"openwebos",
-			"name":"Open webOS Build",
-			"type": ["build"],
+			"name":"Open webOS",
+			"type": ["build", "test"],
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/node_modules/nodejs-module-webos-ipkg/ares/server/main.js", "-P", "/owo-build", "-p", "0"
 			],

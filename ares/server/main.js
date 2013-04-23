@@ -6,6 +6,7 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     util  = require("util"),
+    log = require('npmlog'),
     temp = require("temp"),
     http = require("http"),
     async = require("async"),
@@ -15,9 +16,17 @@ var fs = require("fs"),
     rimraf = require("rimraf"),
     CombinedStream = require('combined-stream');
 
-var basename = path.basename(__filename);
+var basename = path.basename(__filename, '.js');
+log.heading = basename;
+log.level = 'http';
+
 var FORM_DATA_LINE_BREAK = '\r\n';
 var performCleanup = true;
+
+process.on('uncaughtException', function (err) {
+	log.error(basename, err.stack);
+	process.exit(1);
+});
 
 function BdOpenwebOS(config, next) {
 	function HttpError(msg, statusCode) {
@@ -28,7 +37,7 @@ function BdOpenwebOS(config, next) {
 	util.inherits(HttpError, Error);
 	HttpError.prototype.name = "HTTP Error";
 
-	console.log("config=",  util.inspect(config));
+	log.info('BdOpenwebOS', "config:", config);
 
 	// express 3.x: app is not a server
 	var app, server;
@@ -189,16 +198,20 @@ function BdOpenwebOS(config, next) {
 	}
 
 	function fetchPackage(req, res, next) {
-		var packageUrl = req.body.package;
-		console.log("fetch(): ", packageUrl);
+		try {
+			var packageUrl = req.body.package;
+			console.log("fetch(): ", packageUrl);
 
-		req.appDir.packageFile = path.join(req.appDir.root, 'package.ipk');
-
-		var packageStream = fs.createWriteStream(req.appDir.packageFile);
-		request(packageUrl).pipe(packageStream);
-
-		packageStream.on('close', next);
-		packageStream.on('error', next);
+			req.appDir.packageFile = path.join(req.appDir.root, 'package.ipk');
+			
+			var packageStream = fs.createWriteStream(req.appDir.packageFile);
+			request(packageUrl).pipe(packageStream);
+			
+			packageStream.on('close', next);
+			packageStream.on('error', next);
+		} catch(err) {
+			next(err);
+		}
 	}
 
 	function answerOk(req, res, next) {
@@ -386,7 +399,7 @@ BdOpenwebOS.prototype.onExit = function() {
 };
 
 // Main
-if (path.basename(process.argv[1]) === basename) {
+if (path.basename(process.argv[1], '.js') === basename) {
 	// We are main.js: create & run the object...
 
 	var knownOpts = {
