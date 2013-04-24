@@ -35,7 +35,7 @@ enyo.kind({
 				details = response.body;
 			}
 		}
-		next(new Error(msg + inError), details);
+		next(new Error(msg + inError.toString()), details);
 	},
 	/**
 	 * Build an Open webOS application package
@@ -104,7 +104,7 @@ enyo.kind({
 		this.doShowWaitPopup({msg: $L("Storing webOS application package")});
 		var folderId = project.getObject("build.openwebos.target.folderId");
 		if (folderId) {
-			next(null, inData);
+			next(null, folderId, inData);
 		} else {
 			var req = project.getService().createFolder(project.getFolderId(), "target/" + OpenWebosBuild.serviceName);
 			req.response(this, function(inSender, inResponse) {
