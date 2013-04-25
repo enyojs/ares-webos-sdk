@@ -65,7 +65,7 @@
 		"SSH-KEY-SETUP.md",
 		"ares",
 		"bin",
-		"ide.json",
+		"ide-plugin.json",
 		"lib",
 		"scripts",
 		"templates",
