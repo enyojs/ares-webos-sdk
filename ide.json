@@ -6,7 +6,7 @@
 			"name":"Open webOS Build",
 			"type": ["build"],
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/node_modules/nodejs-module-webos-ipkg/ares/server/main.js", "-P", "/owo-build", "-p", "0"
+				"@PLUGINDIR@/ares/server/main.js", "-P", "/owo-build", "-p", "0"
 			],
 			"pluginUrl": "../node_modules/nodejs-module-webos-ipkg/ares/client/package.js",
 			"useJsonp":false,
@@ -19,7 +19,7 @@
 				"bootplate": {
 				},
 				"owo": {
-					"url": "@INSTALLDIR@/node_modules/nodejs-module-webos-ipkg/templates/project-templates.json",
+					"url": "@PLUGINDIR@/templates/project-templates.json",
 					"description": "Open webOS Templates"
 				}
 	        }
