@@ -2,6 +2,12 @@
 	"name": "nodejs-module-webos-ipkg",
 	"main": "./lib/ipkg-tools.js",
 	"version": "0.1.2",
+	"bin": {
+		"ares-generate": "./bin/ares-generate.js",
+		"ares-package": "./bin/ares-package.js",
+		"ares-install": "./bin/ares-install.js",
+		"ares-launch": "./bin/ares-launch.js"
+	},
 	"dependencies": {
 		"shelljs": "0.1.x",
 		"unzip": "0.1.x",

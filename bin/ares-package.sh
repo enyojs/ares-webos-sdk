@@ -4,12 +4,10 @@
 BIN_DIR=$(cd `dirname $0` && pwd)
 
 # node script we are going to run
-SCRIPT="$BIN_DIR/../lib/ares-package.js"
+SCRIPT=${BIN_DIR}/../lib/node_modules/nodejs-module-webos-ipkg/bin/ares-package.js
 
-# path to included node
-NODE_BASE=$BIN_DIR/../node
-NODE_BIN="$NODE_BASE/bin"
-export NODE_PATH="$NODE_BASE/lib"
+# path to node modules
+export NODE_PATH=$(cd ${BIN_DIR}/../lib && pwd)
 
 # run node script with imported params
-PATH=$NODE_BIN:$PATH node $SCRIPT $@
+PATH=$BIN_DIR:$PATH node $SCRIPT $@
