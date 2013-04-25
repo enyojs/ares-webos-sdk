@@ -1,7 +1,7 @@
 {
   "name": "nodejs-module-webos-ipkg",
   "main": "./lib/ipkg-tools.js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "dependencies": {
     "shelljs": "0.1.x",
     "unzip": "0.1.x",
