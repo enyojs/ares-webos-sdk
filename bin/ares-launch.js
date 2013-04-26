@@ -2,9 +2,9 @@
 
 var fs = require('fs'),
     path = require("path"),
-    ipkg = require('./ipkg-tools'),
+    ipkg = require('./../lib/ipkg-tools'),
     npmlog = require('npmlog'),
-    versionTool = require('./version-tools'),
+    versionTool = require('./../lib/version-tools'),
     nopt = require('nopt');
 
 /**********************************************************************/
