@@ -4,8 +4,8 @@ var fs = require("fs"),
     util = require('util'),
     async = require('async'),
     path = require('path'),
-    versionTool = require('./version-tools'),
-    tools = require('./ipkg-tools');
+    versionTool = require('./../lib/version-tools'),
+    tools = require('./../lib/ipkg-tools');
 
 /**********************************************************************/
 
