@@ -399,8 +399,9 @@
       }
     },
     "ssh2": {
-      "version": "0.1.12",
-      "from": "ssh2@>0.0.1"
+      "version": "0.2.5",
+      "from": "ssh2@0.2.5",
+      "resolved": "https://registry.npmjs.org/ssh2/-/ssh2-0.2.5.tgz"
     },
     "npmlog": {
       "version": "0.0.2",

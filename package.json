@@ -20,7 +20,7 @@
 		"fstream": "0.1.x",
 		"graceful-fs": "1.2.x",
 		"combined-stream": "0.0.x",
-		"ssh2": "0.1.x",
+		"ssh2": "0.2.x",
 		"npmlog": "0.0.x",
 		"nopt": "2.1.x",
 		"semver": "1.1.x",
