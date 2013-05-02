@@ -43,12 +43,12 @@ function PalmPackage() {
 		"Usage: ares-package [OPTIONS] ...",
 		"",
 		"Options:",
-		  "--help, -h          Display this help and exit",
-		  "--version           Display version info and exit",
-		  "--debug, -d         Enable debug mode                           [boolean]",
-		  "--outdir, -o        Use OUTPUT_DIR as the output directory      [path]",
-		  "--check, -c         Check the application but don't package it  [boolean]",
-		  "--no-minify         Skip the minification phase  			   [boolean]"
+		"--help, -h          Display this help and exit",
+		"--version           Display version info and exit",
+		"--debug, -d         Enable debug mode                           [boolean]",
+		"--outdir, -o        Use OUTPUT_DIR as the output directory      [path]",
+		"--check, -c         Check the application but don't package it  [boolean]",
+		"--no-minify         Skip the minification phase                 [boolean]"
 	];
 }
 
