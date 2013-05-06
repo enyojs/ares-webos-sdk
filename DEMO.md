@@ -1,41 +1,45 @@
-### Demo
+# Demo
 
 #### SSH key setup
 
-***`NOTE`***: This step is mandatory to succesfully run ares-install.sh and ares-launch.sh.
+**NOTE**: This step is mandatory to succesfully run `ares-novacom` and other commands sitting on it such as `ares-install` and `ares-launch`.
   
 Please refer to [SSH-KEY-SETUP.md](SSH-KEY-SETUP.md) for intructions.
 
-####Download and extract the latest tarball from Jenkins####
+#### Get the bits
+
+***XXX FIXME: check URL***
 
 * Go to: [Enyo-package-ares-SDK-xplat](https://gecko.palm.com/jenkins/view/Enyo/job/Enyo-package-ares-SDK-xplat/)
-* Download the apporiate package for your platform (Mac, Windows, Linux).  Note, the "ide" packages contain both Ares and the command line interface (CLI) tools.  The "cli" package contains only the CLI tools.
+* Download the apporiate package for your platform (Mac, Windows, Linux).  Note, the _ide_ packages contain both Ares and the command line interface (CLI) tools.  The _cli_ package contains only the CLI tools.
 * Unzip/untar the package onto your machine, e.g.:  
 
-	`$ tar -xzf ares-webos-ide-mac.tgz`
+		$ tar -xzf ares-webos-ide-mac.tgz
 
-#### Set the PATH####
+#### Set the PATH
 
-* For the "ide" package:
+* On Windows:
 
-	`$ export PATH=$PATH:<full-path-to-ares-ide>/nodejs-module-webos-ipkg/bin`
+		C:Users\Joe> set PATH=%PATH%;C:\path\to\ares-ide
 
-* For the "cli" package:
+* On Linux & Mac OSX:
 
-	`$ export PATH=$PATH:<full-path-to-nodejs-module-webos-ipkg>/bin`
-	
-####Generate a template app####
+		$ export PATH=$PATH:/path/to/ares-ide/bin
 
-`$ cd <where-ever-you-want>`  
-`$ ares-generate.sh -l`  
+#### Generate a new app
+
+```
+$ cd /path/to/your/project
+$ ares-generate.sh -l
 bootplate-2.1.1-owo	Enyo bootplate 2.1.1  
-`$ ares-generate.sh -t bootplate-2.1.1-owo -p id=com.myapp -p title=MyApp MyApp`  
-Generating bootplate-2.1.1-owo in /Users/ares/MyApp
+$ ares-generate.sh -t bootplate-2.1.1-owo -p id=com.myapp -p title=MyApp MyApp
+Generating bootplate-2.1.1-owo in /path/to/your/project/MyApp
+```
 
+#### Package the app
 
-####Package the template app####
-
-`$ ares-package.sh MyApp`  
+```
+$ ares-package.sh MyApp`  
 Minify-ing Enyo...  
 Minify-ing the application...  
 Success:  the deployable application is available in:  /Users/ares/MyApp/deploy/MyApp  
