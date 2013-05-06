@@ -11,6 +11,7 @@ var fs = require('fs'),
 
 var knownOpts = {
 	"device":	[String, null],
+	"inspect":	Boolean,
 	"device-list":	Boolean,
 	"close":	Boolean,
 	"relaunch":	Boolean,
@@ -20,11 +21,13 @@ var knownOpts = {
 };
 var shortHands = {
 	"d": ["--device"],
+	"I": ["--inspect"],
 	"f": ["--relaunch"],
 	"c": ["--close"],
 	"l": ["--list"],
 	"V": ["--version"],
-	"h": ["--help"]
+	"h": ["--help"],
+	"v": ["--level", "verbose"]
 };
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-install.js'*/);
 
@@ -58,7 +61,6 @@ if (argv.close) {
 	op = close;
 	throw new Error('Not implemented');
 } else if (argv.relaunch) {
-	op = relaunch;
 	throw new Error('Not implemented');
 } else if (argv['device-list']) {
 	throw new Error('Not implemented');
@@ -69,7 +71,8 @@ if (argv.close) {
 }
 
 var options = {
-	device: argv.device
+	device: argv.device,
+	inspect: argv.inspect
 };
 
 /**********************************************************************/
