@@ -129,6 +129,8 @@ function remove() {
 	ipkg.installer.remove(options, pkgId, finish);
 }
 
+/**********************************************************************/
+
 function finish(err, value) {
 	log.info("finish():", "err:", err);
 	if (err) {
@@ -142,7 +144,3 @@ function finish(err, value) {
 		process.exit(0);
 	}
 }
-
-process.on('uncaughtException', function (err) {
-	console.log('Caught exception: ' + err);
-});
