@@ -1,5 +1,5 @@
 {
-  "name": "nodejs-module-webos-ipkg",
+  "name": "ares-webos-sdk",
   "version": "0.1.2",
   "dependencies": {
     "shelljs": {
