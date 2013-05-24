@@ -1,3 +1,4 @@
 enyo.depends(
-	"OpenWebosBuild.js"
+	"AresProperties.js",
+	"WebosBuild.js"	
 );
