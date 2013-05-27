@@ -182,7 +182,7 @@ function BdOpenwebOS(config, next) {
 	function install(req, res, next) {
 		log.info("install()", req.appDir.packageFile);
 
-		tools.installer.install({verbose: true}, req.appDir.packageFile, function(err, result) {
+		tools.installer.install({verbose: true, device:req.body.device}, req.appDir.packageFile, function(err, result) {
 			log.verbose("install()", err, result);
 			next(err);
 		});
@@ -191,7 +191,7 @@ function BdOpenwebOS(config, next) {
 	function launch(req, res, next) {
 		log.info("launch()", req.body.id);
 
-		tools.launcher.launch({verbose: true}, req.body.id, null, function(err, result) {
+		tools.launcher.launch({verbose: true, device: req.body.device}, req.body.id, null, function(err, result) {
 			log.verbose("launch()", err, result);
 			next(err);
 		});

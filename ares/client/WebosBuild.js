@@ -1,9 +1,12 @@
 enyo.kind({
-	name: "OpenWebosBuild",
+	name: "Webos.Build",
 	kind: "enyo.Component",
 	debug: false,
 	events: {
 		onShowWaitPopup: ""
+	},
+	published: {
+		device: ""
 	},
 	/**
 	 * @protected
@@ -106,7 +109,7 @@ enyo.kind({
 		if (folderId) {
 			next(null, folderId, inData);
 		} else {
-			var req = project.getService().createFolder(project.getFolderId(), "target/" + OpenWebosBuild.serviceName);
+			var req = project.getService().createFolder(project.getFolderId(), "target/" + Webos.Build.serviceName);
 			req.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("response received ", inResponse);
 				folderId = inResponse.id;
@@ -153,7 +156,10 @@ enyo.kind({
 	_installPkg: function(project, pkgUrl, next) {
 		this.doShowWaitPopup({msg: $L("Installing webOS package")});
 
-		var data = "package=" + encodeURIComponent(pkgUrl);
+		var data = {
+			package : pkgUrl,
+			device: this.device || "default"
+		}; 
 		var req = new enyo.Ajax({
 			url: this.url + '/op/install',
 			method: 'POST',
@@ -241,11 +247,14 @@ enyo.kind({
 			next(new Error("Did not find application id in appinfo"));
 			return;
 		}
-		var data = "id=" + encodeURIComponent(appId);
+		var data = {
+			id: encodeURIComponent(appId),
+			device: this.device || "default"
+		};
 		var req = new enyo.Ajax({
 			url: this.url + '/op/launch',
 			method: 'POST',
-			handleAs: 'text',
+			handleAs: 'json',
 			postBody: data
 		});
 		req.response(this, function(inSender, inData) {
@@ -270,11 +279,27 @@ enyo.kind({
 	runDebug: function(project, next) {
 		next(new Error("debug: not implemented"));
 	},
+
+	/**
+	 * @return the human-friendly name of this service
+	 */
+	getName: function() {
+		return "WebOS";
+	},
+
+	/**
+	 * Name of the kind to show in the {ProjectProperties} UI
+	 * @return the Enyo kind to use to set Phonegap project properties
+	 */
+	getAresPropertiesKind: function() {
+		return "WebOS.AresProperties";
+	},
+
 	statics: {
-		serviceName: "openwebos"
+		serviceName: "webos"
 	}
 });
 
 // Provide to ServiceRegistry the information to instanciate the service client implemtation
-ServiceRegistry.instance.pluginReady(OpenWebosBuild.serviceName, {kind: "OpenWebosBuild"});
+ServiceRegistry.instance.pluginReady(Webos.Build.serviceName, {kind: "Webos.Build"});
 

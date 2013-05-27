@@ -2,11 +2,11 @@
 	"services": [
 		{
 			"active": true,
-			"id":"openwebos",
-			"name":"Open webOS",
+			"id":"webos",
+			"name":"webOS",
 			"type": ["build", "test"],
 			"command":"@NODE@", "params":[
-				"@PLUGINDIR@/ares/server/main.js", "-P", "/owo-build", "-p", "0"
+				"@PLUGINDIR@/ares/server/main.js", "-P", "/webos", "-p", "0"
 			],
 			"pluginUrl": "../node_modules/ares-webos-sdk/ares/client/package.js",
 			"useJsonp":false,
@@ -20,7 +20,7 @@
 				},
 				"owo": {
 					"url": "@PLUGINDIR@/templates/project-templates.json",
-					"description": "Open webOS Templates"
+					"description": "webOS Templates"
 				}
 	        }
 		}
