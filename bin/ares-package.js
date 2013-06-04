@@ -52,7 +52,7 @@ function PalmPackage() {
 		"--outdir, -o        Use OUTPUT_DIR as the output directory      [path]",
 		"--check, -c         Check the application but don't package it  [boolean]",
 		"--no-minify         Skip the minification phase                 [boolean]",
-		"--app-exclude, -e    Use EXCLUDE_DIR to exclude dir in package	[path]",
+		"--app-exclude, -e   Use EXCLUDE_DIR to exclude dir in package	[path]",
 		"		    To exclude multi sub-dirs, it can be used as '-e subdir1 -e subdir2'"
 	];
 }
