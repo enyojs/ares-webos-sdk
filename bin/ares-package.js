@@ -29,14 +29,17 @@ function PalmPackage() {
 		"debug":	Boolean,
 		"outdir":	path,
 		"check":	Boolean,
-		"no-minify":	Boolean
+		"no-minify":	Boolean,
+		"app-exclude" : [String, Array]
 	};
 	var shortHands = {
 		"h":		"--help",
 		"V":		"--version",
 		"d":		"--debug",
 		"o":		"--outdir",
-		"c":		"--check"
+		"c":		"--check",
+		"":"",	//no-minify
+		"e": 	"--app-exclude"
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.helpString = [
@@ -48,7 +51,9 @@ function PalmPackage() {
 		"--debug, -d         Enable debug mode                           [boolean]",
 		"--outdir, -o        Use OUTPUT_DIR as the output directory      [path]",
 		"--check, -c         Check the application but don't package it  [boolean]",
-		"--no-minify         Skip the minification phase                 [boolean]"
+		"--no-minify         Skip the minification phase                 [boolean]",
+		"--app-exclude, -e   Use EXCLUDE_DIR to exclude dir in package	[path]",
+		"		    To exclude multi sub-dirs, it can be used as '-e subdir1 -e subdir2'"
 	];
 }
 
@@ -89,6 +94,10 @@ PalmPackage.prototype = {
 			this.options.minify = this.argv.minify;
 		} else {
 			this.options.minify = true;
+		}
+
+		if (this.argv.hasOwnProperty('app-exclude')) {
+			this.options.excludedir = this.argv['app-exclude'];
 		}
 	},
 
