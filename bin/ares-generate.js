@@ -39,7 +39,8 @@ function PalmGenerate() {
 		"template":	String,
 		"property":	[String, Array],
 		"repository":	[String, Array],
-		"debug":	Boolean
+		"debug":	Boolean,
+		"add-service":	Boolean
 	};
 	var shortHands = {
 		"h":		"--help",
@@ -49,7 +50,8 @@ function PalmGenerate() {
 		"t":		"--template",
 		"p":		"--property",
 		"r":		"--repository",
-		"d":		"--debug"
+		"d":		"--debug",
+		"a":		"--add-service"
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.template = this.argv.template || this.defaultTemplate;
@@ -65,6 +67,7 @@ function PalmGenerate() {
 		"  --property, -p      Set the property PROPERTY        [string]",
 		"  --repository, -r    Also get templates of REPOSITORY [string]",
 		"  --debug, -d         Enable debug mode                [boolean]",
+		"  --add-service, -a   Add the service template         [boolean]",
 		"",
 		"APP_DIR is the application directory. It will be created if it does not exist.",
 		"",
@@ -78,6 +81,8 @@ function PalmGenerate() {
 		"",
 		"REPOSITORY is an additional list of project templates."
 	];
+
+	this.existed = false;
 }
 
 PalmGenerate.prototype = {
@@ -109,8 +114,10 @@ PalmGenerate.prototype = {
 				console.error("'" + this.destination + "' is not a directory");
 				process.exit(1);
 			}
+			this.existed = true;
 		} else {
 			fs.mkdirSync(this.destination);
+			this.existed = false;
 		}
 		this.destination = fs.realpathSync(this.destination);
 		next();
@@ -121,6 +128,14 @@ PalmGenerate.prototype = {
 		if (this.argv.overwrite) {
 			this.options.overwrite = true;
 		}
+
+		if (this.existed !== undefined) {
+			this.options.existed = this.existed;
+		}
+
+		if (this.argv['add-service']) {
+			this.options['add-service'] = true;
+		}		
 
 		tools.generate(this.argv.template, this.substitutions, this.destination, this.options, function(inError, inData) {
 			if (inError) {
