@@ -17,7 +17,7 @@
 	  {
         "url": "webos-service-config.zip",
         "alternateUrl": "http://enyojs.com/webos/webos-service-config.zip",
-        "prefixToAdd": "com.yourdomain.hello.service",
+        "prefixToAdd": "services/com.yourdomain.hello.service",
         "type":	"service"
 	  }
     ],
@@ -41,7 +41,7 @@
 	  {
         "url": "webos-service-config.zip",
         "alternateUrl": "http://enyojs.com/webos/webos-service-config.zip",
-        "prefixToAdd": "com.yourdomain.hello.service",
+        "prefixToAdd": "services/com.yourdomain.hello.service",
         "type": "service"
 	  }
     ],
@@ -65,7 +65,7 @@
 	  {
         "url": "webos-service-config.zip",
         "alternateUrl": "http://enyojs.com/webos/webos-service-config.zip",
-        "prefixToAdd": "services/serviceTemplate",
+        "prefixToAdd": "services/com.yourdomain.hello.service",
         "type": "service"
 	  }
     ],
