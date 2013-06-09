@@ -17,7 +17,8 @@
 	  {
         "url": "webos-service-config.zip",
         "alternateUrl": "http://enyojs.com/webos/webos-service-config.zip",
-        "serviceTemplate": "com.yourdomain.hello.service"
+        "prefixToAdd": "com.yourdomain.hello.service",
+        "type":	"service"
 	  }
     ],
     "description": "Enyo bootplate 2.1.1"
@@ -40,7 +41,8 @@
 	  {
         "url": "webos-service-config.zip",
         "alternateUrl": "http://enyojs.com/webos/webos-service-config.zip",
-        "serviceTemplate": "com.yourdomain.hello.service"
+        "prefixToAdd": "com.yourdomain.hello.service",
+        "type": "service"
 	  }
     ],
     "description": "Enyo bootplate 2.2.0"
@@ -63,7 +65,8 @@
 	  {
         "url": "webos-service-config.zip",
         "alternateUrl": "http://enyojs.com/webos/webos-service-config.zip",
-        "serviceTemplate": "com.yourdomain.hello.service"
+        "prefixToAdd": "services/serviceTemplate",
+        "type": "service"
 	  }
     ],
     "description": "Enyo bootplate for webOS - Nightly"

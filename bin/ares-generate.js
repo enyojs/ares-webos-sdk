@@ -30,6 +30,7 @@ function PalmGenerate() {
 	];
 
 	this.defaultTemplate = 'bootplate-nightly-owo';
+	this.defaultAddTemplate = 'service';
 
 	var knownOpts = {
 		"help":		Boolean,
@@ -40,7 +41,7 @@ function PalmGenerate() {
 		"property":	[String, Array],
 		"repository":	[String, Array],
 		"debug":	Boolean,
-		"add-service":	Boolean
+		"add":		String
 	};
 	var shortHands = {
 		"h":		"--help",
@@ -51,10 +52,11 @@ function PalmGenerate() {
 		"p":		"--property",
 		"r":		"--repository",
 		"d":		"--debug",
-		"a":		"--add-service"
+		"a":		"--add"
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.template = this.argv.template || this.defaultTemplate;
+	this.argv.add = (this.argv.add === 'true')? this.defaultAddTemplate:this.argv.add || false;
 	this.helpString = [
 		"Usage: ares-generate [OPTIONS] APP_DIR",
 		"",
@@ -67,7 +69,7 @@ function PalmGenerate() {
 		"  --property, -p      Set the property PROPERTY        [string]",
 		"  --repository, -r    Also get templates of REPOSITORY [string]",
 		"  --debug, -d         Enable debug mode                [boolean]",
-		"  --add-service, -a   Add the service template         [boolean]",
+		"  --add, -a           append the additional template   [string]  [default: " + this.defaultAddTemplate + "]",
 		"",
 		"APP_DIR is the application directory. It will be created if it does not exist.",
 		"",
@@ -75,6 +77,9 @@ function PalmGenerate() {
 		"specified as key-value pairs of the form \"key=value\" or as JSON objects of the",
 		"form \"{'key1':'value1', 'key2':'value2', ...}\". Surrounding quotes are required",
 		"in both cases.",
+		"",
+		"ADDTIONAL TEMPLATE is not generated, if there is no '--add' option.",
+		"Currently it is availabe only \'service\' template type can be used.",
 		"",
 		"TEMPLATE is the application template to use. If not specified, the default",
 		"template is used ('" + this.defaultTemplate + "').",
@@ -133,8 +138,8 @@ PalmGenerate.prototype = {
 			this.options.existed = this.existed;
 		}
 
-		if (this.argv['add-service']) {
-			this.options['add-service'] = true;
+		if (this.argv.add !== false) {
+			this.options.add = this.argv.add;
 		}		
 
 		tools.generate(this.argv.template, this.substitutions, this.destination, this.options, function(inError, inData) {
