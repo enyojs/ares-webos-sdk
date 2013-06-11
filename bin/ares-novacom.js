@@ -5,6 +5,7 @@ var fs = require('fs'),
     npmlog = require('npmlog'),
     nopt = require('nopt'),
     async = require('async'),
+    sprintf = require('sprintf').sprintf,
     versionTool = require('./../lib/version-tools'),
     novacom = require('./../lib/novacom');
 
@@ -63,6 +64,7 @@ var shortHands = {
 var helpString = [
 	"",
 	"USAGE:",
+	"\t" + processName + " [OPTIONS] list",
 	"\t" + processName + " [OPTIONS] put file://DEVICE_PATH < HOST_FILE",
 	"\t" + processName + " [OPTIONS] get file://DEVICE_PATH > HOST_FILE",
 	"\t" + processName + " [OPTIONS] run DEVICE_COMMAND",
@@ -97,7 +99,9 @@ process.on('uncaughtException', function (err) {
 log.verbose("argv", argv);
 
 var op, command = argv.argv.remain[0];
-if (command === 'put') {
+if (command === 'list') {
+	op = list;
+} else if (command === 'put') {
 	op = put;
 } else if (command === 'get') {
 	op = get;
@@ -127,6 +131,23 @@ if (op) {
 }
 
 /**********************************************************************/
+
+function list(next) {
+	var resolver = new novacom.Resolver();
+	resolver.load(function(err, devices) {
+		if (err) {
+			next(err);
+		} else {
+			if (Array.isArray(devices)) {
+				devices.forEach(function(device) {
+					console.log(sprintf("%-20s %s", device.name, device.description));
+				});
+			}
+			log.info("list()", "Success");
+			next();
+		}
+	});
+}
 
 function put(next) {
 	next(new Error("Not yet implemented"));
