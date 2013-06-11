@@ -25,6 +25,7 @@
 		"npmlog": "0.0.x",
 		"nopt": "2.1.x",
 		"semver": "1.1.x",
+		"sprintf": "0.1.x",
 		"stream-buffers": "0.2.x",
 		"express": "3.1.x"
 	},
@@ -63,6 +64,7 @@
 		"npmlog",
 		"nopt",
 		"semver",
+		"sprintf",
 		"stream-buffers",
 		"express"
 	],
