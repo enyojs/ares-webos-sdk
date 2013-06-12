@@ -214,11 +214,11 @@ PalmGenerate.prototype = {
 				next(err);
 				return;
 			}
-			data.forEach(function(template) {
+			data.forEach(function(item) {
 				if (type === "libs") {
-					this.libs[template.id] = template;
+					this.libs[item.id] = item;
 				} else {
-					this.templates[template.id] = template;
+					this.templates[item.id] = item;
 				}
 			}, this);
 			next();
@@ -250,7 +250,7 @@ PalmGenerate.prototype = {
 		process.exit(0);
 	},
 
-	listTemplates: function(type) {
+	listItems: function(type) {
 		async.series([
 				versionTool.checkNodeVersion,
 				this.loadTemplateList.bind(this),
@@ -308,9 +308,9 @@ PalmGenerate.prototype = {
 		this.checkAndShowHelp();
 
 		if (this.argv.list) {
-			this.listTemplates('templates');
+			this.listItems('templates');
 		} else if (this.argv['lib-list']) {
-			this.listTemplates('libs');
+			this.listItems('libs');
 		} else if (this.argv.version) {
 			versionTool.showVersionAndExit();
 		} else {
