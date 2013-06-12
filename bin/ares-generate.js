@@ -67,7 +67,7 @@ function PalmGenerate() {
 		"  --help, -h          Display this help and exit     ",
 		"  --version           Display version info and exit  ",
 		"  --list, -l          List the available templates   ",
-		"  --lib-list, -l      List the available libraries   ",
+		"  --lib-list, -ll     List the available libraries   ",
 		"  --overwrite, -f     Overwrite existing files         [boolean]",
 		"  --template, -t      Use the template named TEMPLATE  [path]  [default: " + this.defaultTemplate + "]",
 		"  --property, -p      Set the property PROPERTY        [string]",
@@ -235,28 +235,29 @@ PalmGenerate.prototype = {
 		process.exit(0);
 	},
 
-	displayTemplateList: function(type, err, results) {
+	displayTemplateList: function(type, next) {
 		this.debug("displayTemplateList");
-		if (err) {
-			console.error("*** " + processName + ": "+ err.toString());
-			process.exit(1);
-		}
 		var listItems = (type === "libs")? this.libs : this.templates;
 		var keys = Object.keys(listItems);
 		keys.forEach(function(key) {
 			console.log(util.format("%s\t%s", key, listItems[key].description));
 		}, this);
-
-		process.exit(0);
+		next();
 	},
 
 	listItems: function(type) {
 		async.series([
 				versionTool.checkNodeVersion,
 				this.loadTemplateList.bind(this),
-				this.getTemplateList.bind(this, type)
-			],
-			this.displayTemplateList.bind(this, type));
+				this.getTemplateList.bind(this, type),
+				this.displayTemplateList.bind(this, type)
+			], function(err, results) {
+				if (err) {
+					console.error("*** " + processName + ": "+ err.toString());
+					process.exit(1);
+				}
+				process.exit(0);
+			}.bind(this));
 	},
 
 	showUsage: function(exitCode) {
