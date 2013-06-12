@@ -98,7 +98,7 @@ process.on('uncaughtException', function (err) {
 
 log.verbose("argv", argv);
 
-var op, command = argv.argv.remain[0];
+var op, command = argv.argv.remain.shift();
 if (command === 'list') {
 	op = list;
 } else if (command === 'put') {
@@ -121,7 +121,7 @@ if (command === 'list') {
 }
 
 var options = {
-	device: argv.device
+	name: argv.device
 };
 
 if (op) {
@@ -158,7 +158,15 @@ function get(next) {
 }
 
 function run(next) {
-	next(new Error("Not yet implemented"));
+	var session = new novacom.Session(options, function(err, result) {
+		log.verbose("run()", "argv:", argv.argv.remain);
+		log.verbose("run()", "options:", options);
+		if (err) {
+			next(err);
+			return;
+		}
+		session.run(argv.argv.remain.join(" "), process.stdin, process.stdout, process.stderr, next);
+	});
 }
 
 function forward(next) {
