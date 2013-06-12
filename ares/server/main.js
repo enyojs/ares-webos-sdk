@@ -165,6 +165,23 @@ function BdOpenwebOS(config, next) {
 		});
 	});
 
+	app.post(makeExpressRoute('/op/debug'), function(req, res, next) {
+		async.series([
+			debug.bind(this, req, res)
+		], function (err, results) {
+			if (err) {
+				// cleanup & run express's next() : the errorHandler
+				cleanup.bind(this)(req, res, function() {
+					next(err);
+				});
+			}
+			// we do not invoke error-less next() here
+			// because that would try to return 200 with
+			// an empty body, while we have already sent
+			// back the response.
+		});
+	});
+
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
 	// is bound
@@ -193,6 +210,15 @@ function BdOpenwebOS(config, next) {
 
 		tools.launcher.launch({verbose: true, device: req.body.device}, req.body.id, null, function(err, result) {
 			log.verbose("launch()", err, result);
+			next(err);
+		});
+	}
+
+	function debug(req, res, next) {
+		log.info("debug()", req.body.id);
+		res.status(200).send();
+		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.id}, null, function(err, result) {
+			log.verbose("debug()", err, result);
 			next(err);
 		});
 	}
