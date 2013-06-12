@@ -316,7 +316,7 @@ enyo.kind({
 					details = response.body;
 				}
 			}
-			next(new Error("Unable to debug application:" + inError), details);
+			next(new Error("Unable to debug application:" + (details || inError.toString())));
 		});
 		req.go();
 	},
