@@ -134,19 +134,20 @@ if (op) {
 
 function list(next) {
 	var resolver = new novacom.Resolver();
-	resolver.load(function(err, devices) {
-		if (err) {
-			next(err);
-		} else {
+	async.waterfall([
+		resolver.load.bind(resolver),
+		resolver.list.bind(resolver),
+		function(devices, next) {
+			log.info("list()", "devices:", devices);
 			if (Array.isArray(devices)) {
 				devices.forEach(function(device) {
-					console.log(sprintf("%-20s %s", device.name, device.description));
+					console.log(sprintf("%-16s %-16s %-24s (%s)", device.name, device.type, device.description, device.addr));
 				});
 			}
 			log.info("list()", "Success");
 			next();
 		}
-	});
+	], next);
 }
 
 function put(next) {

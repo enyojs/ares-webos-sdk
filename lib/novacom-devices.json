@@ -1,7 +1,8 @@
 [
 	{
-		"name": "default",
-		"description": "webOS emulator, with port redirection",
+		"name": "webos3-qemux86",
+		"type": "webos3",
+		"description": "webOS 3 emulator",
 		"host": "127.0.0.1",
 		"port": 5522,
 		"username": "root",
@@ -10,21 +11,11 @@
 		}
 	},
 	{
-		"name": "webospro",
-		"description": "webOS Pro emulator, with port redirection",
+		"name": "webospro-qemux86",
+		"type": "webospro",
+		"description": "webOS Pro emulator",
 		"host": "127.0.0.1",
 		"port": 6622,
-		"username": "root",
-		"privateKey": {
-			"openSsh": "webos"
-		}
-	},
-	{
-		"name": "tv",
-		"description": "LG Smart TV",
-		"host": "64.28.151.252",
-		"port": 22,
-		"lunaAppMgr": "com.webos.applicationManager",
 		"username": "root",
 		"privateKey": {
 			"openSsh": "webos"
