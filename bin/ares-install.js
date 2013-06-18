@@ -75,6 +75,7 @@ if (argv.list) {
 }
 
 var options = {
+	appId: 'com.lge.ares.defaultName',
 	device: argv.device
 };
 

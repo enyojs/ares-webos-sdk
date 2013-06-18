@@ -297,7 +297,7 @@ enyo.kind({
 			return;
 		}
 		var data = {
-			id: encodeURIComponent(appId),
+			appid: encodeURIComponent(appId),
 			device: this.device || "default"
 		};
 		var req = new enyo.Ajax({
