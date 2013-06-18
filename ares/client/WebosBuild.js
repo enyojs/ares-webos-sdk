@@ -83,6 +83,7 @@ enyo.kind({
 		if (this.debug) this.log(formData.ctype);
 
 		this.doShowWaitPopup({msg: $L("Building webOS application package")});
+	
 		var req = new enyo.Ajax({
 			url: this.url + '/op/build',
 			method: 'POST',
@@ -147,23 +148,25 @@ enyo.kind({
 			return;
 		}
 		async.waterfall([
+			this._getAppInfo.bind(this, project),
+			this._getAppId.bind(this, project),
 			this._installPkg.bind(this, project, pkgUrl)
 		], next);
 	},
 	/**
 	 * @private
 	 */
-	_installPkg: function(project, pkgUrl, next) {
+	_installPkg: function(project, pkgUrl, appId, next) {
 		this.doShowWaitPopup({msg: $L("Installing webOS package")});
-
 		var data = {
 			package : pkgUrl,
-			device: this.device || "default"
+			appid	: appId,
+			device	: this.device || "default"
 		}; 
 		var req = new enyo.Ajax({
 			url: this.url + '/op/install',
 			method: 'POST',
-			handleAs: 'text',
+			handleAs: 'json',
 			postBody: data
 		});
 		req.response(this, function(inSender, inData) {
@@ -259,7 +262,7 @@ enyo.kind({
 		});
 		req.response(this, function(inSender, inData) {
 			this.log("runApp#inData:", inData);
-			next();
+			next(null, appId);
 		});
 		req.error(this, function(inSender, inError) {
 			var response = inSender.xhrResponse, contentType, details;
@@ -277,7 +280,47 @@ enyo.kind({
 	 * @public
 	 */
 	runDebug: function(project, next) {
-		next(new Error("debug: not implemented"));
+		if (this.debug) this.log('launching');
+		async.waterfall([
+			this.build.bind(this, project),
+			this.install.bind(this, project),
+			this.run.bind(this, project),
+			this._debugApp.bind(this, project)
+		], next);
+	},
+
+	_debugApp: function(project, appId, next) {
+		if (this.debug) this.log('debugging ' + appId);
+		this.doShowWaitPopup({msg: $L("debugging application:" + appId)});
+		if (!appId) {
+			next(new Error("Did not find application id in appinfo"));
+			return;
+		}
+		var data = {
+			id: encodeURIComponent(appId),
+			device: this.device || "default"
+		};
+		var req = new enyo.Ajax({
+			url: this.url + '/op/debug',
+			method: 'POST',
+			handleAs: 'json',
+			postBody: data
+		});
+		req.response(this, function(inSender, inData) {
+			this.log("runDebug#inData:", inData);
+			next();
+		});
+		req.error(this, function(inSender, inError) {
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['content-type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
+			}
+			next(new Error("Unable to debug application:" + (details || inError.toString())));
+		});
+		req.go();
 	},
 
 	/**
