@@ -44,6 +44,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.toString());
+	log.info('uncaughtException', err.stack);
 	process.exit(1);
 });
 
@@ -74,6 +75,7 @@ if (argv.list) {
 }
 
 var options = {
+	appId: 'com.lge.ares.defaultName',
 	device: argv.device
 };
 

@@ -199,7 +199,7 @@ function BdOpenwebOS(config, next) {
 	function install(req, res, next) {
 		log.info("install()", req.appDir.packageFile);
 
-		tools.installer.install({verbose: true, device:req.body.device}, req.appDir.packageFile, function(err, result) {
+		tools.installer.install({verbose: true, appId:req.body.appId, device:req.body.device}, req.appDir.packageFile, function(err, result) {
 			log.verbose("install()", err, result);
 			next(err);
 		});
@@ -217,7 +217,7 @@ function BdOpenwebOS(config, next) {
 	function debug(req, res, next) {
 		log.info("debug()", req.body.id);
 		res.status(200).send();
-		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.id}, null, function(err, result) {
+		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.appId}, null, function(err, result) {
 			log.verbose("debug()", err, result);
 			next(err);
 		});

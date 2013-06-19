@@ -148,18 +148,20 @@ enyo.kind({
 			return;
 		}
 		async.waterfall([
+			this._getAppInfo.bind(this, project),
+			this._getAppId.bind(this, project),
 			this._installPkg.bind(this, project, pkgUrl)
 		], next);
 	},
 	/**
 	 * @private
 	 */
-	_installPkg: function(project, pkgUrl, next) {
+	_installPkg: function(project, pkgUrl, appId, next) {
 		this.doShowWaitPopup({msg: $L("Installing webOS package")});
-
 		var data = {
 			package : pkgUrl,
-			device: this.device || "default"
+			appId	: appId,
+			device	: this.device || "default"
 		}; 
 		var req = new enyo.Ajax({
 			url: this.url + '/op/install',
@@ -295,7 +297,7 @@ enyo.kind({
 			return;
 		}
 		var data = {
-			id: encodeURIComponent(appId),
+			appId: encodeURIComponent(appId),
 			device: this.device || "default"
 		};
 		var req = new enyo.Ajax({
