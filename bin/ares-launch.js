@@ -59,7 +59,6 @@ log.verbose("argv", argv);
 var op;
 if (argv.close) {
 	op = close;
-	throw new Error('Not implemented');
 } else if (argv.relaunch) {
 	throw new Error('Not implemented');
 } else if (argv['device-list']) {

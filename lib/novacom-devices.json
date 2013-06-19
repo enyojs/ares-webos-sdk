@@ -20,5 +20,16 @@
 		"privateKey": {
 			"openSsh": "webos"
 		}
+	},
+	{
+		"name": "tv",
+		"type": "starfish",
+		"description": "LG Smart TV",
+		"host": "127.0.0.1",
+		"port": 22,
+		"username": "root",
+		"privateKey": {
+			"openSsh": "webos"
+		}
 	}
 ]
