@@ -24,35 +24,42 @@ function PalmGenerate() {
 	this.options = {};
 	this.substitutions = [];
 	this.templates = {};
+	this.libs = {};
 
 	this.repositories = [
 		"project-templates.json"
 	];
 
 	this.defaultTemplate = 'bootplate-nightly-owo';
+	this.defaultAddLib = 'webos-service';
 
 	var knownOpts = {
 		"help":		Boolean,
 		"version":	Boolean,
 		"list":		Boolean,
+		"lib-list":		Boolean,
 		"overwrite":	Boolean,
 		"template":	String,
 		"property":	[String, Array],
 		"repository":	[String, Array],
-		"debug":	Boolean
+		"debug":	Boolean,
+		"addlib":	String
 	};
 	var shortHands = {
 		"h":		"--help",
 		"V":		"--version",
 		"l":		"--list",
+		"ll":		"--lib-list",
 		"f":		"--overwrite",
 		"t":		"--template",
 		"p":		"--property",
 		"r":		"--repository",
-		"d":		"--debug"
+		"d":		"--debug",
+		"a":		"--addlib"
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.template = this.argv.template || this.defaultTemplate;
+	this.argv.addlib = (this.argv.addlib === 'true')? this.defaultAddLib:this.argv.addlib || false;
 	this.helpString = [
 		"Usage: ares-generate [OPTIONS] APP_DIR",
 		"",
@@ -60,11 +67,13 @@ function PalmGenerate() {
 		"  --help, -h          Display this help and exit     ",
 		"  --version           Display version info and exit  ",
 		"  --list, -l          List the available templates   ",
+		"  --lib-list, -ll     List the available libraries   ",
 		"  --overwrite, -f     Overwrite existing files         [boolean]",
 		"  --template, -t      Use the template named TEMPLATE  [path]  [default: " + this.defaultTemplate + "]",
 		"  --property, -p      Set the property PROPERTY        [string]",
 		"  --repository, -r    Also get templates of REPOSITORY [string]",
 		"  --debug, -d         Enable debug mode                [boolean]",
+		"  --addlib, -a        append the additional library    [string]  [default: " + this.defaultAddLib + "]",
 		"",
 		"APP_DIR is the application directory. It will be created if it does not exist.",
 		"",
@@ -73,11 +82,15 @@ function PalmGenerate() {
 		"form \"{'key1':'value1', 'key2':'value2', ...}\". Surrounding quotes are required",
 		"in both cases.",
 		"",
+		"ADDTIONAL LIBRARY is not generated, if there is no '--addlib' option.",
+		"",
 		"TEMPLATE is the application template to use. If not specified, the default",
 		"template is used ('" + this.defaultTemplate + "').",
 		"",
 		"REPOSITORY is an additional list of project templates."
 	];
+
+	this.existed = false;
 }
 
 PalmGenerate.prototype = {
@@ -109,8 +122,10 @@ PalmGenerate.prototype = {
 				console.error("'" + this.destination + "' is not a directory");
 				process.exit(1);
 			}
+			this.existed = true;
 		} else {
 			fs.mkdirSync(this.destination);
+			this.existed = false;
 		}
 		this.destination = fs.realpathSync(this.destination);
 		next();
@@ -121,6 +136,14 @@ PalmGenerate.prototype = {
 		if (this.argv.overwrite) {
 			this.options.overwrite = true;
 		}
+
+		if (this.existed !== undefined) {
+			this.options.existed = this.existed;
+		}
+
+		if (this.argv.addlib !== false) {
+			this.options.addlib = this.argv.addlib;
+		}		
 
 		tools.generate(this.argv.template, this.substitutions, this.destination, this.options, function(inError, inData) {
 			if (inError) {
@@ -184,15 +207,19 @@ PalmGenerate.prototype = {
 		}
 	},
 
-	getTemplateList: function(next) {
+	getTemplateList: function(type, next) {
 		this.debug("getTemplateList");
-		tools.list(function(err, data) {
+		tools.list(type, function(err, data) {
 			if (err) {
 				next(err);
 				return;
 			}
-			data.forEach(function(template) {
-				this.templates[template.id] = template;
+			data.forEach(function(item) {
+				if (type === "libs") {
+					this.libs[item.id] = item;
+				} else {
+					this.templates[item.id] = item;
+				}
 			}, this);
 			next();
 		}.bind(this));
@@ -208,27 +235,29 @@ PalmGenerate.prototype = {
 		process.exit(0);
 	},
 
-	displayTemplateList: function(err, results) {
+	displayTemplateList: function(type, next) {
 		this.debug("displayTemplateList");
-		if (err) {
-			console.error("*** " + processName + ": "+ err.toString());
-			process.exit(1);
-		}
-		var keys = Object.keys(this.templates);
+		var listItems = (type === "libs")? this.libs : this.templates;
+		var keys = Object.keys(listItems);
 		keys.forEach(function(key) {
-			console.log(util.format("%s\t%s", key, this.templates[key].description));
+			console.log(util.format("%s\t%s", key, listItems[key].description));
 		}, this);
-
-		process.exit(0);
+		next();
 	},
 
-	listTemplates: function() {
+	listItems: function(type) {
 		async.series([
 				versionTool.checkNodeVersion,
 				this.loadTemplateList.bind(this),
-				this.getTemplateList.bind(this)
-			],
-			this.displayTemplateList.bind(this));
+				this.getTemplateList.bind(this, type),
+				this.displayTemplateList.bind(this, type)
+			], function(err, results) {
+				if (err) {
+					console.error("*** " + processName + ": "+ err.toString());
+					process.exit(1);
+				}
+				process.exit(0);
+			}.bind(this));
 	},
 
 	showUsage: function(exitCode) {
@@ -280,7 +309,9 @@ PalmGenerate.prototype = {
 		this.checkAndShowHelp();
 
 		if (this.argv.list) {
-			this.listTemplates();
+			this.listItems('templates');
+		} else if (this.argv['lib-list']) {
+			this.listItems('libs');
 		} else if (this.argv.version) {
 			versionTool.showVersionAndExit();
 		} else {

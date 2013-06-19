@@ -160,7 +160,7 @@ enyo.kind({
 		this.doShowWaitPopup({msg: $L("Installing webOS package")});
 		var data = {
 			package : pkgUrl,
-			appid	: appId,
+			appId	: appId,
 			device	: this.device || "default"
 		}; 
 		var req = new enyo.Ajax({
@@ -297,7 +297,7 @@ enyo.kind({
 			return;
 		}
 		var data = {
-			appid: encodeURIComponent(appId),
+			appId: encodeURIComponent(appId),
 			device: this.device || "default"
 		};
 		var req = new enyo.Ajax({
