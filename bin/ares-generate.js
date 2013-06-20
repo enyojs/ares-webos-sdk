@@ -5,7 +5,8 @@ var fs = require("fs"),
     async = require('async'),
     path = require('path'),
     versionTool = require('./../lib/version-tools'),
-    tools = require('./../lib/ipkg-tools');
+    //tools = require('./../lib/ipkg-tools');
+	prjgen = require('ares-generator');
 
 /**********************************************************************/
 
@@ -16,13 +17,17 @@ process.on('uncaughtException', function (err) {
 	process.exit(1);
 });
 
+var plugin = {};
+
 /**********************************************************************/
 
 function PalmGenerate() {
 
+	this.configFile  = path.join(path.dirname(process.argv[1]), '../ide-plugin.json');
 	this.destination = undefined;
 	this.options = {};
 	this.substitutions = [];
+	this.sources = {};
 	this.templates = {};
 	this.libs = {};
 
@@ -30,16 +35,17 @@ function PalmGenerate() {
 		"project-templates.json"
 	];
 
-	this.defaultTemplate = 'bootplate-nightly-owo';
+	//this.defaultTemplate = 'bootplate-nightly-owo';
+	this.defaultTemplate = 'bootplate-webos-nightly';
 	this.defaultAddLib = 'webos-service';
+	this.defaultSourceType = 'template';
 
 	var knownOpts = {
 		"help":		Boolean,
 		"version":	Boolean,
-		"list":		Boolean,
-		"lib-list":		Boolean,
+		"list":		String,
 		"overwrite":	Boolean,
-		"template":	String,
+		"template":	[String, Array],
 		"property":	[String, Array],
 		"repository":	[String, Array],
 		"debug":	Boolean,
@@ -49,7 +55,6 @@ function PalmGenerate() {
 		"h":		"--help",
 		"V":		"--version",
 		"l":		"--list",
-		"ll":		"--lib-list",
 		"f":		"--overwrite",
 		"t":		"--template",
 		"p":		"--property",
@@ -58,6 +63,7 @@ function PalmGenerate() {
 		"a":		"--addlib"
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
+	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.argv.template = this.argv.template || this.defaultTemplate;
 	this.argv.addlib = (this.argv.addlib === 'true')? this.defaultAddLib:this.argv.addlib || false;
 	this.helpString = [
@@ -66,8 +72,7 @@ function PalmGenerate() {
 		"Options:",
 		"  --help, -h          Display this help and exit     ",
 		"  --version           Display version info and exit  ",
-		"  --list, -l          List the available templates   ",
-		"  --lib-list, -ll     List the available libraries   ",
+		"  --list, -l          List the available sources       [string]  [default: " + this.defaultSourceType + "]",
 		"  --overwrite, -f     Overwrite existing files         [boolean]",
 		"  --template, -t      Use the template named TEMPLATE  [path]  [default: " + this.defaultTemplate + "]",
 		"  --property, -p      Set the property PROPERTY        [string]",
@@ -98,10 +103,9 @@ PalmGenerate.prototype = {
 	checkTemplateValid: function(next) {
 		this.debug("checkTemplateValid: " + this.argv.template);
 		// Verify it's a string
-		if (typeof this.argv.template != 'string') {
+		if ((typeof this.argv.template != 'string') && !(this.argv.template instanceof Array)){
 			this.showUsage();
 		}
-
 		// TODO: Verify the template exist
 
 		next();
@@ -143,9 +147,9 @@ PalmGenerate.prototype = {
 
 		if (this.argv.addlib !== false) {
 			this.options.addlib = this.argv.addlib;
-		}		
-
-		tools.generate(this.argv.template, this.substitutions, this.destination, this.options, function(inError, inData) {
+		}
+		var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
+		this.generator.generate(sources, this.substitutions, this.destination, function(inError, inData) {
 			if (inError) {
 				next("An error occured, err: " + inError);
 				return;
@@ -209,7 +213,7 @@ PalmGenerate.prototype = {
 
 	getTemplateList: function(type, next) {
 		this.debug("getTemplateList");
-		tools.list(type, function(err, data) {
+		tools.getSources(type, function(err, data) {
 			if (err) {
 				next(err);
 				return;
@@ -237,19 +241,22 @@ PalmGenerate.prototype = {
 
 	displayTemplateList: function(type, next) {
 		this.debug("displayTemplateList");
-		var listItems = (type === "libs")? this.libs : this.templates;
-		var keys = Object.keys(listItems);
-		keys.forEach(function(key) {
-			console.log(util.format("%s\t%s", key, listItems[key].description));
-		}, this);
+		this.generator.getSources(type, function(err, sources) {
+				if(err) {
+					next(err);
+				} else {
+					sources.forEach(function(source){
+							console.log(util.format("%s\t%s", source.id, source.description));
+						});
+					next();
+				}
+			});
 		next();
 	},
 
-	listItems: function(type) {
+	listSources: function(type) {
 		async.series([
 				versionTool.checkNodeVersion,
-				this.loadTemplateList.bind(this),
-				this.getTemplateList.bind(this, type),
 				this.displayTemplateList.bind(this, type)
 			], function(err, results) {
 				if (err) {
@@ -296,7 +303,7 @@ PalmGenerate.prototype = {
 		async.series([
 				versionTool.checkNodeVersion,
 				this.checkCreateAppDir.bind(this),
-				this.loadTemplateList.bind(this),
+				//this.loadTemplateList.bind(this),
 				this.checkTemplateValid.bind(this),
 				this.manageProperties.bind(this),
 				this.instantiateProject.bind(this)
@@ -307,16 +314,38 @@ PalmGenerate.prototype = {
 	exec: function() {
 		this.handleOptions();
 		this.checkAndShowHelp();
-
+		this.loadPluginConfig(this.configFile);
+	
 		if (this.argv.list) {
-			this.listItems('templates');
-		} else if (this.argv['lib-list']) {
-			this.listItems('libs');
+			this.listSources(this.argv.list);
 		} else if (this.argv.version) {
 			versionTool.showVersionAndExit();
 		} else {
 			this.generateProject();
 		}
+	},
+
+	loadPluginConfig: function(configFile) {
+		if (!fs.existsSync(configFile)) {
+			throw "Did not find: '"+configFile+"': ";
+		}
+		configStats = fs.lstatSync(configFile);
+		if (!configStats.isFile()) {
+			throw "Not a file: '"+configFile+"': ";
+		}
+		var configContent = fs.readFileSync(configFile, 'utf8');
+		try {
+			this.plugin = JSON.parse(configContent);
+		} catch(e) {
+			throw "Improper JSON: "+configContent;
+		}
+		if (!this.plugin.services || !this.plugin.services[0]) {
+			throw "Corrupted '"+configFile+"': no services defined";
+		}
+		this.plugin.services = this.plugin.services.filter(function(service){
+				return service.hasOwnProperty('sources');});
+		this.generator = new prjgen.Generator(this.plugin.services[0], function(err) {
+				}); //FIXME: change THIS!!
 	}
 };
 
