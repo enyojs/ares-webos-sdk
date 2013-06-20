@@ -5,7 +5,6 @@ var fs = require("fs"),
     async = require('async'),
     path = require('path'),
     versionTool = require('./../lib/version-tools'),
-    //tools = require('./../lib/ipkg-tools');
 	prjgen = require('ares-generator');
 
 /**********************************************************************/
@@ -27,17 +26,8 @@ function PalmGenerate() {
 	this.destination = undefined;
 	this.options = {};
 	this.substitutions = [];
-	this.sources = {};
-	this.templates = {};
-	this.libs = {};
 
-	this.repositories = [
-		"project-templates.json"
-	];
-
-	//this.defaultTemplate = 'bootplate-nightly-owo';
 	this.defaultTemplate = 'bootplate-webos-nightly';
-	this.defaultAddLib = 'webos-service';
 	this.defaultSourceType = 'template';
 
 	var knownOpts = {
@@ -47,9 +37,7 @@ function PalmGenerate() {
 		"overwrite":	Boolean,
 		"template":	[String, Array],
 		"property":	[String, Array],
-		"repository":	[String, Array],
-		"debug":	Boolean,
-		"addlib":	String
+		"debug":	Boolean
 	};
 	var shortHands = {
 		"h":		"--help",
@@ -58,14 +46,11 @@ function PalmGenerate() {
 		"f":		"--overwrite",
 		"t":		"--template",
 		"p":		"--property",
-		"r":		"--repository",
 		"d":		"--debug",
-		"a":		"--addlib"
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.argv.template = this.argv.template || this.defaultTemplate;
-	this.argv.addlib = (this.argv.addlib === 'true')? this.defaultAddLib:this.argv.addlib || false;
 	this.helpString = [
 		"Usage: ares-generate [OPTIONS] APP_DIR",
 		"",
@@ -76,9 +61,7 @@ function PalmGenerate() {
 		"  --overwrite, -f     Overwrite existing files         [boolean]",
 		"  --template, -t      Use the template named TEMPLATE  [path]  [default: " + this.defaultTemplate + "]",
 		"  --property, -p      Set the property PROPERTY        [string]",
-		"  --repository, -r    Also get templates of REPOSITORY [string]",
 		"  --debug, -d         Enable debug mode                [boolean]",
-		"  --addlib, -a        append the additional library    [string]  [default: " + this.defaultAddLib + "]",
 		"",
 		"APP_DIR is the application directory. It will be created if it does not exist.",
 		"",
@@ -87,12 +70,8 @@ function PalmGenerate() {
 		"form \"{'key1':'value1', 'key2':'value2', ...}\". Surrounding quotes are required",
 		"in both cases.",
 		"",
-		"ADDTIONAL LIBRARY is not generated, if there is no '--addlib' option.",
-		"",
 		"TEMPLATE is the application template to use. If not specified, the default",
 		"template is used ('" + this.defaultTemplate + "').",
-		"",
-		"REPOSITORY is an additional list of project templates."
 	];
 
 	this.existed = false;
@@ -145,11 +124,11 @@ PalmGenerate.prototype = {
 			this.options.existed = this.existed;
 		}
 
-		if (this.argv.addlib !== false) {
-			this.options.addlib = this.argv.addlib;
-		}
 		var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
-		this.generator.generate(sources, this.substitutions, this.destination, function(inError, inData) {
+		async.series([
+			this.generator.setOptions.bind(this.generator, this.options),
+			this.generator.generate.bind(this.generator, sources, this.substitutions, this.destination)
+		], function(inError, inData) {
 			if (inError) {
 				next("An error occured, err: " + inError);
 				return;
@@ -178,55 +157,6 @@ PalmGenerate.prototype = {
 			this.substitutions.push({ fileRegexp: "appinfo.json", json: properties});
 		}
 		next();
-	},
-
-	loadTemplateList: function(next) {
-		this.debug("loadTemplateList");
-
-		if (this.argv.repository) {
-			// Some additionnal repos where specified thru --repo xxxx
-			if (util.isArray(this.argv.repository)) {
-				this.argv.repository.forEach(function(repo) {
-					this.repositories.push(repo);
-				}, this);
-			} else {
-				this.repositories.push(this.argv.repository);
-			}
-		}
-
-		if (this.repositories.length > 0) {
-
-			// Locate the template directory
-			var templatesDir = path.join(path.dirname(process.argv[1]), '../templates');
-
-			async.forEachSeries(this.repositories, function(item, callback) {
-				if (item.substr(0, 4) !== 'http') {
-					// Resolve the path of template files
-					item = path.resolve('templates', templatesDir, item);
-				}
-				tools.registerRemoteTemplates(item, callback);
-			}, next);
-		} else {
-			next();
-		}
-	},
-
-	getTemplateList: function(type, next) {
-		this.debug("getTemplateList");
-		tools.getSources(type, function(err, data) {
-			if (err) {
-				next(err);
-				return;
-			}
-			data.forEach(function(item) {
-				if (type === "libs") {
-					this.libs[item.id] = item;
-				} else {
-					this.templates[item.id] = item;
-				}
-			}, this);
-			next();
-		}.bind(this));
 	},
 
 	projectReady: function(err, results) {
@@ -303,7 +233,6 @@ PalmGenerate.prototype = {
 		async.series([
 				versionTool.checkNodeVersion,
 				this.checkCreateAppDir.bind(this),
-				//this.loadTemplateList.bind(this),
 				this.checkTemplateValid.bind(this),
 				this.manageProperties.bind(this),
 				this.instantiateProject.bind(this)
