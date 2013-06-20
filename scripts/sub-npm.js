@@ -4,7 +4,7 @@ var path = require('path'),
 var submodules = [
 	'node_modules/semver',
 	'node_modules/tar',
-	'node_modules/unzip'
+	'node_modules/ares-generator'
 ];
 
 var mwd = process.cwd();
