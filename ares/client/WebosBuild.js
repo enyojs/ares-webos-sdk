@@ -161,7 +161,7 @@ enyo.kind({
 		var data = {
 			package : pkgUrl,
 			appId	: appId,
-			device	: this.device || "default"
+			device	: this.device || "webos3-qemux86"
 		}; 
 		var req = new enyo.Ajax({
 			url: this.url + '/op/install',
@@ -252,7 +252,7 @@ enyo.kind({
 		}
 		var data = {
 			id: encodeURIComponent(appId),
-			device: this.device || "default"
+			device: this.device || "webos3-qemux86"
 		};
 		var req = new enyo.Ajax({
 			url: this.url + '/op/launch',
@@ -298,7 +298,7 @@ enyo.kind({
 		}
 		var data = {
 			appId: encodeURIComponent(appId),
-			device: this.device || "default"
+			device: this.device || "webos3-qemux86"
 		};
 		var req = new enyo.Ajax({
 			url: this.url + '/op/debug',

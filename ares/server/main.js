@@ -149,6 +149,7 @@ function BdOpenwebOS(config, next) {
 
 	app.post(makeExpressRoute('/op/launch'), function(req, res, next) {
 		async.series([
+			close.bind(this, req, res),
 			launch.bind(this, req, res),
 			answerOk.bind(this, req, res)
 		], function (err, results) {
@@ -211,6 +212,19 @@ function BdOpenwebOS(config, next) {
 		tools.launcher.launch({verbose: true, device: req.body.device}, req.body.id, null, function(err, result) {
 			log.verbose("launch()", err, result);
 			next(err);
+		});
+	}
+
+	function close(req, res, next) {
+		log.info("close()", req.body.id);
+
+		tools.launcher.close({verbose: true, device: req.body.device}, req.body.id, null, function(err, result) {
+			log.verbose("close()", err, result);
+			//FIXME: Currently new webos doesn't support re-launch, 
+			//       so alternatively use 'close->lauch'
+			//       until supporting re-launch properly, just ignore closing error.
+			//next(err);
+			next();
 		});
 	}
 
