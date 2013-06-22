@@ -116,18 +116,13 @@ PalmGenerate.prototype = {
 
 	instantiateProject: function(next) {
 		this.debug("instantiateProject");
-		if (this.argv.overwrite) {
+		if (this.argv.overwrite || !this.existed) {
 			this.options.overwrite = true;
-		}
-
-		if (this.existed !== undefined) {
-			this.options.existed = this.existed;
 		}
 
 		var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
 		async.series([
-			this.generator.setOptions.bind(this.generator, this.options),
-			this.generator.generate.bind(this.generator, sources, this.substitutions, this.destination)
+			this.generator.generate.bind(this.generator, sources, this.substitutions, this.destination, this.options)
 		], function(inError, inData) {
 			if (inError) {
 				next("An error occured, err: " + inError);
