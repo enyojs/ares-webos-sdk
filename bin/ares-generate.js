@@ -4,15 +4,17 @@ var fs = require("fs"),
     util = require('util'),
     async = require('async'),
     path = require('path'),
+    log = require('npmlog'),
     versionTool = require('./../lib/version-tools'),
-	prjgen = require('ares-generator');
+    prjgen = require('ares-generator');
 
 /**********************************************************************/
 
 var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
-	console.error("*** " + processName + ": "+ err.toString());
+	log.error("*** " + processName + ": "+ err.toString());
+	log.info('uncaughtException', err.stack);
 	process.exit(1);
 });
 
@@ -37,7 +39,7 @@ function PalmGenerate() {
 		"overwrite":	Boolean,
 		"template":	[String, Array],
 		"property":	[String, Array],
-		"debug":	Boolean
+		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
 	};
 	var shortHands = {
 		"h":		"--help",
@@ -46,7 +48,7 @@ function PalmGenerate() {
 		"f":		"--overwrite",
 		"t":		"--template",
 		"p":		"--property",
-		"d":		"--debug",
+		"v":		["--level", "verbose"]
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
@@ -71,8 +73,11 @@ function PalmGenerate() {
 		"in both cases.",
 		"",
 		"TEMPLATE is the application template to use. If not specified, the default",
-		"template is used ('" + this.defaultTemplate + "').",
+		"template is used ('" + this.defaultTemplate + "')."
 	];
+
+	log.heading = processName;
+	log.level = this.argv.level || 'warn';
 
 	this.existed = false;
 }
@@ -80,7 +85,7 @@ function PalmGenerate() {
 PalmGenerate.prototype = {
 
 	checkTemplateValid: function(next) {
-		this.debug("checkTemplateValid: " + this.argv.template);
+		log.info("checkTemplateValid: " + this.argv.template);
 		// Verify it's a string
 		if ((typeof this.argv.template != 'string') && !(this.argv.template instanceof Array)){
 			this.showUsage();
@@ -91,7 +96,7 @@ PalmGenerate.prototype = {
 	},
 
 	checkCreateAppDir: function(next) {
-		this.debug("checkCreateAppDir");
+		log.info("checkCreateAppDir");
 		// Verify we have an APP_DIR parameter
 		if (this.argv.argv.remain.length != 1) {
 			this.showUsage();
@@ -102,7 +107,7 @@ PalmGenerate.prototype = {
 		if (fs.existsSync(this.destination)) {
 			var stats = fs.statSync(this.destination);
 			if ( ! stats.isDirectory()) {
-				console.error("'" + this.destination + "' is not a directory");
+				log.error('checkCreateAppDir', "'" + this.destination + "' is not a directory");
 				process.exit(1);
 			}
 			this.existed = true;
@@ -115,31 +120,23 @@ PalmGenerate.prototype = {
 	},
 
 	instantiateProject: function(next) {
-		this.debug("instantiateProject");
+		log.info("instantiateProject");
 		if (this.argv.overwrite || !this.existed) {
 			this.options.overwrite = true;
 		}
 
 		var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
-		async.series([
-			this.generator.generate.bind(this.generator, sources, this.substitutions, this.destination, this.options)
-		], function(inError, inData) {
-			if (inError) {
-				next("An error occured, err: " + inError);
-				return;
-			}
-			next();
-		});
+		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
 	},
 
 	insertProperty: function(prop, properties) {
 		var values = prop.split('=');
 		properties[values[0]] = values[1];
-		this.debug("Inserting property " + values[0] + " = " + values[1]);
+		log.info("Inserting property " + values[0] + " = " + values[1]);
 	},
 
 	manageProperties: function(next) {
-		this.debug("manageProperties");
+		log.info("manageProperties");
 		var properties = {};
 		if (this.argv.property) {
 			if (typeof this.argv.property === 'string') {
@@ -155,17 +152,18 @@ PalmGenerate.prototype = {
 	},
 
 	projectReady: function(err, results) {
-		this.debug("projectReady");
+		log.info("projectReady", "err:", err, "results:", results);
 		if (err) {
-			console.error("*** " + processName + ": "+ err.toString());
+			log.error("*** " + processName + ": "+ err.toString());
+			log.verbose(err.stack);
 			process.exit(1);
 		}
-		this.log("Generating " + this.argv.template + " in " + this.destination);
+		log.info("projectReady", "Generating " + this.argv.template + " in " + this.destination);
 		process.exit(0);
 	},
 
 	displayTemplateList: function(type, next) {
-		this.debug("displayTemplateList");
+		log.info("displayTemplateList");
 		this.generator.getSources(type, function(err, sources) {
 				if(err) {
 					next(err);
@@ -183,13 +181,14 @@ PalmGenerate.prototype = {
 		async.series([
 				versionTool.checkNodeVersion,
 				this.displayTemplateList.bind(this, type)
-			], function(err, results) {
+			], (function(err, results) {
 				if (err) {
-					console.error("*** " + processName + ": "+ err.toString());
+					log.error("*** " + processName + ": "+ err.toString());
+					log.verbose(err.stack);
 					process.exit(1);
 				}
 				process.exit(0);
-			}.bind(this));
+			}).bind(this));
 	},
 
 	showUsage: function(exitCode) {
@@ -208,23 +207,8 @@ PalmGenerate.prototype = {
 		}
 	},
 
-	handleOptions: function() {
-		if (this.argv.debug) {
-			this.options.verbose = true;
-		}
-	},
-
-	debug: function(msg) {
-		if (this.argv.debug) {
-			console.log(msg);
-		}
-	},
-
-	log: function(msg) {
-		console.log(msg);
-	},
-
 	generateProject: function() {
+		log.verbose("generateProject");
 		async.series([
 				versionTool.checkNodeVersion,
 				this.checkCreateAppDir.bind(this),
@@ -236,24 +220,32 @@ PalmGenerate.prototype = {
 	},
 
 	exec: function() {
-		this.handleOptions();
 		this.checkAndShowHelp();
-		this.loadPluginConfig(this.configFile);
-	
-		if (this.argv.list) {
-			this.listSources(this.argv.list);
-		} else if (this.argv.version) {
+		if (this.argv.version) {
 			versionTool.showVersionAndExit();
-		} else {
-			this.generateProject();
 		}
+		async.series([
+			this.loadPluginConfig.bind(this, this.configFile),
+			(function(next) {
+				if (this.argv.list) {
+					this.listSources(this.argv.list);
+				} else {
+					this.generateProject();
+				}
+			}).bind(this)
+		], function(err) {
+			if (err) {
+				log.error("exec", err.toString());
+				log.info("exec", err.stack);
+			}
+		});
 	},
 
-	loadPluginConfig: function(configFile) {
+	loadPluginConfig: function(configFile, next) {
 		if (!fs.existsSync(configFile)) {
 			throw "Did not find: '"+configFile+"': ";
 		}
-		configStats = fs.lstatSync(configFile);
+		var configStats = fs.lstatSync(configFile);
 		if (!configStats.isFile()) {
 			throw "Not a file: '"+configFile+"': ";
 		}
@@ -267,9 +259,9 @@ PalmGenerate.prototype = {
 			throw "Corrupted '"+configFile+"': no services defined";
 		}
 		this.plugin.services = this.plugin.services.filter(function(service){
-				return service.hasOwnProperty('sources');});
-		this.generator = new prjgen.Generator(this.plugin.services[0], function(err) {
-				}); //FIXME: change THIS!!
+			return service.hasOwnProperty('sources');
+		});
+		this.generator = new prjgen.Generator(this.plugin.services[0], next);
 	}
 };
 
