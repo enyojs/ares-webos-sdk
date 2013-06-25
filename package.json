@@ -10,8 +10,8 @@
 		"ares-launch": "./bin/ares-launch.js"
 	},
 	"dependencies": {
+		"ares-generator": "0.1.x",
 		"shelljs": "0.1.x",
-		"unzip": "0.1.3",
 		"request": "2.12.x",
 		"async": "~0.1.x",
 		"mkdirp": "0.3.x",
@@ -49,8 +49,8 @@
 		"install": "node ./scripts/sub-npm.js"
 	},
 	"bundledDependencies": [
+		"ares-generator",
 		"shelljs",
-		"unzip",
 		"request",
 		"async",
 		"mkdirp",
