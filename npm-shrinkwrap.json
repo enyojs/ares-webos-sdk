@@ -690,6 +690,10 @@
                     "sigmund": {
                       "version": "1.0.0",
                       "from": "sigmund@~1.0.0"
+                    },
+                    "inherits": {
+                      "version": "2.0.0",
+                      "from": "inherits@~2.0.0"
                     }
                   }
                 },
@@ -885,6 +889,10 @@
           }
         }
       }
+    },
+    "temp": {
+      "version": "0.4.0",
+      "from": "temp@0.4.x"
     },
     "sprintf": {
       "version": "0.1.1",
