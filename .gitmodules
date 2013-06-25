@@ -1,6 +1,3 @@
-[submodule "node_modules/unzip"]
-	path = node_modules/unzip
-	url = ../../enyojs/node-unzip.git
 [submodule "node_modules/tar"]
 	path = node_modules/tar
 	url = ../../enyojs/node-tar.git
@@ -9,4 +6,4 @@
 	url = ../../isaacs/node-semver.git
 [submodule "node_modules/ares-generator"]
 	path = node_modules/ares-generator
-	url = ../../enyojs/ares-generator.git
+	url = git@github.com:enyojs/ares-generator.git
