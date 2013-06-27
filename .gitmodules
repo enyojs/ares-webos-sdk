@@ -7,3 +7,6 @@
 [submodule "node_modules/semver"]
 	path = node_modules/semver
 	url = ../../isaacs/node-semver.git
+[submodule "enyo"]
+	path = enyo
+	url = git@github.com:enyojs/enyo.git
