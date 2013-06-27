@@ -2,34 +2,34 @@
 
 var fs = require('fs'),
     path = require("path"),
-    ipkg = require('./../lib/ipkg-tools'),
     npmlog = require('npmlog'),
-    versionTool = require('./../lib/version-tools'),
-    nopt = require('nopt');
+    nopt = require('nopt'),
+    ipkg = require('./../lib/ipkg-tools'),
+    versionTool = require('./../lib/version-tools');
+    
 
 /**********************************************************************/
 
 var knownOpts = {
 	"device":	[String, null],
-	"inspect":	Boolean,
-	"device-list":	Boolean,
-	"close":	Boolean,
-	"relaunch":	Boolean,
+	"app":	[String, null],
+	"service":	[String, null],
+	"browser":	Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
 };
 var shortHands = {
 	"d": ["--device"],
-	"I": ["--inspect"],
-	"f": ["--relaunch"],
-	"c": ["--close"],
-	"l": ["--list"],
+	"a": ["--app"],
+	"s": ["--service"],
+	"b": ["--browser"],
 	"V": ["--version"],
 	"h": ["--help"],
 	"v": ["--level", "verbose"]
 };
-var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-install.js'*/);
+
+var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-inspect.js'*/);
 
 /**********************************************************************/
 
@@ -45,7 +45,7 @@ process.on('uncaughtException', function (err) {
 var log = npmlog;
 log.heading = processName;
 log.level = argv.level || 'warn';
-ipkg.launcher.log.level = log.level;
+
 
 /**********************************************************************/
 
@@ -57,21 +57,18 @@ if (argv.help) {
 log.verbose("argv", argv);
 
 var op;
-if (argv.close) {
-	op = close;
-} else if (argv.relaunch) {
-	throw new Error('Not implemented');
-} else if (argv['device-list']) {
-	throw new Error('Not implemented');
-} else if (argv['version']) {
+
+if (argv['version']) {
 	versionTool.showVersionAndExit();
 } else {
-	op = launch;
+	op = inspect;
 }
 
 var options = {
 	device: argv.device,
-	inspect: argv.inspect
+	appId: argv.app,
+	serviceId: argv.service,
+	browser: argv.browser
 };
 
 /**********************************************************************/
@@ -85,9 +82,9 @@ if (op) {
 function help() {
 	console.log("\n" +
 			"USAGE:\n" +
-			"\t" + processName + " [OPTIONS] <APP_ID>\n" +
-			"\t" + processName + " [OPTIONS] --close <APP_ID>\n" +
-			"\t" + processName + " [OPTIONS] --relaunch <APP_ID>\n" +
+			"\t" + processName + " [OPTIONS] --app|-a <APP_ID>\n" +
+			"\t" + processName + " [OPTIONS] --service|-s <SERVICE_ID>\n" +
+			"\t" + processName + " [OPTIONS] --browser|-b\n" +
 			"\t" + processName + " [OPTIONS] --version|-V\n" +
 			"\t" + processName + " [OPTIONS] --help|-h\n" +
 			"\n" +
@@ -96,24 +93,13 @@ function help() {
 			"\t--level: tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]\n");
 }
 
-function launch() {
-	var pkgId = argv.argv.remain[0];
-	log.info("launch():", "pkgId:", pkgId);
-	if (!pkgId) {
+function inspect(){
+	log.info("inspect():", "AppId:", options.appId);
+	if(!options.appId){
 		help();
 		process.exit(1);
 	}
-	ipkg.launcher.launch(options, pkgId, null, finish);
-}
-
-function close() {
-	var pkgId = argv.argv.remain[0];
-	log.info("close():", "pkgId:", pkgId);
-	if (!pkgId) {
-		help();
-		process.exit(1);
-	}
-	ipkg.launcher.close(options, pkgId, null, finish);
+	ipkg.inspector.inspect(options, null, finish);
 }
 
 function finish(err, value) {
@@ -126,8 +112,8 @@ function finish(err, value) {
 			console.log(value.msg);
 		}
 		process.exit(0);
-	}}
-
+	}
+}
 
 process.on('uncaughtException', function (err) {
 	console.log('Caught exception: ' + err);

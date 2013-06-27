@@ -1,0 +1,35 @@
+[
+	{
+		"name": "webos3-qemux86",
+		"type": "webos3",
+		"description": "webOS 3 emulator",
+		"host": "127.0.0.1",
+		"port": 5522,
+		"username": "root",
+		"privateKey": {
+			"openSsh": "webos"
+		}
+	},
+	{
+		"name": "webospro-qemux86",
+		"type": "webospro",
+		"description": "webOS Pro emulator",
+		"host": "127.0.0.1",
+		"port": 6622,
+		"username": "root",
+		"privateKey": {
+			"openSsh": "webos"
+		}
+	},
+	{
+		"name": "tv",
+		"type": "starfish",
+		"description": "LG Smart TV",
+		"host": "127.0.0.1",
+		"port": 22,
+		"username": "root",
+		"privateKey": {
+			"openSsh": "webos"
+		}
+	}
+]

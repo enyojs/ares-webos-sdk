@@ -5,6 +5,7 @@ var fs = require('fs'),
     npmlog = require('npmlog'),
     nopt = require('nopt'),
     async = require('async'),
+    sprintf = require('sprintf').sprintf,
     versionTool = require('./../lib/version-tools'),
     novacom = require('./../lib/novacom');
 
@@ -63,6 +64,7 @@ var shortHands = {
 var helpString = [
 	"",
 	"USAGE:",
+	"\t" + processName + " [OPTIONS] list",
 	"\t" + processName + " [OPTIONS] put file://DEVICE_PATH < HOST_FILE",
 	"\t" + processName + " [OPTIONS] get file://DEVICE_PATH > HOST_FILE",
 	"\t" + processName + " [OPTIONS] run DEVICE_COMMAND",
@@ -96,8 +98,10 @@ process.on('uncaughtException', function (err) {
 
 log.verbose("argv", argv);
 
-var op, command = argv.argv.remain[0];
-if (command === 'put') {
+var op, command = argv.argv.remain.shift();
+if (command === 'list') {
+	op = list;
+} else if (command === 'put') {
 	op = put;
 } else if (command === 'get') {
 	op = get;
@@ -117,7 +121,7 @@ if (command === 'put') {
 }
 
 var options = {
-	device: argv.device
+	name: argv.device
 };
 
 if (op) {
@@ -128,6 +132,24 @@ if (op) {
 
 /**********************************************************************/
 
+function list(next) {
+	var resolver = new novacom.Resolver();
+	async.waterfall([
+		resolver.load.bind(resolver),
+		resolver.list.bind(resolver),
+		function(devices, next) {
+			log.info("list()", "devices:", devices);
+			if (Array.isArray(devices)) {
+				devices.forEach(function(device) {
+					console.log(sprintf("%-16s %-16s %-24s (%s)", device.name, device.type, device.description, device.addr));
+				});
+			}
+			log.info("list()", "Success");
+			next();
+		}
+	], next);
+}
+
 function put(next) {
 	next(new Error("Not yet implemented"));
 }
@@ -137,7 +159,15 @@ function get(next) {
 }
 
 function run(next) {
-	next(new Error("Not yet implemented"));
+	var session = new novacom.Session(options, function(err, result) {
+		log.verbose("run()", "argv:", argv.argv.remain);
+		log.verbose("run()", "options:", options);
+		if (err) {
+			next(err);
+			return;
+		}
+		session.run(argv.argv.remain.join(" "), process.stdin, process.stdout, process.stderr, next);
+	});
 }
 
 function forward(next) {
@@ -150,11 +180,12 @@ function forward(next) {
 	try {
 		argv.port.forEach(function(portStr) {
 			var portArr = portStr.split(':'),
-			    devicePort, localPort;
+			    devicePort, localPort, deviceAddr;
+			deviceAddr = options.session.ssh._host;
 			devicePort = parseInt(portArr[0], 10);
 			localPort = parseInt(portArr[1], 10) || devicePort;
 			tasks.push(function(next) {
-				options.session.forward(devicePort, localPort, next);
+				options.session.forward(deviceAddr, devicePort, localPort, next);
 			});
 		});
 	} catch(err) {
