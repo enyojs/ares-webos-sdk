@@ -123,7 +123,6 @@ enyo.kind({
 		
 		req.response(this, function(inSender, inData) {
 			this.doModifiedSource(inData);
-			this.bubble("onProjectSelected");
 		});
 		
 		req.error(this, function(inSender, inError) {
