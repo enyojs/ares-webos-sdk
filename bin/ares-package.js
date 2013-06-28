@@ -30,7 +30,9 @@ function PalmPackage() {
 		"outdir":	path,
 		"check":	Boolean,
 		"no-minify":	Boolean,
-		"app-exclude" : [String, Array]
+		"app-exclude" : [String, Array],
+		"rom":		Boolean,
+		"deployscript": String
 	};
 	var shortHands = {
 		"h":		"--help",
@@ -39,7 +41,9 @@ function PalmPackage() {
 		"o":		"--outdir",
 		"c":		"--check",
 		"":"",	//no-minify
-		"e": 	"--app-exclude"
+		"e":		"--app-exclude",
+		"r":		"--rom",
+		"d":		"--deployscript"
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.helpString = [
@@ -53,7 +57,9 @@ function PalmPackage() {
 		"--check, -c         Check the application but don't package it  [boolean]",
 		"--no-minify         Skip the minification phase                 [boolean]",
 		"--app-exclude, -e   Use EXCLUDE_DIR to exclude dir in package	[path]",
-		"		    To exclude multi sub-dirs, it can be used as '-e subdir1 -e subdir2'"
+		"                    To exclude multi sub-dirs, it can be used as '-e subdir1 -e subdir2'",
+		"--rom, -r           Do not create ipk; instead output a folder structure to OUTPUT_DIR suitable for inclusion in webOS ROM image [boolean]",
+		"--deployscript, -d  Path to enyo deploy script [path]"
 	];
 }
 
@@ -99,6 +105,17 @@ PalmPackage.prototype = {
 		if (this.argv.hasOwnProperty('app-exclude')) {
 			this.options.excludedir = this.argv['app-exclude'];
 		}
+
+		if (this.argv.hasOwnProperty('rom')) {
+			this.options.rom = this.argv.rom;
+		} else {
+			this.options.rom = false;
+		}
+
+		if (this.argv.hasOwnProperty('deployscript')) {
+			this.options.deployscript = this.argv.deployscript;
+		}
+
 	},
 
 	debug: function(msg) {
