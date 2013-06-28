@@ -161,7 +161,7 @@ enyo.kind({
 		var data = {
 			package : pkgUrl,
 			appId	: appId,
-			device	: this.device || "default"
+			device	: this.device || "webos3-qemux86"
 		}; 
 		var req = new enyo.Ajax({
 			url: this.url + '/op/install',
@@ -252,7 +252,7 @@ enyo.kind({
 		}
 		var data = {
 			id: encodeURIComponent(appId),
-			device: this.device || "default"
+			device: this.device || "webos3-qemux86"
 		};
 		var req = new enyo.Ajax({
 			url: this.url + '/op/launch',
@@ -298,7 +298,7 @@ enyo.kind({
 		}
 		var data = {
 			appId: encodeURIComponent(appId),
-			device: this.device || "default"
+			device: this.device || "webos3-qemux86"
 		};
 		var req = new enyo.Ajax({
 			url: this.url + '/op/debug',
@@ -336,6 +336,15 @@ enyo.kind({
 	 */
 	getAresPropertiesKind: function() {
 		return "WebOS.AresProperties";
+	},
+
+	/**
+	 * Name of the kind to show in the {ProjectProperties} UI
+	 * @return the Enyo kind to use to set service-specific project properties
+	 * @public
+	 */
+	getProjectPropertiesKind: function() {
+		return "WebOS.ProjectProperties";
 	},
 
 	statics: {
