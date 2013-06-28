@@ -180,11 +180,12 @@ function forward(next) {
 	try {
 		argv.port.forEach(function(portStr) {
 			var portArr = portStr.split(':'),
-			    devicePort, localPort;
+			    devicePort, localPort, deviceAddr;
+			deviceAddr = options.session.ssh._host;
 			devicePort = parseInt(portArr[0], 10);
 			localPort = parseInt(portArr[1], 10) || devicePort;
 			tasks.push(function(next) {
-				options.session.forward(devicePort, localPort, next);
+				options.session.forward(deviceAddr, devicePort, localPort, next);
 			});
 		});
 	} catch(err) {

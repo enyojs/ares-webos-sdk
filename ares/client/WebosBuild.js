@@ -338,6 +338,15 @@ enyo.kind({
 		return "WebOS.AresProperties";
 	},
 
+	/**
+	 * Name of the kind to show in the {ProjectProperties} UI
+	 * @return the Enyo kind to use to set service-specific project properties
+	 * @public
+	 */
+	getProjectPropertiesKind: function() {
+		return "WebOS.ProjectProperties";
+	},
+
 	statics: {
 		serviceName: "webos"
 	}
