@@ -141,6 +141,9 @@ enyo.kind({
 		} else {
 			this.$.add.hide();
 		}
+		this.$.webosSvcPicker.setSelected(0);
+		this.selectedWebosSvc = undefined;
+		this.doApplyAddSource({source:this.selectedWebosSvc});
 		return true;
 	},
 	statics: {
