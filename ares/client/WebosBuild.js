@@ -43,15 +43,10 @@ enyo.kind({
 
 	/**
 	 * Default configuration used when a new project is created.
-	 * The Project configuration is transformed into a config.xml
-	 * file at each build.  It is later expected to be modified by
-	 * the UI kind returned by
-	 * {PhoneGap.Build#getProjectPropertiesKind}.
-	 * 
 	 * @public
 	 */
 	getDefaultProjectConfig: function() {
-		return ares.clone(Phonegap.Build.DEFAULT_PROJECT_CONFIG);
+		return ares.clone(Webos.Build.serviceName);
 	},	
 	/**
 	 * Shared enyo.Ajax error handler
@@ -359,7 +354,7 @@ enyo.kind({
 
 	/**
 	 * Name of the kind to show in the {ProjectProperties} UI
-	 * @return the Enyo kind to use to set Phonegap project properties
+	 * @return the Enyo kind to use to set WebOS project properties
 	 */
 	getAresPropertiesKind: function() {
 		return "WebOS.AresProperties";
