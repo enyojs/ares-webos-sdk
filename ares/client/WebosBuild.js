@@ -26,6 +26,33 @@ enyo.kind({
 			if (this.debug) this.log("url:", this.url);
 		}
 	},
+
+	/**
+	 * @return {Object} the configuration this service was configured by
+	 */
+	getConfig: function() {
+		return this.config;
+	},
+
+	/**
+	 * @return the human-friendly name of this service
+	 */
+	getName: function() {
+		return this.config.name || this.config.id;
+	},
+
+	/**
+	 * Default configuration used when a new project is created.
+	 * The Project configuration is transformed into a config.xml
+	 * file at each build.  It is later expected to be modified by
+	 * the UI kind returned by
+	 * {PhoneGap.Build#getProjectPropertiesKind}.
+	 * 
+	 * @public
+	 */
+	getDefaultProjectConfig: function() {
+		return ares.clone(Phonegap.Build.DEFAULT_PROJECT_CONFIG);
+	},	
 	/**
 	 * Shared enyo.Ajax error handler
 	 * @private
@@ -348,7 +375,10 @@ enyo.kind({
 	},
 
 	statics: {
-		serviceName: "webos"
+		serviceName: "webos",
+		DEFAULT_PROJECT_CONFIG: {
+			enabled: false
+		}		
 	}
 });
 
