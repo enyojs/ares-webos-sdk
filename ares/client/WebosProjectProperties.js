@@ -16,7 +16,7 @@ enyo.kind({
 		onModifiedSource: ""
 	},
 	handlers: {
-		onModifiedConfig: "createProject" ,
+		onChangeProjectStatus: "handleChangeProjectStatus"
 	},
 	components: [
 		{kind:"enyo.Scroller", fit:"true", classes:"ares-project-properties",components:[
@@ -47,6 +47,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this._initWebosSvcList();
+		this.$.add.hide();
 	},
 	/**
 	 * @private
@@ -129,9 +130,22 @@ enyo.kind({
 			this.log("Unable to get the service files (" + inError + ")");
 			this.$.errorPopup.raise('Unable to instanciate service content from the source');
 		});
-
+		return true;
 	},
-
+	/**
+	 * @protected
+	 */	
+	handleChangeProjectStatus: function (inSender, inEvent){
+		if (inEvent.status === "modify") {
+			this.$.add.show();
+		} else {
+			this.$.add.hide();
+		}
+		this.$.webosSvcPicker.setSelected(0);
+		this.selectedWebosSvc = undefined;
+		this.doApplyAddSource({source:this.selectedWebosSvc});
+		return true;
+	},
 	statics: {
 		getProvider: function() {
 			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
