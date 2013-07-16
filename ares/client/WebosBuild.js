@@ -262,6 +262,55 @@ enyo.kind({
 			req.go();
 		}
 	},
+    /**
+	 * @public
+	 */
+	updateAppInfo: function(project, next) {
+		if (this.debug) this.log('updateAppInfo');
+		async.waterfall([
+			this._getAppInfo.bind(this, project),
+			this._getAppInfoData.bind(this, project),
+			this._updateAppInfo.bind(this, project)
+		], next);
+	},
+	/**
+	 * @private
+	 */
+    _getAppInfoData: function(project, appId, appInfoFile, next) {
+      var req = project.getService().getFile(appInfoFile.id);
+      req.response(this, function(inRequest, inData) {
+        var data = JSON.parse(inData.content);
+        next(null, appInfoFile, data);
+      });
+      req.error(this, this._handleServiceError.bind(this, "Unable to get appinfo.json data", next));
+      req.go();
+    },
+    /**
+	 * @private
+	 */
+    _updateAppInfo: function(project, appInfoFile, appInfoData, next) {
+      var config = project.getConfig();
+      appInfoData.id = config.data.id;
+      appInfoData.version = config.data.version;
+      appInfoData.title = config.data.title;
+
+      var req = project.getService().putFile(appInfoFile.id, JSON.stringify(appInfoData, null, 2));
+      req.response(this, function(inRequest, inData) {
+        this.log("updateAppInfo#inData", inData);
+        next();
+      });
+      req.error(this, function(inSender, inError) {
+        var response = inSender.xhrResponse, contentType, details;
+        if (response) {
+          contentType = response.headers['content-type'];
+          if (contentType && contentType.match('^text/plain')) {
+            details = response.body;
+          }
+        }
+        next(new Error("Unable to update appinfo.json file:" + (details || inError.toString())));
+      });
+      req.go();
+    },
 	/**
 	 * @private
 	 */
