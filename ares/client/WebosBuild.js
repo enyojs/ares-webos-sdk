@@ -216,6 +216,11 @@ enyo.kind({
 			this._getAppInfo.bind(this, project),
 			this._getAppId.bind(this, project),
 			this._runApp.bind(this, project)
+			//ByJunil-test
+			//this._getServicesDir.bind(this, project),
+			//this._getServiceDirs.bind(this, project),
+			//this._getServiceInfoFiles.bind(this, project),
+			//this._getServiceIds.bind(this, project)
 		], next);
 	},
 	/**
@@ -259,6 +264,110 @@ enyo.kind({
 				}
 			});
 			req.error(this, this._handleServiceError.bind(this, "Unable to list project root folder", next));
+			req.go();
+		}
+	},
+	/**
+	 * @private
+	 */
+	_getServicesDir: function(project, next) {
+		var servicesDir;
+		var req = project.getService().propfind(project.getFolderId(), 1);
+			req.response(this, function(inRequest, inData) {
+				this.log("_getServicesDir#inData:", inData);
+				var servicesDir = enyo.filter(inData.children, function(child) {
+					return child.name === 'services';
+				}, this)[0];
+				next(null, servicesDir);
+			});
+			req.error(this, this._handleServiceError.bind(this, "Unable to list project service folder", next));
+			req.go();
+	},
+	/**
+	 * @private
+	 */
+	_getServiceDirs: function(project, servicesDir, next) {
+		if (!servicesDir) {
+			next(null, null);
+		} else {
+			var req = project.getService().propfind(servicesDir.id, 1);
+				req.response(this, function(inRequest, inData) {
+					this.log("_getServiceDirs#inData:", inData);
+					var serviceDirs = enyo.filter(inData.children, function(child) {
+						return child.isDir === true;
+					}, this);
+					next(null, serviceDirs);
+				});
+				req.error(this, this._handleServiceError.bind(this, "Unable to list project service folder", next));
+				req.go();
+		}
+	},
+
+	/**
+	 * @private
+	 */
+	_getServiceInfoFiles: function(project, serviceDirs, next) {
+		var serviceInfoFiles = [];
+		if (!serviceDirs) {
+			next(null, null);
+		} else {
+			async.series([
+				async.forEachSeries.bind(this, serviceDirs, __getServiceInfoFiles.bind(this))
+			], function(err) {
+				if (err) {
+					next(err);
+				}
+				next(null, serviceInfoFiles);
+			});
+		}
+
+		function __getServiceInfoFiles(serviceInfoDir, next) {
+			var req = project.getService().propfind(serviceInfoDir.id, 1);
+			req.response(this, function(inRequest, inData) {
+				this.log("_getServiceInfoFiles#__getServiceInfoFiles#inData:", inData);
+				var serviceInfoFile = enyo.filter(inData.children, function(child) {
+					return child.name === 'services.json';
+				}, this)[0];
+				serviceInfoFiles.push(serviceInfoFile);
+				next();
+			});
+			req.error(this, this._handleServiceError.bind(this, "Unable to list project service folder", next));
+			req.go();
+		}
+	},
+	/**
+	 * @private
+	 */
+	_getServiceIds: function(project, serviceInfoFiles, next) {
+		var serviceIds = [];
+		if (!serviceInfoFiles) {
+			next(null, null);
+		} else {
+			async.series([
+				async.forEachSeries.bind(this, serviceInfoFiles, __getServiceInfoFile.bind(this))
+			], function(err) {
+				if (err) {
+					next(err);
+				}
+				next(null, appId);
+			});
+		}
+
+		function __getServiceInfoFile(serviceInfoFile, next) {
+			var req = project.getService().getFile(serviceInfoFile.id);
+			req.response(this, function(inRequest, inData) {
+				try {
+					this.log("_getServiceIds#__getServiceInfoFile#inData:", inData);
+					var serviceInfo, serviceId;
+					serviceInfo = JSON.parse(inData.content);
+					serviceId = serviceInfo.id;
+					serviceIds.push(serviceId);
+					next();
+				} catch(err) {
+					next(err);
+				}
+			});
+			req.error(this, this._handleServiceError.bind(this, "Unable to list project service folder", next));
 			req.go();
 		}
 	},
