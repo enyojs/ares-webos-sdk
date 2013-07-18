@@ -8,10 +8,7 @@ SCRIPT=${BIN_DIR}/../lib/node_modules/ares-webos-sdk/bin/ares-inspect.js
 
 # check file path
 if [ ! -e $SCRIPT ]; then
-    echo "no file file found"
     SCRIPT=${BIN_DIR}/ares-inspect.js
-else
-    echo "file exist"
 fi
 
 # path to node modules
