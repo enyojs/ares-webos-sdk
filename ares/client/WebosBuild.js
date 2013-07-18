@@ -216,11 +216,6 @@ enyo.kind({
 			this._getAppInfo.bind(this, project),
 			this._getAppId.bind(this, project),
 			this._runApp.bind(this, project)
-			//ByJunil-test
-			//this._getServicesDir.bind(this, project),
-			//this._getServiceDirs.bind(this, project),
-			//this._getServiceInfoFiles.bind(this, project),
-			//this._getServiceIds.bind(this, project)
 		], next);
 	},
 	/**
@@ -349,7 +344,7 @@ enyo.kind({
 				if (err) {
 					next(err);
 				}
-				next(null, appId);
+				next(null, serviceIds);
 			});
 		}
 
@@ -417,6 +412,7 @@ enyo.kind({
 			this.install.bind(this, project),
 			this.run.bind(this, project),
 			this._debugApp.bind(this, project)
+			this.debugService.bind(this, project)
 		], next);
 	},
 
@@ -450,6 +446,51 @@ enyo.kind({
 				}
 			}
 			next(new Error("Unable to debug application:" + (details || inError.toString())));
+		});
+		req.go();
+	},
+
+	debugService: function(project, next) {
+		if (this.debug) this.log('debugService');
+		async.waterfall([
+			this._getServicesDir.bind(this, project),
+			this._getServiceDirs.bind(this, project),
+			this._getServiceInfoFiles.bind(this, project),
+			this._getServiceIds.bind(this, project),
+			this._debugService.bind(this, project)
+		], next);
+	},
+	
+	_debugService: function(project, serviceIds, next) {
+		if (this.debug) this.log('debugging ' + serviceIds);
+		this.doShowWaitPopup({msg: $L("debugging service:" + serviceIds)});
+		if (serviceIds.length === 0) {
+			next(new Error("Did not find service id in selected project"));
+			return;
+		}
+		var data = {
+			serviceId: encodeURIComponent(serviceIds),
+			device: this.device || "webos3-qemux86"
+		};
+		var req = new enyo.Ajax({
+			url: this.url + '/op/debug',
+			method: 'POST',
+			handleAs: 'json',
+			postBody: data
+		});
+		req.response(this, function(inSender, inData) {
+			this.log("runDebug#inData:", inData);
+			next();
+		});
+		req.error(this, function(inSender, inError) {
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['content-type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
+			}
+			next(new Error("Unable to debug service:" + (details || inError.toString())));
 		});
 		req.go();
 	},
