@@ -213,6 +213,8 @@ enyo.kind({
 	run: function(project, next) {
 		if (this.debug) this.log('launching');
 		async.waterfall([
+			this.build.bind(this, project),
+			this.install.bind(this, project),
 			this._getAppInfo.bind(this, project),
 			this._getAppId.bind(this, project),
 			this._runApp.bind(this, project)
