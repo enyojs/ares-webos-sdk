@@ -410,8 +410,6 @@ enyo.kind({
 	runDebug: function(project, next) {
 		if (this.debug) this.log('launching');
 		async.waterfall([
-			this.build.bind(this, project),
-			this.install.bind(this, project),
 			this.run.bind(this, project),
 			this._debugApp.bind(this, project),
 			this.debugService.bind(this, project)
