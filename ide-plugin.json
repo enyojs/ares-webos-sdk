@@ -8,7 +8,7 @@
 			"command":"@NODE@", "params":[
 				"@PLUGINDIR@/ares/server/main.js", "-P", "/webos", "-p", "0"
 			],
-			"pluginUrl": "../node_modules/ares-webos-sdk/ares/client/package.js",
+			"pluginClient": "@PLUGINURL@/ares/client/package.js",
 			"useJsonp":false,
 			"verbose": false,
 			"respawn": false
