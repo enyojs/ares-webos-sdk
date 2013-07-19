@@ -61,8 +61,6 @@ if (argv.close) {
 	op = close;
 } else if (argv.relaunch) {
 	throw new Error('Not implemented');
-} else if (argv['device-list']) {
-	throw new Error('Not implemented');
 } else if (argv['version']) {
 	versionTool.showVersionAndExit();
 } else {
