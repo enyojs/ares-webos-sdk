@@ -56,7 +56,7 @@ var shortHands = {
 	"V": ["--version"],
 	// command-specific aliases
 	"l": ["list"],
-	"P": ["forward"],
+	"f": ["forward"],
 	"d": ["--device"],
 	"p": ["--port"]
 };
@@ -174,18 +174,20 @@ function forward(next) {
 	log.info('forward', "ports:", argv.port);
 	var tasks = [
 		function(next) {
-			options.session = new novacom.Session(options.device, next);
+			options.session = new novacom.Session(options, next);
 		}
 	];
 	try {
 		argv.port.forEach(function(portStr) {
 			var portArr = portStr.split(':'),
 			    devicePort, localPort, deviceAddr;
-			deviceAddr = options.session.ssh._host;
 			devicePort = parseInt(portArr[0], 10);
 			localPort = parseInt(portArr[1], 10) || devicePort;
 			tasks.push(function(next) {
-				options.session.forward(deviceAddr, devicePort, localPort, next);
+				options.session.forward(devicePort, localPort, next);
+			});
+			tasks.push(function(next) {
+				log.info('forward','running...');
 			});
 		});
 	} catch(err) {
