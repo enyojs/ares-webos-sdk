@@ -18,6 +18,7 @@
 		"temp": "~0.4.x",
 		"rimraf": "2.1.x",
 		"rsync": "0.0.x",
+		"readline": "0.0.x",
 		"tar": "0.1.x",
 		"fstream": "0.1.x",
 		"graceful-fs": "1.2.x",
