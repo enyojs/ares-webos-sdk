@@ -231,7 +231,9 @@ function BdOpenwebOS(config, next) {
 	function debug(req, res, next) {
 		log.info("debug()", req.body.id);
 		res.status(200).send();
-		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.appId}, null, function(err, result) {
+		var app = req.body.appId;
+		var service = req.body.serviceId && req.body.serviceId.split("%2C");
+		tools.inspector.inspect({verbose: true, device: req.body.device, appId: app, serviceId: service}, null, function(err, result) {
 			log.verbose("debug()", err, result);
 			next(err);
 		});
