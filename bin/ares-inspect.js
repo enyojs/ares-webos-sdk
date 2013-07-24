@@ -13,7 +13,7 @@ var fs = require('fs'),
 var knownOpts = {
 	"device":	[String, null],
 	"app":	[String, null],
-	"service":	[String, null],
+	"service":	[String, Array],
 	"browser":	Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
