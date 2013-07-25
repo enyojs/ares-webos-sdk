@@ -94,8 +94,8 @@ function help() {
 }
 
 function inspect(){
-	log.info("inspect():", "AppId:", options.appId);
-	if(!options.appId){
+	log.info("inspect():", "AppId:", options.appId, "ServiceId:", options.serviceId);
+	if(!options.appId && !options.serviceId){
 		help();
 		process.exit(1);
 	}
