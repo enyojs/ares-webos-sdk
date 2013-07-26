@@ -464,7 +464,7 @@ enyo.kind({
 	_debugService: function(project, serviceIds, next) {
 		if (this.debug) this.log('debugging ' + serviceIds);
 		if (serviceIds.length === 0) {
-			this.log("Did not find service id in selected project"));
+			this.log("Did not find service id in selected project");
 			next();
 			return;
 		}
