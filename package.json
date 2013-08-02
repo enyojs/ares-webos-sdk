@@ -28,7 +28,8 @@
 		"semver": "1.1.x",
 		"sprintf": "0.1.x",
 		"stream-buffers": "0.2.x",
-		"express": "3.1.x"
+		"express": "3.1.x",
+                "inherits": "1.x"
 	},
 	"engines": {
 		"node": "0.8.x >=0.8.21",
@@ -66,7 +67,8 @@
 		"semver",
 		"sprintf",
 		"stream-buffers",
-		"express"
+		"express",
+                "inherits"
 	],
 	"files": [
 		"DEMO.md",

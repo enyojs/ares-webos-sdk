@@ -425,6 +425,10 @@
       "version": "0.4.0",
       "from": "temp@0.4.x"
     },
+    "inherits": {
+      "version": "1.0.0",
+      "from": "inherits@1.x"
+    },
     "rimraf": {
       "version": "2.1.4",
       "from": "https://registry.npmjs.org/rimraf/-/rimraf-2.1.4.tgz",
