@@ -435,6 +435,10 @@
       "version": "0.0.2",
       "from": "rsync@0.0.2"
     },
+	"readline": {
+      "version": "0.0.3",
+      "from": "readline@"
+	},
     "tar": {
       "version": "0.1.17",
       "dependencies": {
