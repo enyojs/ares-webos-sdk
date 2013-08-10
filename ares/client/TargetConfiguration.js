@@ -11,6 +11,7 @@ enyo.kind({
         {from: ".model.host", to: ".$.ipInput.value", twoWay:true},
         {from: ".model.port", to: ".$.portInput.value", twoWay:true},
         {from: ".model.privateKey", to: ".$.keyCheckbox.checked"},
+        {from: ".model.privateKeyName", to: ".$.privateKeyName.value"},
         {from: ".model.modified", to: ".$.saveButton.disabled", transform: function(val) {return !val}}
     ],
     components: [           
@@ -23,7 +24,7 @@ enyo.kind({
             ]},
             {kind:"FittableColumns", fit:true, components:[
                 {kind: "enyo.Group",  fit:true, onActivate:"selectDevice", components:[
-                    {kind: "enyo.DataList", style:"width:35%;", name:"deviceList", components: [
+                    {kind: "enyo.DataList", name:"deviceList", components: [
                         {kind:"onyx.Button", style:"width:85%; margin:5px;", bindFrom:"name", bindTo:"name", components: [
                             {tag:"span", content:"* ", bindFrom:"modified", bindTo:"showing"},
                             {tag:"span", bindFrom:"name"}
@@ -66,6 +67,9 @@ enyo.kind({
                     {components: [
                         {content:"Key Registered"},
                         {components: [
+                            {kind:"onyx.InputDecorator", components: [
+                                {kind:"onyx.Input", name:"privateKeyName", disabled:true}
+                            ]},
                             {kind:"onyx.Checkbox", disabled:true, name:"keyCheckbox"}
                         ]}
                     ]}
