@@ -58,13 +58,15 @@ var shortHands = {
 	"l": ["list"],
 	"f": ["forward"],
 	"d": ["--device"],
-	"p": ["--port"]
+	"p": ["--port"],
+	"k": ["getkey"]
 };
 
 var helpString = [
 	"",
 	"USAGE:",
 	"\t" + processName + " [OPTIONS] list",
+	"\t" + processName + " [OPTIONS] getkey",
 	"\t" + processName + " [OPTIONS] put file://DEVICE_PATH < HOST_FILE",
 	"\t" + processName + " [OPTIONS] get file://DEVICE_PATH > HOST_FILE",
 	"\t" + processName + " [OPTIONS] run DEVICE_COMMAND",
@@ -101,6 +103,8 @@ log.verbose("argv", argv);
 var op, command = argv.argv.remain.shift();
 if (command === 'list') {
 	op = list;
+} else if (command === 'getkey') {
+	op = getkey;
 } else if (command === 'put') {
 	op = put;
 } else if (command === 'get') {
@@ -147,6 +151,14 @@ function list(next) {
 			log.info("list()", "Success");
 			next();
 		}
+	], next);
+}
+
+function getkey(next) {
+	var resolver = new novacom.Resolver();
+	async.waterfall([
+		resolver.load.bind(resolver),
+		resolver.getSshPrvKey.bind(resolver, options)
 	], next);
 }
 
