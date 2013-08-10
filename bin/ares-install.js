@@ -114,9 +114,11 @@ function install() {
 
 function list() {
 	ipkg.installer.list(options, function(err, pkgs) {
+		var strPkgs = "";
 		if (pkgs) pkgs.forEach(function (pkg) {
-			process.stdout.write(pkg.id + '\n');
+			strPkgs = strPkgs.concat(pkg.id).concat('\n');
 		});
+		process.stdout.write(strPkgs);
 		finish(err);
 	});
 }
