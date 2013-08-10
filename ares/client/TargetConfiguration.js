@@ -12,6 +12,7 @@ enyo.kind({
         {from: ".model.port", to: ".$.portInput.value", twoWay:true},
         {from: ".model.privateKey", to: ".$.keyCheckbox.checked"},
         {from: ".model.privateKeyName", to: ".$.privateKeyName.value"},
+        {from: ".model.privateKey", to: ".$.reqButton.content"},
         {from: ".model.modified", to: ".$.saveButton.disabled", transform: function(val) {return !val}}
     ],
     components: [           
@@ -65,12 +66,12 @@ enyo.kind({
                         ]}
                     ]},
                     {components: [
-                        {content:"Key Registered"},
+                        {content:"Private Key"},
                         {components: [
                             {kind:"onyx.InputDecorator", components: [
                                 {kind:"onyx.Input", name:"privateKeyName", disabled:true}
                             ]},
-                            {kind:"onyx.Checkbox", disabled:true, name:"keyCheckbox"}
+                            {kind:"onyx.Checkbox", name:"keyCheckbox", onActivate:"requestPrivateKey"}
                         ]}
                     ]}
                 ]}
@@ -85,7 +86,7 @@ enyo.kind({
         var devicesData = this.getDevicesList();
         this.devices = new enyo.Collection(devicesData);
         this.$.deviceList.set("controller", this.devices);
-        this.defaultTarget = this.findKindBy("name", "webospro-qemux86"); //set "webospro-qemux86" as default target
+        this.defaultTarget = this.findKindBy("name", "webOS TV Emulator"); //set "WebOS Emulator " as default target
         this.defaultTarget.setActive(true);
     },
 

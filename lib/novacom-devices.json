@@ -2,7 +2,7 @@
 	{
 		"name": "webos3-qemux86",
 		"type": "webos3",
-		"description": "webOS 3 emulator",
+		"description": "HP webOS 3 emulator",
 		"host": "127.0.0.1",
 		"port": 5522,
 		"username": "root",
@@ -11,20 +11,20 @@
 		}
 	},
 	{
-		"name": "webospro-qemux86",
-		"type": "webospro",
-		"description": "webOS Pro emulator",
+		"name": "webOS TV Emulator",
+		"type": "starfish",
+		"description": "LG webOS TV Emulator",
 		"host": "127.0.0.1",
 		"port": 6622,
 		"username": "root",
 		"privateKey": {
-			"openSsh": "webos"
+			"openSsh": "webos_emul"
 		}
 	},
 	{
-		"name": "tv",
+		"name": "webOS TV",
 		"type": "starfish",
-		"description": "LG Smart TV",
+		"description": "LG webOS TV",
 		"host": "127.0.0.1",
 		"port": 22,
 		"username": "root",
