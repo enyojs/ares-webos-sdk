@@ -158,7 +158,28 @@ function getkey(next) {
 	var resolver = new novacom.Resolver();
 	async.waterfall([
 		resolver.load.bind(resolver),
-		resolver.getSshPrvKey.bind(resolver, options)
+		resolver.getSshPrvKey.bind(resolver, options),
+		function(keyFileName, next) {
+			console.log("[ByJunil]keyFilePath:",keyFileName);
+			if (keyFileName) {
+				options.priavetKey = { "openSsh": keyFileName };
+				process.stdin.resume();
+				process.stdin.setEncoding('utf8');
+				process.stdout.write('input passphrase [default: webos]:');
+				process.stdin.on('data', function (text) {
+					var passphrase = text.toString().trim();
+					if (passphrase === '') {
+						passphrase = 'webos';
+					}
+					console.log('registed passphrase is ', passphrase);
+					options.passphrase = passphrase;
+					console.log('options:',options);
+					next();
+				});
+			} else {
+				next();
+			}
+		}
 	], next);
 }
 
