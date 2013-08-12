@@ -108,6 +108,81 @@ enyo.kind({
 		if (this.debug) this.log("config:", this.config);
 		return this.config;
 	},
+    /** public */
+    saveProjectConfig: function(project) {
+        if(project) {
+            this.updateAppInfo(project);
+        }
+        return true;
+    },
+    updateAppInfo: function(project) {
+        var self = this;
+        async.waterfall([
+            this._getAppInfo.bind(this, project),
+            this._getAppInfoData.bind(this, project),
+            this._updateAppInfo.bind(this, project)
+        ], function(err, results) {
+            if (err) {
+                self.$.errorPopup.raise(err.toString());
+            }
+        });
+    },
+    /**
+     * @private
+     */
+    _getAppInfo: function(project, next) {
+        var req = project.getService().propfind(project.getFolderId(), 1);
+        req.response(this, function(inRequest, inData) {
+            var appInfoFile = enyo.filter(inData.children, function(child) {
+                return child.name === 'appinfo.json';
+            }, this)[0];
+            next(null, appInfoFile);
+        });
+        req.error(this, this._handleServiceError.bind(this, "Unable to list project root folder", next));
+        req.go();
+    },
+    /**
+     * @private
+     */
+    _getAppInfoData: function(project, appInfoFile, next) {
+      var req = project.getService().getFile(appInfoFile.id);
+      req.response(this, function(inRequest, inData) {
+        var data = JSON.parse(inData.content);
+        next(null, appInfoFile, data);
+      });
+      req.error(this, this._handleServiceError.bind(this, "Unable to get appinfo.json data", next));
+      req.go();
+    },
+    /**
+     * @private
+     */
+    _updateAppInfo: function(project, appInfoFile, appInfoData, next) {
+      var config = project.getConfig();
+      appInfoData.id = config.data.id;
+      appInfoData.version = config.data.version;
+      appInfoData.title = config.data.title;
+      var req = project.getService().putFile(appInfoFile.id, JSON.stringify(appInfoData, null, 2));
+      req.response(this, function(inRequest, inData) {
+        this.log("updateAppInfo#inData", inData);
+        next();
+      });
+      req.error(this, this._handleServiceError.bind(this, "Unable to update appinfo.json file:", next));
+      req.go();
+    },
+    /**
+     * Shared enyo.Ajax error handler
+     * @private
+     */
+    _handleServiceError: function(msg, next, inSender, inError) {
+        var response = inSender.xhrResponse, contentType, details;
+        if (response) {
+            contentType = response.headers['content-type'];
+            if (contentType && contentType.match('^text/plain')) {
+                details = response.body;
+            }
+        }
+        next(new Error(msg + inError.toString()), details);
+    },
 	/**
 	 * @protected
 	 */
