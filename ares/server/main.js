@@ -169,6 +169,7 @@ function BdOpenwebOS(config, next) {
 
 	app.post(makeExpressRoute('/op/install'), function(req, res, next) {
 		async.series([
+			close.bind(this, req, res),
 			prepare.bind(this, req, res),
 			fetchPackage.bind(this, req, res),
 			install.bind(this, req, res),
@@ -190,7 +191,6 @@ function BdOpenwebOS(config, next) {
 
 	app.post(makeExpressRoute('/op/launch'), function(req, res, next) {
 		async.series([
-			close.bind(this, req, res),
 			launch.bind(this, req, res),
 			answerOk.bind(this, req, res)
 		], function (err, results) {
@@ -257,9 +257,10 @@ function BdOpenwebOS(config, next) {
 	}
 
 	function close(req, res, next) {
-		log.info("close()", req.body.id);
+		var appId = req.body.id || req.body.appId;
+		log.info("close()", appId);
 
-		tools.launcher.close({verbose: true, device: req.body.device}, req.body.id, null, function(err, result) {
+		tools.launcher.close({verbose: true, device: req.body.device}, appId, null, function(err, result) {
 			log.verbose("close()", err, result);
 			//FIXME: Currently new webos doesn't support re-launch, 
 			//       so alternatively use 'close->lauch'
