@@ -11,21 +11,21 @@
 		}
 	},
 	{
-		"name": "webOS TV Emulator",
-		"type": "starfish",
+		"name": "webospro-qemux86",
+		"type": "webospro",
 		"description": "LG webOS TV Emulator",
 		"host": "127.0.0.1",
 		"port": 6622,
 		"username": "root",
 		"privateKey": {
-			"openSsh": "webos_emul"
+			"openSsh": "webos"
 		}
 	},
 	{
 		"name": "webOS TV",
 		"type": "starfish",
 		"description": "LG webOS TV",
-		"host": "127.0.0.1",
+		"host": "10.177.227.42",
 		"port": 22,
 		"username": "root",
 		"privateKey": {
