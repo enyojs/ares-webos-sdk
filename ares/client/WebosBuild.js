@@ -61,6 +61,61 @@ enyo.kind({
 			}
 		}
 		next(new Error(msg + inError.toString()), details);
+	},	
+	loadDevicesList:function(next){
+		var req = new enyo.Ajax({
+			url: this.url + '/devices/load',
+			method: 'POST',
+			handleAs: 'text',
+			postBody: 'devicesload'
+		});
+		
+		req.response(this, function(inSender, inData) {
+			next(inData);
+		});
+		
+		req.error(this, this._handleServiceError.bind(this, "Failed to load Devices list", next));
+		req.go();
+	},
+	saveDevicesList:function(devicesList, next){
+		if (this.debug) { this.log("saving webOS Devices List: " + this.url + '/load'); }
+	
+		var devices = [];
+	
+		for(var i in devicesList){
+			devices.push(enyo.json.stringify(devicesList[i]));
+		}
+		
+		var req = new enyo.Ajax({
+			url: this.url + '/devices/save',
+			method: 'POST',
+			handleAs: 'json',
+			postBody: devices
+		});
+		
+		req.response(this, function(inSender, inData) {
+			next(inData);
+		});
+		
+		req.error(this, this._handleServiceError.bind(this, "Failed to save Devices list", next));
+		req.go();	
+	},
+	requestPrivateKey:function(deviceName, next){
+		if (this.debug) { this.log("requestPrivateKey"); }
+	
+		var req = new enyo.Ajax({
+			url: this.url + '/devices/requestKey',
+			method: 'POST',
+			handleAs: 'json',
+			postBody: deviceName
+		});
+		
+		req.response(this, function(inSender, inData) {
+			next(inData);
+		});
+		
+		req.error(this, this._handleServiceError.bind(this, "Failed to save Devices list", next));
+		req.go();	
 	},
 	/**
 	 * Build an Open webOS application package
