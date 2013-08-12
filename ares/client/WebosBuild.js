@@ -100,6 +100,23 @@ enyo.kind({
 		req.error(this, this._handleServiceError.bind(this, "Failed to save Devices list", next));
 		req.go();	
 	},
+	requestPrivateKey:function(deviceName, next){
+		if (this.debug) { this.log("requestPrivateKey"); }
+	
+		var req = new enyo.Ajax({
+			url: this.url + '/devices/requestKey',
+			method: 'POST',
+			handleAs: 'json',
+			postBody: deviceName
+		});
+		
+		req.response(this, function(inSender, inData) {
+			next(inData);
+		});
+		
+		req.error(this, this._handleServiceError.bind(this, "Failed to save Devices list", next));
+		req.go();	
+	},
 	/**
 	 * Build an Open webOS application package
 	 * @param {Ares.Model.Project} project
