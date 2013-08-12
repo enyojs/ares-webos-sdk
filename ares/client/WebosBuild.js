@@ -189,8 +189,10 @@ enyo.kind({
 			url: this.url + '/op/install',
 			method: 'POST',
 			handleAs: 'json',
-			postBody: data
+			postBody: data,
+			timeout: 300000
 		});
+
 		req.response(this, function(inSender, inData) {
 			this.log("inData:", inData);
 			next();
