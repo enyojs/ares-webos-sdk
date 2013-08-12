@@ -13,6 +13,7 @@ var fs = require("fs"),
     mkdirp = require("mkdirp"),
     request = require('request'),
     tools = require('../../lib/ipkg-tools'),
+    novacom = require('../../lib/novacom'),
     rimraf = require("rimraf"),
     CombinedStream = require('combined-stream');
 
@@ -101,6 +102,34 @@ function BdOpenwebOS(config, next) {
 
 	// express-3.x: middleware with arity === 4 is detected as the error handler
 	app.use(errorHandler);
+
+	// load Devices List
+	app.post(makeExpressRoute('/devices/load'), function(req, res, next) {
+		async.series([
+			loadDevices.bind(this, req, res),
+			returnDevicesData.bind(this, req, res)
+		], function (err, results) {
+			if (err) {
+				cleanup.bind(this)(req, res, function() {
+					next(err);
+				});
+			}
+		});
+	});
+
+	// save Devices Data
+	app.post(makeExpressRoute('/devices/save'), function(req, res, next) {
+		async.series([
+			saveDevices.bind(this, req, res),
+			answerOk.bind(this, req, res)
+		], function (err, results) {
+			if (err) {
+				cleanup.bind(this)(req, res, function() {
+					next(err);
+				});
+			}
+		});
+	});
 
 	/*
 	 * Verbs
@@ -231,9 +260,7 @@ function BdOpenwebOS(config, next) {
 	function debug(req, res, next) {
 		log.info("debug()", req.body.id);
 		res.status(200).send();
-		var app = req.body.appId;
-		var service = req.body.serviceId && req.body.serviceId.split("%2C");
-		tools.inspector.inspect({verbose: true, device: req.body.device, appId: app, serviceId: service}, null, function(err, result) {
+		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.appId}, null, function(err, result) {
 			log.verbose("debug()", err, result);
 			next(err);
 		});
@@ -431,6 +458,44 @@ function BdOpenwebOS(config, next) {
 
 	function getLastPartFooter(boundary) {
 		return '--' + boundary + '--';
+	}
+
+	function loadDevices(req, res, next){
+		var resolver = new novacom.Resolver();
+		async.waterfall([
+			resolver.load.bind(resolver),
+			resolver.list.bind(resolver),
+			function(devices, next) {
+				log.info("loadDevices()", "devices:", devices);
+				for(var i in devices){
+					// delete unused data
+					if(devices[i]["privateKey"])
+						devices[i]["privateKey"] = true;
+					else
+						devices[i]["privateKey"] = false;
+					delete devices[i]["addr"];
+				}
+				req.devices = devices;
+				next();
+			}
+		], next);
+	}
+
+	function saveDevices(req, res, next){
+		var resolver = new novacom.Resolver();
+		var devicesData = [];
+		for(var i in req.body){
+			devicesData.push(JSON.parse(req.body[i]));
+		}
+		async.waterfall([
+			resolver.save.bind(resolver, devicesData)
+		], next);
+	}
+
+	function returnDevicesData(req, res, next){
+		var devices = req.devices;
+		res.status(200);
+		res.send(devices);	
 	}
 }
 
