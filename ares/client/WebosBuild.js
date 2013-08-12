@@ -338,7 +338,7 @@ enyo.kind({
 	_getServiceIds: function(project, serviceInfoFiles, next) {
 		var serviceIds = [];
 		if (!serviceInfoFiles) {
-			next(null, null);
+			next(null, serviceIds);
 		} else {
 			async.series([
 				async.forEachSeries.bind(this, serviceInfoFiles, __getServiceInfoFile.bind(this))
@@ -463,11 +463,12 @@ enyo.kind({
 	
 	_debugService: function(project, serviceIds, next) {
 		if (this.debug) this.log('debugging ' + serviceIds);
-		this.doShowWaitPopup({msg: $L("debugging service:" + serviceIds)});
 		if (serviceIds.length === 0) {
-			next(new Error("Did not find service id in selected project"));
+			this.log("Did not find service id in selected project");
+			next();
 			return;
 		}
+		this.doShowWaitPopup({msg: $L("debugging service:" + serviceIds)});
 		var data = {
 			serviceId: encodeURIComponent(serviceIds),
 			device: this.device || "webos3-qemux86"
