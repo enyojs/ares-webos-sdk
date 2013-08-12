@@ -160,9 +160,8 @@ function getkey(next) {
 		resolver.load.bind(resolver),
 		resolver.getSshPrvKey.bind(resolver, options),
 		function(keyFileName, next) {
-			console.log("[ByJunil]keyFilePath:",keyFileName);
 			if (keyFileName) {
-				options.priavetKey = { "openSsh": keyFileName };
+				options.privateKey = { "openSsh": keyFileName };
 				process.stdin.resume();
 				process.stdin.setEncoding('utf8');
 				process.stdout.write('input passphrase [default: webos]:');
@@ -171,15 +170,15 @@ function getkey(next) {
 					if (passphrase === '') {
 						passphrase = 'webos';
 					}
-					console.log('registed passphrase is ', passphrase);
+					log.info('registed passphrase is ', passphrase);
 					options.passphrase = passphrase;
-					console.log('options:',options);
-					next();
+					next(null, options);
 				});
 			} else {
-				next();
+				next(null, null);
 			}
-		}
+		},
+		resolver.modifyDeviceFile.bind(resolver)
 	], next);
 }
 
