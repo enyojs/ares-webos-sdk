@@ -12,6 +12,9 @@ enyo.kind({
 	components: [
 		{name:"targetConfiguration", kind: "TargetConfiguration", style:"width:500px; height:300px;"}
 	],
+	events:{
+		onError:""
+	},
 	
 	create: function() {
 		this.inherited(arguments);
@@ -22,6 +25,12 @@ enyo.kind({
 		this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
 		this.provider['loadDevicesList'](function(inData) {
 			var devices = enyo.json.parse(inData);
+			for(index in devices){
+				if(!devices[index]["passphrase"])
+					devices[index]["passphrase"] = "";
+				if(!devices[index]["password"])
+					devices[index]["password"] = "";
+			}
 			self.$.targetConfiguration.setDevicesList(devices);
 		});
 	}

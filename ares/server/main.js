@@ -131,6 +131,18 @@ function BdOpenwebOS(config, next) {
 		});
 	});
 
+	app.post(makeExpressRoute('/devices/requestKey'), function(req, res, next) {
+		async.series([
+			getSshPrvKey.bind(this, req, res),
+			answerOk.bind(this, req, res)
+		], function (err, results) {
+			if (err) {
+				cleanup.bind(this)(req, res, function() {
+					next(err);
+				});
+			}
+		});
+	});
 	/*
 	 * Verbs
 	 */
@@ -496,6 +508,14 @@ function BdOpenwebOS(config, next) {
 		var devices = req.devices;
 		res.status(200);
 		res.send(devices);	
+	}
+
+	function getSshPrvKey(req, res, next){
+		var resolver = new novacom.Resolver();
+		async.waterfall([
+			resolver.load.bind(resolver),
+			resolver.getSshPrvKey.bind(resolver, {verbose: true, name: req.body.device})
+		], next);
 	}
 }
 
