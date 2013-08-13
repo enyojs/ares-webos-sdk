@@ -12,25 +12,22 @@ var fs = require('fs'),
 
 var knownOpts = {
 	"device":	[String, null],
-	"app":	[String, null],
-	"service":	[String, Array],
-	"browser":	Boolean,
+	"port":	[String, null],
+	"close":	Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
 };
 var shortHands = {
 	"d": ["--device"],
-	"a": ["--app"],
-	"s": ["--service"],
-	"b": ["--browser"],
+	"p": ["--port"],
+	"c": ["--close"],
 	"V": ["--version"],
 	"h": ["--help"],
 	"v": ["--level", "verbose"]
 };
 
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-inspect.js'*/);
-
 /**********************************************************************/
 
 var processName = path.basename(process.argv[1]).replace(/.js/, '');
@@ -60,15 +57,16 @@ var op;
 
 if (argv['version']) {
 	versionTool.showVersionAndExit();
+} else if (argv['close']) {
+	op = close;
 } else {
-	op = inspect;
+	op = gdbserver;
 }
 
 var options = {
 	device: argv.device,
-	appId: argv.app,
-	serviceId: argv.service,
-	browser: argv.browser
+	appId: argv.argv.remain[0],
+	port: argv.port
 };
 
 /**********************************************************************/
@@ -82,24 +80,33 @@ if (op) {
 function help() {
 	console.log("\n" +
 			"USAGE:\n" +
-			"\t" + processName + " [OPTIONS] --app|-a <APP_ID>\n" +
-			"\t" + processName + " [OPTIONS] --service|-s <SERVICE_ID>\n" +
-			"\t" + processName + " [OPTIONS] --browser|-b\n" +
+			"\t" + processName + " [OPTIONS] <APP_ID>\n" +
 			"\t" + processName + " [OPTIONS] --version|-V\n" +
 			"\t" + processName + " [OPTIONS] --help|-h\n" +
 			"\n" +
 			"OPTIONS:\n" +
 			"\t--device|-d: device name to connect to default]\n" +
+			"\t--port|-p: gdbserver port to use [default:9930]\n" +
+			"\t--close|-c: close running gdbserver\n" +
 			"\t--level: tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]\n");
 }
 
-function inspect(){
-	log.info("inspect():", "AppId:", options.appId, "ServiceId:", options.serviceId);
-	if(!options.appId && !options.serviceId){
+function gdbserver(){
+	log.info("gdbserver():", "AppId:", options.appId);
+	if(!options.appId){
 		help();
 		process.exit(1);
 	}
-	ipkg.inspector.inspect(options, null, finish);
+	ipkg.gdbserver.run(options, null, finish);
+}
+
+function close(){
+	log.info("gdbserver():", "close");
+	if(!options.device){
+		help();
+		process.exit(1);
+	}
+	ipkg.gdbserver.close(options, null, finish);
 }
 
 function finish(err, value) {
