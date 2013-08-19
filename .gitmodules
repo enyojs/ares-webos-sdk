@@ -1,9 +1,6 @@
 [submodule "node_modules/tar"]
 	path = node_modules/tar
 	url = ../../enyojs/node-tar.git
-[submodule "node_modules/semver"]
-	path = node_modules/semver
-	url = ../../isaacs/node-semver.git
 [submodule "enyo"]
 	path = enyo
 	url = git@github.com:enyojs/enyo.git
