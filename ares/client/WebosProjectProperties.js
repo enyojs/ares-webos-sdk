@@ -8,12 +8,16 @@ enyo.kind({
 	kind: "Ares.ProjectProperties",
 	debug: false,
 	published: {
-		config: {}
+		config: {},
+		selectedWebosSvc: undefined
 	},
 	events: {
 		onConfigure: "",
 		onApplyAddSource: "",
-		onModifiedSource: ""
+		onModifiedSource: "",
+		onAddSource:"",
+		onRemoveSource:"",
+		onInitSource:""
 	},
 	handlers: {
 		onChangeProjectStatus: "handleChangeProjectStatus"
@@ -39,7 +43,6 @@ enyo.kind({
 
 	webosSvcs: [],
 	WEBOSSERVICE_NONE: "NONE",
-	selectedWebosSvc: undefined,
 
 	/**
 	 * @private
@@ -59,7 +62,7 @@ enyo.kind({
 		}, this);
 		this.$.webosSvcPicker.setCount(this.webosSvcs.length);
 		this.$.webosSvcPicker.setSelected(0);
-		this.selectedWebosSvc = undefined;
+		this.setSelectedWebosSvc(undefined);
 	},
 	_initWebosSvcList: function() {
 		var service = ServiceRegistry.instance.getServicesByType('generate')[0];
@@ -89,19 +92,25 @@ enyo.kind({
 	 * @private
 	 */
 	webosSvcSelected: function(inSender, inEvent) {
-		if (inEvent.content === this.WEBOSSEVICE_NONE) {
-			this.selectedWebosSvc = undefined;
+		if (inEvent.content === this.WEBOSSERVICE_NONE) {
+			this.setSelectedWebosSvc(undefined);
 		} else {
-			this.selectedWebosSvc = inEvent.content;
+			this.setSelectedWebosSvc(inEvent.content);
 		}
-
-		this.doApplyAddSource({source:this.selectedWebosSvc});
+		this.doAddSource({source:this.selectedWebosSvc});
+	},
+	selectedWebosSvcChanged: function(inOldValue){
+		this.doRemoveSource({source:inOldValue});
 	},
 	/** public */
 	setProjectConfig: function(config) {
 		this.config = config;
+		if(config.enabled){
+			this.doAddSource({source:"webos-app-config"});
+		} else {
+			this.doInitSource();
+		}
 		if (this.debug) this.log("config:", this.config);
-		this.config.enabled = true;
 	},
 	/** public */
 	getProjectConfig: function() {
@@ -217,8 +226,8 @@ enyo.kind({
 			this.$.add.hide();
 		}
 		this.$.webosSvcPicker.setSelected(0);
-		this.selectedWebosSvc = undefined;
-		this.doApplyAddSource({source:this.selectedWebosSvc});
+		this.setSelectedWebosSvc(undefined);
+		this.doAddSource({source:this.selectedWebosSvc});
 		return true;
 	},
 	statics: {
