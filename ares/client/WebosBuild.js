@@ -46,7 +46,7 @@ enyo.kind({
 	 * @public
 	 */
 	getDefaultProjectConfig: function() {
-		return ares.clone(Webos.Build.serviceName);
+		return ares.clone(Webos.Build.DEFAULT_PROJECT_CONFIG);
 	},	
 	/**
 	 * Shared enyo.Ajax error handler
@@ -580,7 +580,7 @@ enyo.kind({
 	statics: {
 		serviceName: "webos",
 		DEFAULT_PROJECT_CONFIG: {
-			enabled: false
+			enabled: true
 		}		
 	}
 });
