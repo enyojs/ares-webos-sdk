@@ -104,7 +104,9 @@ enyo.kind({
         this.devices = new enyo.Collection(devicesData);
         this.$.deviceList.set("controller", this.devices);
         this.defaultTarget = this.findKindBy("name", "webospro-qemux86"); //set "WebOS Emulator " as default target
-        this.defaultTarget.setActive(true);
+        if (this.defaultTarget) {
+            this.defaultTarget.setActive(true);
+        }
     },
 
     selectDevice: function(inSender, inEvent) {
