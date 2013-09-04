@@ -60,8 +60,6 @@ log.verbose("argv", argv);
 var op;
 if (argv.list) {
 	op = list;
-} else if (argv.list) {
-	op = list;
 } else if (argv.install) {
 	op = install;
 } else if (argv.remove) {
@@ -91,7 +89,7 @@ function help() {
 	console.log("\n" +
 			"USAGE:\n" +
 			"\t" + processName + " [OPTIONS] <PACKAGE_FILE>\n" +
-			"\t" + processName + " [OPTIONS] --remove <PACKAGE_ID>\n" +
+			"\t" + processName + " [OPTIONS] --remove|-r <APP_ID>\n" +
 			"\t" + processName + " [OPTIONS] --list|-l\n" +
 			"\t" + processName + " [OPTIONS] --device-list|-D\n" +
 			"\t" + processName + " [OPTIONS] --version|-V\n" +
@@ -115,7 +113,7 @@ function install() {
 function list() {
 	ipkg.installer.list(options, function(err, pkgs) {
 		var strPkgs = "";
-		if (pkgs) pkgs.forEach(function (pkg) {
+		if (pkgs instanceof Array) pkgs.forEach(function (pkg) {
 			strPkgs = strPkgs.concat(pkg.id).concat('\n');
 		});
 		process.stdout.write(strPkgs);
@@ -124,7 +122,7 @@ function list() {
 }
 
 function remove() {
-	var pkgId = argv.remove;
+	var pkgId = (argv.remove === 'true')? argv.argv.remain[0] : argv.remove;
 	log.info("remove():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();

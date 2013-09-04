@@ -155,8 +155,17 @@ enyo.kind({
 	 * @param {FormData} formData
 	 * @param {Function} next is a CommonJS callback
 	 */
-	_submitBuildRequest: function(project, formData, next) {
+	_submitBuildRequest: function(actionmode, project, formData, next) {
 		if (this.debug) this.log(formData.ctype);
+		var minify = true;
+		
+		if (actionmode === 'debug'){
+			minify = false;
+		}
+
+		var mode = {
+			minifymode : minify
+		};
 
 		this.doShowWaitPopup({msg: $L("Building webOS application package")});
 	
@@ -174,8 +183,10 @@ enyo.kind({
 			next(null, {content: inData, ctype: ctype});
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to build application", next));
-		req.go();
+		req.go(mode);
 	},
+
+	
 	/**
 	 * Prepare the folder where to store the built package
 	 * @private
@@ -234,6 +245,7 @@ enyo.kind({
 	 */
 	_installPkg: function(project, pkgUrl, appId, next) {
 		this.doShowWaitPopup({msg: $L("Installing webOS package")});
+		pkgUrl = pkgUrl || project.getObject("build.openwebos.target.pkgUrl");
 		var data = {
 			package : pkgUrl,
 			appId	: appId,
@@ -249,7 +261,7 @@ enyo.kind({
 
 		req.response(this, function(inSender, inData) {
 			this.log("inData:", inData);
-			next();
+			next(null, appId);
 		});
 		req.error(this, function(inSender, inError) {
 			var response = inSender.xhrResponse, contentType, details;
