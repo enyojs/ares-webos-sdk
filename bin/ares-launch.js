@@ -13,7 +13,7 @@ var knownOpts = {
 	"device":	[String, null],
 	"inspect":	Boolean,
 	"device-list":	Boolean,
-	"close":	Boolean,
+	"close":	String,
 	"relaunch":	Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
@@ -105,7 +105,7 @@ function launch() {
 }
 
 function close() {
-	var pkgId = argv.argv.remain[0];
+	var pkgId = (argv.close === 'true')? argv.argv.remain[0] : argv.close;
 	log.info("close():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
