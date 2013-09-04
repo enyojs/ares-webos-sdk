@@ -17,6 +17,9 @@
 /node_modules/temp
 /node_modules/combined-stream
 /node_modules/express
+/node_modules/readline
+/node_modules/rsync
+/node_modules/semver
 /node
 *~
 
