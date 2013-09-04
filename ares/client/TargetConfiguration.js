@@ -1,5 +1,5 @@
 enyo.kind({
-    name: "TargetConfiguration", 
+    name: "TargetConfiguration",
     kind: "FittableColumns",
     published: {
         devicesList: null,
@@ -108,8 +108,8 @@ enyo.kind({
         this.defaultTarget = this.findKindBy("name", defaultTarget); //set "WebOS Emulator " as default target
         if (this.defaultTarget) {
             this.defaultTarget.setActive(true);
+            this.provider.setDevice(defaultTarget);
         }
-        this.provider.setDevice(defaultTarget);
     },
 
     selectDevice: function(inSender, inEvent) {
