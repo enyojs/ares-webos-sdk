@@ -8,6 +8,9 @@ enyo.kind({
 	published: {
 		device: ""
 	},
+	components: [
+		{kind: "User.ErrorPopup", name: "userErrorPopup", msg: $L("unknown error")}
+	],
 	/**
 	 * @protected
 	 */
@@ -125,12 +128,8 @@ enyo.kind({
 	 */
 	build: function(project, next) {
 		if (this.debug) { this.log("Starting webOS build: " + this.url + '/build'); }
-		async.waterfall([
-			this._getFilesData.bind(this, project),
-			this._submitBuildRequest.bind(this, project),
-			this._prepareStore.bind(this, project),
-			this._storePkg.bind(this, project)
-		], next);
+
+		this._buildRunDebugcheckAppInfoFile(project, next,'build');
 	},
 	/**
 	 * Get the list of files of the project for further upload
@@ -269,13 +268,8 @@ enyo.kind({
 	 */
 	run: function(project, next) {
 		if (this.debug) this.log('launching');
-		async.waterfall([
-			this.build.bind(this, project),
-			this.install.bind(this, project),
-			this._getAppInfo.bind(this, project),
-			this._getAppId.bind(this, project),
-			this._runApp.bind(this, project)
-		], next);
+
+		this._buildRunDebugcheckAppInfoFile(project, next,'run');
 	},
 	/**
 	 * @private
@@ -466,11 +460,8 @@ enyo.kind({
 	 */
 	runDebug: function(project, next) {
 		if (this.debug) this.log('launching');
-		async.waterfall([
-			this.run.bind(this, project),
-			this._debugApp.bind(this, project),
-			this.debugService.bind(this, project)
-		], next);
+
+		this._buildRunDebugcheckAppInfoFile(project, next,'runDebug');
 	},
 
 	_debugApp: function(project, appId, next) {
@@ -582,6 +573,41 @@ enyo.kind({
 		DEFAULT_PROJECT_CONFIG: {
 			enabled: false
 		}		
+	},
+
+	_buildRunDebugcheckAppInfoFile: function(project,next,action){			
+		var req = project.getService().propfind(project.getFolderId(), 1);
+		 req.response(this, function(inRequest, inData) {			
+			var appInfoFile = enyo.filter(inData.children, function(child) {
+				return child.name === 'appinfo.json';
+			}, this)[0];
+				
+			if(typeof appInfoFile == "undefined"){
+				this.$.userErrorPopup.raise($L("There is not appinfo.json file in the " + inData.name + " project folder."));					
+				next();
+			}else if(action === 'build'){
+				async.waterfall([	
+					this._getFilesData.bind(this, project),
+					this._submitBuildRequest.bind(this, project),
+					this._prepareStore.bind(this, project),
+					this._storePkg.bind(this, project)
+				], next);
+			}else if(action === 'run'){
+				async.waterfall([
+					this.build.bind(this, project),
+					this.install.bind(this, project),
+					this._getAppInfo.bind(this, project),
+					this._getAppId.bind(this, project),
+					this._runApp.bind(this, project)
+				], next);
+			}else if(action === 'runDebug'){
+				async.waterfall([
+					this.run.bind(this, project),
+					this._debugApp.bind(this, project),
+					this.debugService.bind(this, project)
+				], next);
+			}
+		});		
 	}
 });
 
