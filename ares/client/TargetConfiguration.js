@@ -101,11 +101,14 @@ enyo.kind({
         this.inherited(arguments);
         //Get the Devices List from novacom-device.json
         var devicesData = this.getDevicesList();
+        var defaultTarget = "webospro-qemux86";
+        this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
         this.devices = new enyo.Collection(devicesData);
         this.$.deviceList.set("controller", this.devices);
-        this.defaultTarget = this.findKindBy("name", "webospro-qemux86"); //set "WebOS Emulator " as default target
+        this.defaultTarget = this.findKindBy("name", defaultTarget); //set "WebOS Emulator " as default target
         if (this.defaultTarget) {
             this.defaultTarget.setActive(true);
+            this.provider.setDevice(defaultTarget);
         }
     },
 
