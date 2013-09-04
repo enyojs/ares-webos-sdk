@@ -22,16 +22,14 @@
 					"description": "Enyo bootplate 2.1.1",
 					"files": [
 						{
-							"url": "bootplate-2.1.1.zip",
-							"alternateUrl": "http://enyojs.com/archive/bootplate-2.1.1.zip",
+							"url": "http://enyojs.com/archive/bootplate-2.1.1.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
 								"bootplate/api"
 							]
 						},
 						{
-							"url": "webos-app-config.zip",
-							"alternateUrl": "http://enyojs.com/webos/webos-app-config.zip"
+							"url": "http://enyojs.com/webos/webos-app-config.zip"
 						}
 					]
 				},
@@ -41,16 +39,14 @@
 					"description": "Enyo bootplate 2.2.0",
 					"files": [
 						{
-							"url": "bootplate-2.2.0.zip",
-							"alternateUrl": "http://enyojs.com/archive/bootplate-2.2.0.zip",
+							"url": "http://enyojs.com/archive/bootplate-2.2.0.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
 								"bootplate/api"
 							]
 						},
 						{
-							"url": "webos-app-config.zip",
-							"alternateUrl": "http://enyojs.com/webos/webos-app-config.zip"
+							"url": "http://enyojs.com/webos/webos-app-config.zip"
 						}
 					]
 				},
@@ -60,16 +56,14 @@
 					"description": "Enyo bootplate for webOS - Nightly",
 					"files": [
 						{
-							"url": "bootplate-latest.zip",
-							"alternateUrl": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
+							"url": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
 								"bootplate/api"
 							]
 						},
 						{
-							"url": "webos-app-config.zip",
-							"alternateUrl": "http://enyojs.com/webos/webos-app-config.zip"
+							"url": "http://enyojs.com/webos/webos-app-config.zip"
 						}
 					]
 				},
@@ -79,8 +73,7 @@
 					"description": "Hello World webOS Service 1.0.0",
 					"files": [
 						{
-							"url": "webos-service-config.zip",
-							"alternateUrl": "http://enyojs.com/webos/webos-service-config.zip",
+							"url": "http://enyojs.com/webos/webos-service-config.zip",
 							"prefixToAdd": "services/com.yourdomain.hello.service"
 						}
 					]

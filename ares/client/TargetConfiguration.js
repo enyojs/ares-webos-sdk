@@ -106,7 +106,9 @@ enyo.kind({
         this.devices = new enyo.Collection(devicesData);
         this.$.deviceList.set("controller", this.devices);
         this.defaultTarget = this.findKindBy("name", defaultTarget); //set "WebOS Emulator " as default target
-        this.defaultTarget.setActive(true);
+        if (this.defaultTarget) {
+            this.defaultTarget.setActive(true);
+        }
         this.provider.setDevice(defaultTarget);
     },
 
