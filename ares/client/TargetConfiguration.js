@@ -1,5 +1,5 @@
 enyo.kind({
-    name: "TargetConfiguration",
+    name: "TargetConfiguration", 
     kind: "FittableColumns",
     published: {
         devicesList: null,
