@@ -373,8 +373,11 @@ function BdOpenwebOS(config, next) {
 
 	function build(req, res, next) {
 		log.info("build()", req.appDir.source, req.appDir.build);
+		var minifymode = true;
+		if(req.query.minifymode !== "true")
+			minifymode = false;
 
-		tools.packageApp([req.appDir.source], req.appDir.build, {verbose: true}, function(err, result) {
+		tools.packageApp([req.appDir.source], req.appDir.build, {verbose: true, minify: minifymode}, function(err, result) {
 			log.verbose("build()", err, result);
 			if (err) {
 				next(err);
