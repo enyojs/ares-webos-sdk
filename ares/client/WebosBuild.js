@@ -6,7 +6,7 @@ enyo.kind({
 		onShowWaitPopup: ""
 	},
 	published: {
-		device: ""
+		device: "webospro-qemux86"
 	},
 	/**
 	 * @protected
