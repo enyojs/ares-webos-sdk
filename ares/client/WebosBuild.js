@@ -598,7 +598,6 @@ enyo.kind({
 			}, this)[0];
 				
 			if(typeof appInfoFile == "undefined"){
-				//this.$.userErrorPopup.raise($L("There is not appinfo.json file in the " + inData.name + " project folder."));					
 				next(new Error("There is not appinfo.json file in the " + inData.name + " project folder."));
 				return;
 			} else {
