@@ -593,11 +593,11 @@ enyo.kind({
 	_checkAppInfo: function(project, next) {
 		var req = project.getService().propfind(project.getFolderId(), 1);
 		 req.response(this, function(inRequest, inData) {			
-			var appInfoFile = enyo.filter(inData.children, function(child) {
+			var appInfoFiles = enyo.filter(inData.children, function(child) {
 				return child.name === 'appinfo.json';
-			}, this)[0];
+			}, this);
 				
-			if(typeof appInfoFile == "undefined"){
+			if(appInfoFiles.length === 0){
 				next(new Error("There is not appinfo.json file in the " + inData.name + " project folder."));
 				return;
 			} else {
