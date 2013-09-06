@@ -6,7 +6,7 @@ enyo.kind({
 		onShowWaitPopup: ""
 	},
 	published: {
-		device: ""
+		device: "webospro-qemux86"
 	},
 	/**
 	 * @protected
@@ -125,12 +125,13 @@ enyo.kind({
 	 */
 	build: function(project, next) {
 		if (this.debug) { this.log("Starting webOS build: " + this.url + '/build'); }
-		async.waterfall([
-			this._getFilesData.bind(this, project),
-			this._submitBuildRequest.bind(this, project),
-			this._prepareStore.bind(this, project),
-			this._storePkg.bind(this, project)
-		], next);
+	    async.waterfall([
+	    	this._checkAppInfo.bind(this, project),
+	    	this._getFilesData.bind(this, project),
+	    	this._submitBuildRequest.bind(this, "build", project),
+	    	this._prepareStore.bind(this, project),
+	    	this._storePkg.bind(this, project)
+	    ], next);
 	},
 	/**
 	 * Get the list of files of the project for further upload
@@ -156,8 +157,17 @@ enyo.kind({
 	 * @param {FormData} formData
 	 * @param {Function} next is a CommonJS callback
 	 */
-	_submitBuildRequest: function(project, formData, next) {
+	_submitBuildRequest: function(actionmode, project, formData, next) {
 		if (this.debug) this.log(formData.ctype);
+		var minify = true;
+		
+		if (actionmode === 'debug'){
+			minify = false;
+		}
+
+		var mode = {
+			minifymode : minify
+		};
 
 		this.doShowWaitPopup({msg: $L("Building webOS application package")});
 	
@@ -175,8 +185,10 @@ enyo.kind({
 			next(null, {content: inData, ctype: ctype});
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to build application", next));
-		req.go();
+		req.go(mode);
 	},
+
+	
 	/**
 	 * Prepare the folder where to store the built package
 	 * @private
@@ -225,6 +237,7 @@ enyo.kind({
 			return;
 		}
 		async.waterfall([
+			this._checkAppInfo.bind(this, project),
 			this._getAppInfo.bind(this, project),
 			this._getAppId.bind(this, project),
 			this._installPkg.bind(this, project, pkgUrl)
@@ -235,6 +248,7 @@ enyo.kind({
 	 */
 	_installPkg: function(project, pkgUrl, appId, next) {
 		this.doShowWaitPopup({msg: $L("Installing webOS package")});
+		pkgUrl = pkgUrl || project.getObject("build.openwebos.target.pkgUrl");
 		var data = {
 			package : pkgUrl,
 			appId	: appId,
@@ -250,7 +264,7 @@ enyo.kind({
 
 		req.response(this, function(inSender, inData) {
 			this.log("inData:", inData);
-			next();
+			next(null, appId);
 		});
 		req.error(this, function(inSender, inError) {
 			var response = inSender.xhrResponse, contentType, details;
@@ -269,13 +283,22 @@ enyo.kind({
 	 */
 	run: function(project, next) {
 		if (this.debug) this.log('launching');
-		async.waterfall([
-			this.build.bind(this, project),
-			this.install.bind(this, project),
+
+	    async.waterfall([
+	    	this._checkAppInfo.bind(this, project),
+	    	//Build
+			this._getFilesData.bind(this, project),
+			this._submitBuildRequest.bind(this, "run", project),
+			this._prepareStore.bind(this, project),
+			this._storePkg.bind(this, project),
+			//Install
 			this._getAppInfo.bind(this, project),
 			this._getAppId.bind(this, project),
+			this._installPkg.bind(this, project, null),
+			//Run
 			this._runApp.bind(this, project)
-		], next);
+
+	    ], next);
 	},
 	/**
 	 * @private
@@ -466,11 +489,25 @@ enyo.kind({
 	 */
 	runDebug: function(project, next) {
 		if (this.debug) this.log('launching');
-		async.waterfall([
-			this.run.bind(this, project),
+
+	    async.waterfall([
+	    	this._checkAppInfo.bind(this, project),
+			//Build
+			this._getFilesData.bind(this, project),
+			this._submitBuildRequest.bind(this, "debug", project),
+			this._prepareStore.bind(this, project),
+			this._storePkg.bind(this, project),
+			//Install
+			this._getAppInfo.bind(this, project),
+			this._getAppId.bind(this, project),
+			this._installPkg.bind(this, project, null),
+			//Run
+			this._runApp.bind(this, project),
+			//Debug
 			this._debugApp.bind(this, project),
 			this.debugService.bind(this, project)
-		], next);
+
+	    ], next);		
 	},
 
 	_debugApp: function(project, appId, next) {
@@ -551,6 +588,22 @@ enyo.kind({
 			next(new Error("Unable to debug service:" + (details || inError.toString())));
 		});
 		req.go();
+	},
+
+	_checkAppInfo: function(project, next) {
+		var req = project.getService().propfind(project.getFolderId(), 1);
+		 req.response(this, function(inRequest, inData) {			
+			var appInfoFiles = enyo.filter(inData.children, function(child) {
+				return child.name === 'appinfo.json';
+			}, this);
+				
+			if(appInfoFiles.length === 0){
+				next(new Error("There is not appinfo.json file in the " + inData.name + " project folder."));
+				return;
+			} else {
+				next();
+			}
+		});		
 	},
 
 	/**
