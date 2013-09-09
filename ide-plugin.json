@@ -17,7 +17,7 @@
 			"id": "genZip",
 			"sources": [
 				{
-					"id": "bootplate-webos-2.1.1",
+					"id": "bootplate-2.1.1",
 					"type": "template",
 					"description": "Enyo bootplate 2.1.1",
 					"files": [
@@ -27,14 +27,11 @@
 							"excluded": [
 								"bootplate/api"
 							]
-						},
-						{
-							"url": "http://enyojs.com/webos/webos-app-config.zip"
 						}
 					]
 				},
 				{
-					"id": "bootplate-webos-2.2.0",
+					"id": "bootplate-2.2.0",
 					"type": "template",
 					"description": "Enyo bootplate 2.2.0",
 					"files": [
@@ -44,14 +41,11 @@
 							"excluded": [
 								"bootplate/api"
 							]
-						},
-						{
-							"url": "http://enyojs.com/webos/webos-app-config.zip"
 						}
 					]
 				},
 				{
-					"id": "bootplate-webos-nightly",
+					"id": "bootplate-nightly",
 					"type": "template",
 					"description": "Enyo bootplate for webOS - Nightly",
 					"files": [
@@ -61,9 +55,6 @@
 							"excluded": [
 								"bootplate/api"
 							]
-						},
-						{
-							"url": "http://enyojs.com/webos/webos-app-config.zip"
 						}
 					]
 				},
@@ -75,6 +66,16 @@
 						{
 							"url": "http://enyojs.com/webos/webos-service-config.zip",
 							"prefixToAdd": "services/com.yourdomain.hello.service"
+						}
+					]
+				},
+				{
+					"id": "webos-app-config",
+					"type": "webosConfig",
+					"description": "webOS Applicatin Config data",
+					"files": [
+						{
+							"url": "http://enyojs.com/webos/webos-app-config.zip"
 						}
 					]
 				}
