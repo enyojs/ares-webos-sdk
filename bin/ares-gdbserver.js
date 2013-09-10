@@ -85,7 +85,7 @@ function help() {
 			"\t" + processName + " [OPTIONS] --help|-h\n" +
 			"\n" +
 			"OPTIONS:\n" +
-			"\t--device|-d: device name to connect to default]\n" +
+			"\t--device|-d: device name to connect\n" +
 			"\t--port|-p: gdbserver port to use [default:9930]\n" +
 			"\t--close|-c: close running gdbserver\n" +
 			"\t--level: tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]\n");
