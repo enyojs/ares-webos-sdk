@@ -34,9 +34,16 @@ enyo.kind({
             {kind:"FittableColumns", fit:true, components:[
                 {kind: "enyo.Group",  fit:true, onActivate:"selectDevice", components:[
                     {kind: "enyo.DataList", name:"deviceList", components: [
-                        {kind:"onyx.Button", style:"width:85%; margin:5px;", bindFrom:"name", bindTo:"name", components: [
-                            {tag:"span", content:"* ", bindFrom:"modified", bindTo:"showing"},
-                            {tag:"span", bindFrom:"name"}
+                        {kind:"onyx.Button", style:"width:85%; margin:5px;", bindings:[
+                            {from:".model.name", to:".name"}
+                        ],
+                        components: [
+                            {tag:"span", content:"* ", bindings:[
+                                {from:".model.modified", to:".showing"}
+                            ]},
+                            {tag:"span", bindings:[
+                                {from:".model.name", to:".content"}
+                            ]}
                         ]}                    
                     ]}
                 ]},
