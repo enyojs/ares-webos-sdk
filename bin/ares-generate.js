@@ -127,7 +127,10 @@ PalmGenerate.prototype = {
 		}
 
 		var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
-		sources = sources.concat(this.essentialTemplates);
+		var essentialSources = this.essentialTemplates.filter(function(source) {
+			return sources.indexOf(source) === -1;
+		});
+		sources = sources.concat(essentialSources);
 		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
 	},
 
