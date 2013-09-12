@@ -111,6 +111,8 @@ function BdOpenwebOS(config, next) {
 		], function (err, results) {
 			if (err) {
 				cleanup.bind(this)(req, res, function() {
+					log.error('/devices/load', err.stack);
+					err.stack = null;
 					next(err);
 				});
 			}
@@ -125,6 +127,8 @@ function BdOpenwebOS(config, next) {
 		], function (err, results) {
 			if (err) {
 				cleanup.bind(this)(req, res, function() {
+					log.error('/devices/save', err.stack);
+					err.stack = null;
 					next(err);
 				});
 			}
@@ -138,6 +142,8 @@ function BdOpenwebOS(config, next) {
 		], function (err, results) {
 			if (err) {
 				cleanup.bind(this)(req, res, function() {
+					log.error('/devices/requestKey', err.stack);
+					err.stack = null;
 					next(err);
 				});
 			}
@@ -157,6 +163,8 @@ function BdOpenwebOS(config, next) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
 				cleanup.bind(this)(req, res, function() {
+					log.error('/op/build', err.stack);
+					err.stack = null;
 					next(err);
 				});
 			}
@@ -179,6 +187,8 @@ function BdOpenwebOS(config, next) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
 				cleanup.bind(this)(req, res, function() {
+					log.error('/op/install', err.stack);
+					err.stack = null;
 					next(err);
 				});
 			}
@@ -197,6 +207,8 @@ function BdOpenwebOS(config, next) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
 				cleanup.bind(this)(req, res, function() {
+					log.error('/op/launch', err.stack);
+					err.stack = null;
 					next(err);
 				});
 			}
@@ -214,6 +226,8 @@ function BdOpenwebOS(config, next) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
 				cleanup.bind(this)(req, res, function() {
+					log.error('/op/debug', err.stack);
+					err.stack = null;
 					next(err);
 				});
 			}

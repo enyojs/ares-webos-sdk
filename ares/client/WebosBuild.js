@@ -274,7 +274,7 @@ enyo.kind({
 					details = response.body;
 				}
 			}
-			next(new Error("Unable to install application:" + inError), details);
+			next(new Error("Unable to install application(" + inError +"): "+ details.replace(/^Error:/,"")));
 		});
 		req.go();
 	},
@@ -480,7 +480,7 @@ enyo.kind({
 					details = response.body;
 				}
 			}
-			next(new Error("Unable to launch application:" + inError), details);
+			next(new Error("Unable to launch application(" + inError +"): "+ details.replace(/^Error:/,"")));
 		});
 		req.go();
 	},
@@ -539,7 +539,7 @@ enyo.kind({
 					details = response.body;
 				}
 			}
-			next(new Error("Unable to debug application:" + (details || inError.toString())));
+			next(new Error("Unable to debug application(" + inError +"): "+ details.replace(/^Error:/,"")));
 		});
 		req.go();
 	},
@@ -585,7 +585,7 @@ enyo.kind({
 					details = response.body;
 				}
 			}
-			next(new Error("Unable to debug service:" + (details || inError.toString())));
+			next(new Error("Unable to debug service(" + inError +"): "+ details.replace(/^Error:/,"")));
 		});
 		req.go();
 	},
