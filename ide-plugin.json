@@ -6,7 +6,7 @@
 			"name":"webOS",
 			"type": ["build", "test"],
 			"command":"@NODE@", "params":[
-				"@PLUGINDIR@/ares/server/main.js", "-P", "/webos", "-p", "0"
+				"@PLUGINDIR@/ares/server/main.js", "-P", "/webos", "-p", "0", "-t", "240000"
 			],
 			"pluginClient": "@PLUGINURL@/ares/client/package.js",
 			"useJsonp":false,
