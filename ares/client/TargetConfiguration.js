@@ -184,6 +184,9 @@ enyo.kind({
         this.devicesBackupData = devicesList;
         this.devicesBackupData.lastselected = this.model.name;
         this.devices.data(this.devicesBackupData);
+        this.targetDevice = this.findKindBy("name", this.devicesBackupData.lastselected);
+        this.targetDevice.setActive(false);
+        this.targetDevice.setActive(true);
         this.setIsModified(false);
     },
 
