@@ -9,7 +9,7 @@
 		"privateKey": {
 			"openSsh": "webos"
 		},
-		"upload":"put"
+		"files":"stream"
 	},
 	{
 		"name": "webospro-qemux86",
@@ -21,7 +21,7 @@
 		"privateKey": {
 			"openSsh": "webos"
 		},
-		"upload":"sftp"
+		"files":"sftp"
 	},
 	{
 		"name": "tv",
@@ -33,6 +33,6 @@
 		"privateKey": {
 			"openSsh": "webos"
 		},
-		"upload":"put"
+		"files":"stream"
 	}
 ]
