@@ -8,7 +8,8 @@
 		"username": "root",
 		"privateKey": {
 			"openSsh": "webos"
-		}
+		},
+		"files":"stream"
 	},
 	{
 		"name": "webospro-qemux86",
@@ -19,17 +20,19 @@
 		"username": "root",
 		"privateKey": {
 			"openSsh": "webos"
-		}
+		},
+		"files":"sftp"
 	},
 	{
-		"name": "webOS TV",
+		"name": "tv",
 		"type": "starfish",
 		"description": "LG webOS TV",
-		"host": "10.177.227.42",
+		"host": "127.0.0.1",
 		"port": 22,
 		"username": "root",
 		"privateKey": {
 			"openSsh": "webos"
-		}
+		},
+		"files":"stream"
 	}
 ]
