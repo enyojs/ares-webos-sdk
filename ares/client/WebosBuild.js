@@ -3,7 +3,8 @@ enyo.kind({
 	kind: "enyo.Component",
 	debug: false,
 	events: {
-		onShowWaitPopup: ""
+		onShowWaitPopup: "",
+		onError: ""
 	},
 	published: {
 		device: "webospro-qemux86"
@@ -126,7 +127,7 @@ enyo.kind({
 	build: function(project, next) {
 		if (this.debug) { this.log("Starting webOS build: " + this.url + '/build'); }
 	    async.waterfall([
-	    	this._checkAppInfo.bind(this, project),
+	    	this._checkAppInfo.bind(this, project, next),
 	    	this._getFilesData.bind(this, project),
 	    	this._submitBuildRequest.bind(this, "build", project),
 	    	this._prepareStore.bind(this, project),
@@ -237,7 +238,7 @@ enyo.kind({
 			return;
 		}
 		async.waterfall([
-			this._checkAppInfo.bind(this, project),
+			this._checkAppInfo.bind(this, project, next),
 			this._getAppInfo.bind(this, project),
 			this._getAppId.bind(this, project),
 			this._installPkg.bind(this, project, pkgUrl)
@@ -285,7 +286,7 @@ enyo.kind({
 		if (this.debug) this.log('launching');
 
 	    async.waterfall([
-	    	this._checkAppInfo.bind(this, project),
+	    	this._checkAppInfo.bind(this, project, next),
 	    	//Build
 			this._getFilesData.bind(this, project),
 			this._submitBuildRequest.bind(this, "run", project),
@@ -491,7 +492,7 @@ enyo.kind({
 		if (this.debug) this.log('launching');
 
 	    async.waterfall([
-	    	this._checkAppInfo.bind(this, project),
+	    	this._checkAppInfo.bind(this, project, next),
 			//Build
 			this._getFilesData.bind(this, project),
 			this._submitBuildRequest.bind(this, "debug", project),
@@ -590,7 +591,10 @@ enyo.kind({
 		req.go();
 	},
 
-	_checkAppInfo: function(project, next) {
+	_checkAppInfo: function(project, outNext , next) {
+		if (!next && typeof outNext === 'function') {
+			next = outNext;
+		}
 		var req = project.getService().propfind(project.getFolderId(), 1);
 		 req.response(this, function(inRequest, inData) {			
 			var appInfoFiles = enyo.filter(inData.children, function(child) {
@@ -598,7 +602,8 @@ enyo.kind({
 			}, this);
 				
 			if(appInfoFiles.length === 0){
-				next(new Error("There is not appinfo.json file in the " + inData.name + " project folder."));
+				this.doError({msg:"There is not appinfo.json file in the " + inData.name + " project folder." , title:"User Error"});
+				 outNext();
 				return;
 			} else {
 				next();
