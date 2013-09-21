@@ -127,7 +127,7 @@ enyo.kind({
 	build: function(project, next) {
 		if (this.debug) { this.log("Starting webOS build: " + this.url + '/build'); }
 	    async.waterfall([
-	    	this._checkAppInfo.bind(this, project,next),
+	    	this._checkAppInfo.bind(this, project, next),
 	    	this._getFilesData.bind(this, project),
 	    	this._submitBuildRequest.bind(this, "build", project),
 	    	this._prepareStore.bind(this, project),
@@ -238,7 +238,7 @@ enyo.kind({
 			return;
 		}
 		async.waterfall([
-			this._checkAppInfo.bind(this, project,next),
+			this._checkAppInfo.bind(this, project, next),
 			this._getAppInfo.bind(this, project),
 			this._getAppId.bind(this, project),
 			this._installPkg.bind(this, project, pkgUrl)
@@ -286,7 +286,7 @@ enyo.kind({
 		if (this.debug) this.log('launching');
 
 	    async.waterfall([
-	    	this._checkAppInfo.bind(this, project,next),
+	    	this._checkAppInfo.bind(this, project, next),
 	    	//Build
 			this._getFilesData.bind(this, project),
 			this._submitBuildRequest.bind(this, "run", project),
@@ -492,7 +492,7 @@ enyo.kind({
 		if (this.debug) this.log('launching');
 
 	    async.waterfall([
-	    	this._checkAppInfo.bind(this, project,next),
+	    	this._checkAppInfo.bind(this, project, next),
 			//Build
 			this._getFilesData.bind(this, project),
 			this._submitBuildRequest.bind(this, "debug", project),
