@@ -136,7 +136,7 @@ PalmGenerate.prototype = {
 
 	isJson: function(str) {
 		try {
-			objStr  = JSON.parse(str);
+			JSON.parse(str);
 		} catch(err) {
 			return false;
 		}
