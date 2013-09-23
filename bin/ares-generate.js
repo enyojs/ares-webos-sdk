@@ -134,8 +134,17 @@ PalmGenerate.prototype = {
 		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
 	},
 
+	isJson: function(str) {
+		try {
+			objStr  = JSON.parse(str);
+		} catch(err) {
+			return false;
+		}
+		return true;
+	},
+
 	insertProperty: function(prop, properties) {
-		var values = prop.split('=');
+		var values = prop.split(':');
 		properties[values[0]] = values[1];
 		log.info("Inserting property " + values[0] + " = " + values[1]);
 	},
@@ -145,10 +154,20 @@ PalmGenerate.prototype = {
 		var properties = {};
 		if (this.argv.property) {
 			if (typeof this.argv.property === 'string') {
-				this.insertProperty(this.argv.property, properties);
+				this.argv.property = this.argv.property.replace(/[']/g,"\"").replace(/=/g,":");
+				if (isJson(this.argv.property)) {
+					properties = JSON.parse(this.argv.property);
+				} else {
+					this.insertProperty(this.argv.property, properties);
+				}
 			} else {
 				this.argv.property.forEach(function(prop) {
-					this.insertProperty(prop, properties);
+					prop = prop.toString().replace(/[']/g,"\"").replace(/=/g,":");
+					if (this.isJson(prop)) {
+						properties = JSON.parse(prop);
+					} else {
+						this.insertProperty(prop, properties);
+					}
 				}, this);
 			}
 			this.substitutions.push({ fileRegexp: "appinfo.json", json: properties});
