@@ -70,7 +70,7 @@ function PalmGenerate() {
 		"",
 		"PROPERTY defines properties to be used during generation. Properties can be",
 		"specified as key-value pairs of the form \"key=value\" or as JSON objects of the",
-		"form \"{'key1':'value1', 'key2':'value2', ...}\". Surrounding quotes are required",
+		"form '{\"key1\":\"value1\", \"key2\":\"value2\", ...}'. Surrounding quotes are required",
 		"in both cases.",
 		"",
 		"TEMPLATE is the application template to use. If not specified, the default",
