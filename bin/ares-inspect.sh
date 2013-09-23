@@ -15,4 +15,4 @@ fi
 export NODE_PATH=$(cd ${BIN_DIR}/../lib && pwd)
 
 # run node script with imported params
-PATH=$BIN_DIR:$PATH node $SCRIPT $@
+PATH=$BIN_DIR:$PATH node $SCRIPT "$@"
