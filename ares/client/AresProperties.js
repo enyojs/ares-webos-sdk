@@ -16,9 +16,6 @@ enyo.kind({
 	events:{
 		onError:""
 	},
-	handlers:{
-		onOK:"checkDeviceList"
-	},
 	
 	create: function() {
 		this.inherited(arguments);
@@ -39,7 +36,7 @@ enyo.kind({
 			self.$.targetConfiguration.setDevicesList(devices);
 		});
 	},
-	checkDeviceList: function(){
+	okButtonAction: function(){
 		var modified = this.$.targetConfiguration.checkModified();
 		if(modified){
 			this.$.targetSavePopup.show();

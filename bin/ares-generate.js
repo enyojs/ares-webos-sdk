@@ -70,7 +70,7 @@ function PalmGenerate() {
 		"",
 		"PROPERTY defines properties to be used during generation. Properties can be",
 		"specified as key-value pairs of the form \"key=value\" or as JSON objects of the",
-		"form \"{'key1':'value1', 'key2':'value2', ...}\". Surrounding quotes are required",
+		"form '{\"key1\":\"value1\", \"key2\":\"value2\", ...}'. Surrounding quotes are required",
 		"in both cases.",
 		"",
 		"TEMPLATE is the application template to use. If not specified, the default",
@@ -134,6 +134,15 @@ PalmGenerate.prototype = {
 		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
 	},
 
+	isJson: function(str) {
+		try {
+			JSON.parse(str);
+		} catch(err) {
+			return false;
+		}
+		return true;
+	},
+
 	insertProperty: function(prop, properties) {
 		var values = prop.split('=');
 		properties[values[0]] = values[1];
@@ -145,10 +154,18 @@ PalmGenerate.prototype = {
 		var properties = {};
 		if (this.argv.property) {
 			if (typeof this.argv.property === 'string') {
-				this.insertProperty(this.argv.property, properties);
+				if (isJson(this.argv.property)) {
+					properties = JSON.parse(this.argv.property);
+				} else {
+					this.insertProperty(this.argv.property, properties);
+				}
 			} else {
 				this.argv.property.forEach(function(prop) {
-					this.insertProperty(prop, properties);
+					if (this.isJson(prop)) {
+						properties = JSON.parse(prop);
+					} else {
+						this.insertProperty(prop, properties);
+					}
 				}, this);
 			}
 			this.substitutions.push({ fileRegexp: "appinfo.json", json: properties});
