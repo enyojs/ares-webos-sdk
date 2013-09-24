@@ -113,7 +113,7 @@ enyo.kind({
         //Get the Devices List from novacom-device.json
         var devicesData = this.getDevicesList();
         this.devicesBackupData = enyo.clone(devicesData);
-        this.devicesBackupData.lastselected = "webospro-qemux86"
+        this.devicesBackupData.lastselected = "emulator"
         var defaultTarget = this.devicesBackupData.lastselected;
         this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
         this.devices = new enyo.Collection(devicesData);

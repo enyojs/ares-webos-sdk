@@ -7,7 +7,7 @@ enyo.kind({
 		onError: ""
 	},
 	published: {
-		device: "webospro-qemux86"
+		device: "emulator"
 	},
 	/**
 	 * @protected
@@ -253,7 +253,7 @@ enyo.kind({
 		var data = {
 			package : pkgUrl,
 			appId	: appId,
-			device	: this.device || "webos3-qemux86"
+			device	: this.device || "webos3"
 		}; 
 		var req = new enyo.Ajax({
 			url: this.url + '/op/install',
@@ -461,7 +461,7 @@ enyo.kind({
 		}
 		var data = {
 			id: encodeURIComponent(appId),
-			device: this.device || "webos3-qemux86"
+			device: this.device || "webos3"
 		};
 		var req = new enyo.Ajax({
 			url: this.url + '/op/launch',
@@ -520,7 +520,7 @@ enyo.kind({
 		}
 		var data = {
 			appId: encodeURIComponent(appId),
-			device: this.device || "webos3-qemux86"
+			device: this.device || "webos3"
 		};
 		var req = new enyo.Ajax({
 			url: this.url + '/op/debug',
@@ -566,7 +566,7 @@ enyo.kind({
 		this.doShowWaitPopup({msg: $L("debugging service:" + serviceIds)});
 		var data = {
 			serviceId: encodeURIComponent(serviceIds),
-			device: this.device || "webos3-qemux86"
+			device: this.device || "webos3"
 		};
 		var req = new enyo.Ajax({
 			url: this.url + '/op/debug',
