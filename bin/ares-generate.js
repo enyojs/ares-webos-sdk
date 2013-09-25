@@ -283,7 +283,8 @@ PalmGenerate.prototype = {
 		this.plugin.services = this.plugin.services.filter(function(service){
 			return service.hasOwnProperty('sources');
 		});
-		this.generator = new prjgen.Generator(this.plugin.services[0], next);
+		var genConfig = util._extend({level: log.level}, this.plugin.services[0]);
+		this.generator = new prjgen.Generator(genConfig, next);
 	}
 };
 
