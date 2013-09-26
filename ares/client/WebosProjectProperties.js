@@ -187,7 +187,7 @@ enyo.kind({
         req.go();
     },
     /**
-     * @ protected
+     * @private
      */
     _getAppInfoData: function(project, appInfoFile, next) {
     	if(appInfoFile === undefined){
@@ -203,7 +203,7 @@ enyo.kind({
     	}    	
     },
     /**
-     * @ protected
+     * @private
      */
     _updateAppInfo: function(project, appInfoFile, appInfoData, next){
     	if(appInfoFile === undefined){
@@ -232,7 +232,7 @@ enyo.kind({
     },
     /**
      * Shared enyo.Ajax error handler
-     * @ protected
+     * @private
      */
     _handleServiceError: function(msg, next, inSender, inError) {
         var response = inSender.xhrResponse, contentType, details;
@@ -245,7 +245,7 @@ enyo.kind({
         next(new Error(msg + inError.toString()), details);
     },
 	/**
-	 * @ protected
+	 * @prodected
 	 */
 	addService: function (inSender, inEvent){
 		//var genService = ServiceRegistry.instance.getServicesByType('generate')[0];
