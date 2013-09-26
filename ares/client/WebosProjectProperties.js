@@ -155,7 +155,7 @@ enyo.kind({
 	},
     /** public */
     saveProjectConfig: function(project) {
-        if(project) {
+        if(project && this.config.enabled){
             this.updateAppInfo(project);
         }
         return true;
