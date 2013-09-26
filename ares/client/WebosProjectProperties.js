@@ -245,7 +245,7 @@ enyo.kind({
         next(new Error(msg + inError.toString()), details);
     },
 	/**
-	 * @prodected
+	 * @protected
 	 */
 	addService: function (inSender, inEvent){
 		//var genService = ServiceRegistry.instance.getServicesByType('generate')[0];
