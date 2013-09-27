@@ -182,16 +182,18 @@ PalmGenerate.prototype = {
 	displayTemplateList: function(type, next) {
 		log.info("displayTemplateList");
 		this.generator.getSources(type, function(err, sources) {
-				if(err) {
-					next(err);
-				} else {
-					sources.forEach(function(source){
-							console.log(util.format("%s\t%s", source.id, source.description));
-						});
-					next();
-				}
-			});
-		next();
+			console.log(arguments);
+			if(err) {
+				next(err);
+			} else {
+				var sourceIds = Object.keys(sources);
+				sourceIds.forEach(function(sourceId){
+					var source = sources[sourceId];
+					console.log(util.format("%s\t%s", source.id, source.description));
+				});
+				next();
+			}
+		});
 	},
 
 	listSources: function(type) {
@@ -237,6 +239,7 @@ PalmGenerate.prototype = {
 	},
 
 	exec: function() {
+		log.verbose("exec");
 		this.checkAndShowHelp();
 		if (this.argv.version) {
 			versionTool.showVersionAndExit();
