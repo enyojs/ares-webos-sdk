@@ -31,7 +31,6 @@ function PalmGenerate() {
 
 	this.defaultTemplate = 'bootplate-nightly';
 	this.defaultSourceType = 'template';
-	this.essentialTemplates = ['webos-app-config'];
 
 	var knownOpts = {
 		"help":		Boolean,
@@ -127,10 +126,6 @@ PalmGenerate.prototype = {
 		}
 
 		var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
-		var essentialSources = this.essentialTemplates.filter(function(source) {
-			return sources.indexOf(source) === -1;
-		});
-		sources = sources.concat(essentialSources);
 		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
 	},
 

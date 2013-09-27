@@ -20,6 +20,7 @@
 					"id": "bootplate-2.1.1",
 					"type": "template",
 					"description": "Enyo bootplate 2.1.1",
+					"deps": ["webos-app-config"],
 					"files": [
 						{
 							"url": "http://enyojs.com/archive/bootplate-2.1.1.zip",
@@ -34,6 +35,7 @@
 					"id": "bootplate-2.2.0",
 					"type": "template",
 					"description": "Enyo bootplate 2.2.0",
+					"deps": ["webos-app-config"],
 					"files": [
 						{
 							"url": "http://enyojs.com/archive/bootplate-2.2.0.zip",
@@ -48,6 +50,7 @@
 					"id": "bootplate-nightly",
 					"type": "template",
 					"description": "Enyo bootplate for webOS - Nightly",
+					"deps": ["webos-app-config"],
 					"files": [
 						{
 							"url": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
