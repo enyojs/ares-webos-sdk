@@ -17,6 +17,28 @@
 			"id": "genZip",
 			"sources": [
 				{
+					"id": "bootplate-moonstone",
+					"Xtype": "template",
+					"type": null,
+					"description": "Moonstone Bootplate (Local)",
+					"deps": ["webos-app-config"],
+					"files": [
+						{
+							"url": "@PLUGINDIR@/../bootplate-moonstone",
+							"excluded": [	
+								".git/",
+								"enyo/.git/",
+								"lib/enyo-cordova/.git/",
+								"lib/enyo-ilib/.git/",
+								"lib/moonstone/.git/",
+								"lib/layout/.git/",
+								"lib/spotlight/.git/",
+								"lib/enyo-webos/.git/"
+							]
+						}
+					]
+				},
+				{
 					"id": "bootplate-2.1.1",
 					"type": "template",
 					"description": "Enyo bootplate 2.1.1",
