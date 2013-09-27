@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var fs = require("fs"),
+    url = require("url"),
     util = require('util'),
     async = require('async'),
     path = require('path'),
@@ -39,6 +40,7 @@ function PalmGenerate() {
 		"overwrite":	Boolean,
 		"template":	[String, Array],
 		"property":	[String, Array],
+		"proxy-url":	url,
 		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
 	};
 	var shortHands = {
@@ -48,6 +50,7 @@ function PalmGenerate() {
 		"f":		"--overwrite",
 		"t":		"--template",
 		"p":		"--property",
+		"P":		"--proxy-url",
 		"v":		["--level", "verbose"]
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
@@ -62,6 +65,7 @@ function PalmGenerate() {
 		"  --list, -l          List the available sources       [string]  [default: " + this.defaultSourceType + "]",
 		"  --overwrite, -f     Overwrite existing files         [boolean]",
 		"  --template, -t      Use the template named TEMPLATE  [path]  [default: " + this.defaultTemplate + "]",
+		"  --proxy-url, -P     Use the given HTTP/S proxy URL   [url]",
 		"  --property, -p      Set the property PROPERTY        [string]",
 		"  --debug, -d         Enable debug mode                [boolean]",
 		"",
@@ -283,7 +287,11 @@ PalmGenerate.prototype = {
 		this.plugin.services = this.plugin.services.filter(function(service){
 			return service.hasOwnProperty('sources');
 		});
-		var genConfig = util._extend({level: log.level}, this.plugin.services[0]);
+		var genConfig = {
+			level: log.level,
+			proxyUrl: this.argv["proxy-url"]
+		};
+		genConfig = util._extend(genConfig, this.plugin.services[0]);
 		this.generator = new prjgen.Generator(genConfig, next);
 	}
 };
