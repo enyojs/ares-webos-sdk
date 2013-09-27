@@ -273,6 +273,8 @@ PalmGenerate.prototype = {
 		}
 		var configContent = fs.readFileSync(configFile, 'utf8');
 		try {
+			var pluginDir = path.dirname(configFile);
+			configContent = configContent.replace(/@PLUGINDIR@/g, pluginDir);
 			this.plugin = JSON.parse(configContent);
 		} catch(e) {
 			throw "Improper JSON: "+configContent;
