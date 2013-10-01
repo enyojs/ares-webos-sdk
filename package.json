@@ -10,7 +10,7 @@
 		"ares-launch": "./bin/ares-launch.js"
 	},
 	"dependencies": {
-		"ares-generator": "0.2.3",
+		"ares-generator": "0.2.4",
 		"shelljs": "~0.1.4",
 		"request": "2.12.x",
 		"async": "~0.2.9",
@@ -32,7 +32,7 @@
 		"express": "~3.3.4"
 	},
 	"engines": {
-		"node": ">=0.8.21",
+		"node": "~0.10.0",
 		"npm": ">=1.2.11"
 	},
 	"engineStrict": true,

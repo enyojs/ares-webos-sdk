@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var fs = require("fs"),
+    url = require("url"),
     util = require('util'),
     async = require('async'),
     path = require('path'),
@@ -29,9 +30,7 @@ function PalmGenerate() {
 	this.options = {};
 	this.substitutions = [];
 
-	this.defaultTemplate = 'bootplate-nightly';
 	this.defaultSourceType = 'template';
-	this.essentialTemplates = ['webos-app-config'];
 
 	var knownOpts = {
 		"help":		Boolean,
@@ -40,6 +39,7 @@ function PalmGenerate() {
 		"overwrite":	Boolean,
 		"template":	[String, Array],
 		"property":	[String, Array],
+		"proxy-url":	url,
 		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
 	};
 	var shortHands = {
@@ -49,11 +49,11 @@ function PalmGenerate() {
 		"f":		"--overwrite",
 		"t":		"--template",
 		"p":		"--property",
+		"P":		"--proxy-url",
 		"v":		["--level", "verbose"]
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
-	this.argv.template = this.argv.template || this.defaultTemplate;
 	this.helpString = [
 		"Usage: ares-generate [OPTIONS] APP_DIR",
 		"",
@@ -62,7 +62,8 @@ function PalmGenerate() {
 		"  --version           Display version info and exit  ",
 		"  --list, -l          List the available sources       [string]  [default: " + this.defaultSourceType + "]",
 		"  --overwrite, -f     Overwrite existing files         [boolean]",
-		"  --template, -t      Use the template named TEMPLATE  [path]  [default: " + this.defaultTemplate + "]",
+		"  --template, -t      Use the template named TEMPLATE  [path]",
+		"  --proxy-url, -P     Use the given HTTP/S proxy URL   [url]",
 		"  --property, -p      Set the property PROPERTY        [string]",
 		"  --debug, -d         Enable debug mode                [boolean]",
 		"",
@@ -74,7 +75,7 @@ function PalmGenerate() {
 		"in both cases.",
 		"",
 		"TEMPLATE is the application template to use. If not specified, the default",
-		"template is used ('" + this.defaultTemplate + "')."
+		"template (the firstone marked with `isDefault: true`)."
 	];
 
 	log.heading = processName;
@@ -85,8 +86,29 @@ function PalmGenerate() {
 
 PalmGenerate.prototype = {
 
+	applyDefaultTemplate: function(next) {
+		log.info("applyDefaultTemplate");
+		this.generator.getSources(this.defaultSourceType, function(err, sources) {
+			if(err) {
+				next(err);
+			} else {
+				var matchedSources = sources.filter(function(source){
+					return source.isDefault;
+				});
+				var defaultTemplate = matchedSources[0] || sources[0];
+				this.argv.template = defaultTemplate.id;
+				log.info("applyDefaultTemplate#defaultTemplate:", this.argv.template);
+				next();
+			}
+		}.bind(this));
+	},
+
 	checkTemplateValid: function(next) {
 		log.info("checkTemplateValid: " + this.argv.template);
+		if (!this.argv.template) {
+			this.applyDefaultTemplate(next);
+			return;
+		}
 		// Verify it's a string
 		if ((typeof this.argv.template != 'string') && !(this.argv.template instanceof Array)){
 			this.showUsage();
@@ -127,10 +149,6 @@ PalmGenerate.prototype = {
 		}
 
 		var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
-		var essentialSources = this.essentialTemplates.filter(function(source) {
-			return sources.indexOf(source) === -1;
-		});
-		sources = sources.concat(essentialSources);
 		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
 	},
 
@@ -187,16 +205,18 @@ PalmGenerate.prototype = {
 	displayTemplateList: function(type, next) {
 		log.info("displayTemplateList");
 		this.generator.getSources(type, function(err, sources) {
-				if(err) {
-					next(err);
-				} else {
-					sources.forEach(function(source){
-							console.log(util.format("%s\t%s", source.id, source.description));
-						});
-					next();
-				}
-			});
-		next();
+			if(err) {
+				next(err);
+			} else {
+				var sourceIds = Object.keys(sources);
+				sourceIds.forEach(function(sourceId){
+					var source = sources[sourceId];
+					log.info("displayTemplateList()", "source:", source);
+					console.log(util.format("%s\t%s %s", source.id, source.description, source.isDefault ? "(default)" : ""));
+				});
+				next();
+			}
+		});
 	},
 
 	listSources: function(type) {
@@ -242,6 +262,7 @@ PalmGenerate.prototype = {
 	},
 
 	exec: function() {
+		log.verbose("exec");
 		this.checkAndShowHelp();
 		if (this.argv.version) {
 			versionTool.showVersionAndExit();
@@ -273,6 +294,8 @@ PalmGenerate.prototype = {
 		}
 		var configContent = fs.readFileSync(configFile, 'utf8');
 		try {
+			var pluginDir = path.dirname(configFile);
+			configContent = configContent.replace(/@PLUGINDIR@/g, pluginDir);
 			this.plugin = JSON.parse(configContent);
 		} catch(e) {
 			throw "Improper JSON: "+configContent;
@@ -283,7 +306,12 @@ PalmGenerate.prototype = {
 		this.plugin.services = this.plugin.services.filter(function(service){
 			return service.hasOwnProperty('sources');
 		});
-		this.generator = new prjgen.Generator(this.plugin.services[0], next);
+		var genConfig = {
+			level: log.level,
+			proxyUrl: this.argv["proxy-url"]
+		};
+		genConfig = util._extend(genConfig, this.plugin.services[0]);
+		this.generator = new prjgen.Generator(genConfig, next);
 	}
 };
 
