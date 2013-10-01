@@ -113,7 +113,7 @@ enyo.kind({
         //Get the Devices List from novacom-device.json
         var devicesData = this.getDevicesList();
         this.devicesBackupData = enyo.clone(devicesData);
-        this.devicesBackupData.lastselected = "webospro-qemux86"
+        this.devicesBackupData.lastselected = "emulator"
         var defaultTarget = this.devicesBackupData.lastselected;
         this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
         this.devices = new enyo.Collection(devicesData);
@@ -178,16 +178,19 @@ enyo.kind({
         }
         this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
         this.provider['saveDevicesList'](devicesData, function(inError) {
-            if(inError)
+            if(inError){
                 self.doError({msg:"Cannot save the Devices Data"});
+            } else {
+                self.devicesBackupData = devicesList;
+                self.devicesBackupData.lastselected = self.model.name;
+                self.devices.data(self.devicesBackupData);
+                self.targetDevice = self.findKindBy("name", self.devicesBackupData.lastselected);
+                self.targetDevice.setActive(false);
+                self.targetDevice.setActive(true);
+                self.setIsModified(false);
+            }
         });
-        this.devicesBackupData = devicesList;
-        this.devicesBackupData.lastselected = this.model.name;
-        this.devices.data(this.devicesBackupData);
-        this.targetDevice = this.findKindBy("name", this.devicesBackupData.lastselected);
-        this.targetDevice.setActive(false);
-        this.targetDevice.setActive(true);
-        this.setIsModified(false);
+        
     },
 
     requestPrivateKey: function() {

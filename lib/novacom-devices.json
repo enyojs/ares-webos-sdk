@@ -1,8 +1,8 @@
 [
 	{
-		"name": "webos3-qemux86",
+		"name": "webos3",
 		"type": "webos3",
-		"description": "HP webOS 3 emulator",
+		"description": "HP webOS 3 Emulator",
 		"host": "127.0.0.1",
 		"port": 5522,
 		"username": "root",
@@ -12,8 +12,8 @@
 		"files":"stream"
 	},
 	{
-		"name": "webospro-qemux86",
-		"type": "webospro",
+		"name": "emulator",
+		"type": "starfish",
 		"description": "LG webOS TV Emulator",
 		"host": "127.0.0.1",
 		"port": 6622,
