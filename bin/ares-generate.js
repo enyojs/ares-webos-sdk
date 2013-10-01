@@ -30,7 +30,6 @@ function PalmGenerate() {
 	this.options = {};
 	this.substitutions = [];
 
-	this.defaultTemplate = 'bootplate-nightly';
 	this.defaultSourceType = 'template';
 
 	var knownOpts = {
@@ -55,7 +54,6 @@ function PalmGenerate() {
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
-	this.argv.template = this.argv.template || this.defaultTemplate;
 	this.helpString = [
 		"Usage: ares-generate [OPTIONS] APP_DIR",
 		"",
@@ -64,7 +62,7 @@ function PalmGenerate() {
 		"  --version           Display version info and exit  ",
 		"  --list, -l          List the available sources       [string]  [default: " + this.defaultSourceType + "]",
 		"  --overwrite, -f     Overwrite existing files         [boolean]",
-		"  --template, -t      Use the template named TEMPLATE  [path]  [default: " + this.defaultTemplate + "]",
+		"  --template, -t      Use the template named TEMPLATE  [path]",
 		"  --proxy-url, -P     Use the given HTTP/S proxy URL   [url]",
 		"  --property, -p      Set the property PROPERTY        [string]",
 		"  --debug, -d         Enable debug mode                [boolean]",
@@ -77,7 +75,7 @@ function PalmGenerate() {
 		"in both cases.",
 		"",
 		"TEMPLATE is the application template to use. If not specified, the default",
-		"template is used ('" + this.defaultTemplate + "')."
+		"template in which description has 'Recommended' words or the first template in the list."
 	];
 
 	log.heading = processName;
@@ -88,8 +86,29 @@ function PalmGenerate() {
 
 PalmGenerate.prototype = {
 
+	applyDefaultTemplate: function(next) {
+		log.info("applyDefaultTemplate");
+		this.generator.getSources(this.defaultSourceType, function(err, sources) {
+			if(err) {
+				next(err);
+			} else {
+				var matchedSources = sources.filter(function(source){
+					return source.description.match(/Recommended/gi);
+				});
+				var defaultTemplate = matchedSources[0] || sources[0];
+				this.argv.template = defaultTemplate.id;
+				log.info("applyDefaultTemplate#defaultTemplate:", this.argv.template);
+				next();
+			}
+		}.bind(this));
+	},
+
 	checkTemplateValid: function(next) {
 		log.info("checkTemplateValid: " + this.argv.template);
+		if (!this.argv.template) {
+			this.applyDefaultTemplate(next);
+			return;
+		}
 		// Verify it's a string
 		if ((typeof this.argv.template != 'string') && !(this.argv.template instanceof Array)){
 			this.showUsage();
@@ -186,7 +205,6 @@ PalmGenerate.prototype = {
 	displayTemplateList: function(type, next) {
 		log.info("displayTemplateList");
 		this.generator.getSources(type, function(err, sources) {
-			console.log(arguments);
 			if(err) {
 				next(err);
 			} else {
