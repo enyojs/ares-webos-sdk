@@ -75,7 +75,7 @@ function PalmGenerate() {
 		"in both cases.",
 		"",
 		"TEMPLATE is the application template to use. If not specified, the default",
-		"template in which description has 'Recommended' words or the first template in the list."
+		"template (the firstone marked with `default: true`)."
 	];
 
 	log.heading = processName;
@@ -93,7 +93,7 @@ PalmGenerate.prototype = {
 				next(err);
 			} else {
 				var matchedSources = sources.filter(function(source){
-					return source.description.match(/Recommended/gi);
+					return source.default;
 				});
 				var defaultTemplate = matchedSources[0] || sources[0];
 				this.argv.template = defaultTemplate.id;
@@ -211,7 +211,8 @@ PalmGenerate.prototype = {
 				var sourceIds = Object.keys(sources);
 				sourceIds.forEach(function(sourceId){
 					var source = sources[sourceId];
-					console.log(util.format("%s\t%s", source.id, source.description));
+					log.info("displayTemplateList()", "source:", source);
+					console.log(util.format("%s\t%s %s", source.id, source.description, source.default ? "(default)" : ""));
 				});
 				next();
 			}

@@ -36,7 +36,8 @@
 				{
 					"id": "bootplate-2.3.0-pre.5",
 					"type": "template",
-					"description": "Enyo bootplate 2.3.0-pre.5 (Recommended)",
+					"default": true,
+					"description": "Enyo bootplate 2.3.0-pre.5",
 					"deps": ["webos-app-config"],
 					"files": [
 						{
