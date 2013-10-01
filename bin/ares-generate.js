@@ -75,7 +75,7 @@ function PalmGenerate() {
 		"in both cases.",
 		"",
 		"TEMPLATE is the application template to use. If not specified, the default",
-		"template (the firstone marked with `default: true`)."
+		"template (the firstone marked with `isDefault: true`)."
 	];
 
 	log.heading = processName;
@@ -93,7 +93,7 @@ PalmGenerate.prototype = {
 				next(err);
 			} else {
 				var matchedSources = sources.filter(function(source){
-					return source.default;
+					return source.isDefault;
 				});
 				var defaultTemplate = matchedSources[0] || sources[0];
 				this.argv.template = defaultTemplate.id;
@@ -212,7 +212,7 @@ PalmGenerate.prototype = {
 				sourceIds.forEach(function(sourceId){
 					var source = sources[sourceId];
 					log.info("displayTemplateList()", "source:", source);
-					console.log(util.format("%s\t%s %s", source.id, source.description, source.default ? "(default)" : ""));
+					console.log(util.format("%s\t%s %s", source.id, source.description, source.isDefault ? "(default)" : ""));
 				});
 				next();
 			}
