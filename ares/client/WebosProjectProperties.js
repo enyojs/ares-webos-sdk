@@ -105,9 +105,7 @@ enyo.kind({
 	/** public */
 	setProjectConfig: function(config) {
 		this.config = config;
-		if(config.enabled){
-			this.doAddSource({source:"webos-app-config"});
-		} else {
+		if(!config.enabled){
 			this.doInitSource();
 		}
 		if (this.debug) this.log("config:", this.config);
