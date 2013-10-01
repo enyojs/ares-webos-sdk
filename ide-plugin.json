@@ -17,35 +17,30 @@
 			"id": "genZip",
 			"sources": [
 				{
-					"id": "bootplate-moonstone",
+					"id": "bootplate-sample-local",
 					"Xtype": "template",
 					"type": null,
-					"description": "Moonstone Bootplate (Local)",
+					"description": "Local Bootplate Sample(Local)",
 					"deps": ["webos-app-config"],
 					"files": [
 						{
-							"url": "@PLUGINDIR@/../bootplate-moonstone",
+							"url": "@PLUGINDIR@/../bootplate-folder-name",
 							"excluded": [	
 								".git/",
 								"enyo/.git/",
-								"lib/enyo-cordova/.git/",
-								"lib/enyo-ilib/.git/",
-								"lib/moonstone/.git/",
-								"lib/layout/.git/",
-								"lib/spotlight/.git/",
-								"lib/enyo-webos/.git/"
+								"lib/enyo-sample/.git/"
 							]
 						}
 					]
 				},
 				{
-					"id": "bootplate-2.1.1",
+					"id": "bootplate-2.3.0-pre.5",
 					"type": "template",
-					"description": "Enyo bootplate 2.1.1",
+					"description": "Enyo bootplate 2.3.0-pre.5 (Recommended)",
 					"deps": ["webos-app-config"],
 					"files": [
 						{
-							"url": "http://enyojs.com/archive/bootplate-2.1.1.zip",
+							"url": "http://enyojs.com/archive/bootplate-2.3.0-pre.5.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
 								"bootplate/api/"
@@ -69,13 +64,13 @@
 					]
 				},
 				{
-					"id": "bootplate-nightly",
+					"id": "bootplate-2.1.1",
 					"type": "template",
-					"description": "Enyo bootplate for webOS - Nightly",
+					"description": "Enyo bootplate 2.1.1",
 					"deps": ["webos-app-config"],
 					"files": [
 						{
-							"url": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
+							"url": "http://enyojs.com/archive/bootplate-2.1.1.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
 								"bootplate/api/"
