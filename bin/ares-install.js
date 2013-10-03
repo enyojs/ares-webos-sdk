@@ -5,6 +5,7 @@ var fs = require('fs'),
     ipkg = require('./../lib/ipkg-tools'),
     npmlog = require('npmlog'),
     versionTool = require('./../lib/version-tools'),
+    console = require('./../lib/consoleSync'),
     nopt = require('nopt');
 
 /**********************************************************************/

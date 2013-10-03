@@ -5,6 +5,7 @@ var fs = require('fs'),
     ipkg = require('./../lib/ipkg-tools'),
     npmlog = require('npmlog'),
     versionTool = require('./../lib/version-tools'),
+    console = require('./../lib/consoleSync'),
     nopt = require('nopt');
 
 /**********************************************************************/
@@ -117,7 +118,7 @@ function close() {
 function finish(err, value) {
 	if (err) {
 		log.error('finish():', err);
-		console.log(err);
+		console.log(processName + ": "+ err.toString());
 		process.exit(1);
 	} else {
 		if (value && value.msg) {

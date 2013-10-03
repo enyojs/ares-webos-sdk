@@ -7,6 +7,7 @@ var fs = require("fs"),
     path = require('path'),
     log = require('npmlog'),
     versionTool = require('./../lib/version-tools'),
+    console = require('./../lib/consoleSync'),
     prjgen = require('ares-generator');
 
 /**********************************************************************/
