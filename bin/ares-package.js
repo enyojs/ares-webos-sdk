@@ -5,6 +5,7 @@ var fs = require("fs"),
     path = require('path'),
     async = require('async'),
     versionTool = require('./../lib/version-tools'),
+    console = require('./../lib/consoleSync'),
     tools = require('./../lib/ipkg-tools');
 
 /**********************************************************************/

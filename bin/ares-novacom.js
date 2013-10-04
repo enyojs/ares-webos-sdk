@@ -7,6 +7,7 @@ var fs = require('fs'),
     async = require('async'),
     sprintf = require('sprintf').sprintf,
     versionTool = require('./../lib/version-tools'),
+    console = require('./../lib/consoleSync'),
     novacom = require('./../lib/novacom');
 
 /**********************************************************************/
