@@ -76,9 +76,8 @@ var options = {
 	device: argv.device,
 	appId: argv.app,
 	serviceId: argv.service,
-	browser: argv.browser
-	/*FIXME : delete this variable when 9998 port is not working directly */
-	noPortForwarding : argv.noPortForwarding
+	browser: argv.browser,
+	chromium: argv.bundledbrowser
 };
 
 /**********************************************************************/
