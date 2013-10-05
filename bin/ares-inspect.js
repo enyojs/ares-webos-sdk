@@ -17,7 +17,6 @@ var knownOpts = {
 	"service":	[String, Array],
 	"browser":	Boolean,
 	"bundledbrowser": Boolean,
-	"noPortForwarding": Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
@@ -30,8 +29,7 @@ var shortHands = {
 	"B": ["--bundledbrowser"],
 	"V": ["--version"],
 	"h": ["--help"],
-	"v": ["--level", "verbose"],
-	"p": ["--noPortForwarding"]
+	"v": ["--level", "verbose"]
 };
 
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-inspect.js'*/);
@@ -69,9 +67,6 @@ if (argv['version']) {
 	op = inspect;
 }
 
-
-
-
 var options = {
 	device: argv.device,
 	appId: argv.app,
@@ -95,7 +90,6 @@ function help() {
 			"\t" + processName + " [OPTIONS] --service|-s <SERVICE_ID>\n" +
 			"\t" + processName + " [OPTIONS] --browser|-b\n" +
 			"\t" + processName + " [OPTIONS] --bundledbrowser|-B : Open the included browser on the Ares URL\n" +
-			"\t" + processName + " [OPTIONS] --noPortForwarding|-p : debug without port forwading\n" +
 			"\t" + processName + " [OPTIONS] --version|-V\n" +
 			"\t" + processName + " [OPTIONS] --help|-h\n" +
 			"\n" +
