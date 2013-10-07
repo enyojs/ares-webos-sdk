@@ -65,9 +65,6 @@ if (argv['version']) {
 	op = inspect;
 }
 
-
-
-
 var options = {
 	device: argv.device,
 	appId: argv.app,
@@ -89,8 +86,6 @@ function help() {
 			"\t" + processName + " [OPTIONS] --app|-a <APP_ID>\n" +
 			"\t" + processName + " [OPTIONS] --service|-s <SERVICE_ID>\n" +
 			"\t" + processName + " [OPTIONS] --browser|-b\n" +
-			"\t" + processName + " [OPTIONS] --bundledbrowser|-B : Open the included browser on the Ares URL\n" +
-			"\t" + processName + " [OPTIONS] --noPortForwarding|-p : debug without port forwading\n" +
 			"\t" + processName + " [OPTIONS] --version|-V\n" +
 			"\t" + processName + " [OPTIONS] --help|-h\n" +
 			"\n" +
