@@ -16,6 +16,7 @@ var knownOpts = {
 	"app":	[String, null],
 	"service":	[String, Array],
 	"browser":	Boolean,
+	"bundledbrowser": Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
@@ -25,6 +26,7 @@ var shortHands = {
 	"a": ["--app"],
 	"s": ["--service"],
 	"b": ["--browser"],
+	"B": ["--bundledbrowser"],
 	"V": ["--version"],
 	"h": ["--help"],
 	"v": ["--level", "verbose"]
@@ -40,6 +42,10 @@ process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.toString());
 	process.exit(1);
 });
+
+if (process.env['ARES_BUNDLE_BROWSER'] && !argv['bundledbrowser']) {
+	delete process.env['ARES_BUNDLE_BROWSER'];
+}
 
 /**********************************************************************/
 
@@ -69,7 +75,8 @@ var options = {
 	device: argv.device,
 	appId: argv.app,
 	serviceId: argv.service,
-	browser: argv.browser
+	browser: argv.browser,
+	bundledBrowser: argv.bundledbrowser
 };
 
 /**********************************************************************/
@@ -86,6 +93,7 @@ function help() {
 			"\t" + processName + " [OPTIONS] --app|-a <APP_ID>\n" +
 			"\t" + processName + " [OPTIONS] --service|-s <SERVICE_ID>\n" +
 			"\t" + processName + " [OPTIONS] --browser|-b\n" +
+			"\t" + processName + " [OPTIONS] --bundledbrowser|-B : Open the included browser on the Ares URL\n" +
 			"\t" + processName + " [OPTIONS] --version|-V\n" +
 			"\t" + processName + " [OPTIONS] --help|-h\n" +
 			"\n" +

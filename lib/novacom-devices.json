@@ -34,6 +34,7 @@
 		"privateKey": {
 			"openSsh": "webos"
 		},
+		"password": "webos",
 		"files":"stream",
 		"noPortForwarding":true
 	}
