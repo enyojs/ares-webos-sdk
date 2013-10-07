@@ -16,8 +16,6 @@ var knownOpts = {
 	"app":	[String, null],
 	"service":	[String, Array],
 	"browser":	Boolean,
-	"bundledbrowser": Boolean,
-	"noPortForwarding": Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
@@ -27,11 +25,9 @@ var shortHands = {
 	"a": ["--app"],
 	"s": ["--service"],
 	"b": ["--browser"],
-	"B": ["--bundledbrowser"],
 	"V": ["--version"],
 	"h": ["--help"],
-	"v": ["--level", "verbose"],
-	"p": ["--noPortForwarding"]
+	"v": ["--level", "verbose"]
 };
 
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-inspect.js'*/);
@@ -77,8 +73,6 @@ var options = {
 	appId: argv.app,
 	serviceId: argv.service,
 	browser: argv.browser
-	/*FIXME : delete this variable when 9998 port is not working directly */
-	noPortForwarding : argv.noPortForwarding
 };
 
 /**********************************************************************/

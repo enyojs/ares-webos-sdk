@@ -21,18 +21,20 @@
 		"privateKey": {
 			"openSsh": "webos"
 		},
-		"files":"sftp"
+		"files":"sftp",
+		"noPortForwarding":true
 	},
 	{
 		"name": "tv",
 		"type": "starfish",
 		"description": "LG webOS TV",
-		"host": "127.0.0.1",
+		"host": "10.177.220.197",
 		"port": 22,
 		"username": "root",
 		"privateKey": {
 			"openSsh": "webos"
 		},
-		"files":"stream"
+		"files":"stream",
+		"noPortForwarding":true
 	}
 ]
