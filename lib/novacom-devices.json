@@ -21,7 +21,8 @@
 		"privateKey": {
 			"openSsh": "webos"
 		},
-		"files":"sftp"
+		"files":"sftp",
+		"noPortForwarding":true
 	},
 	{
 		"name": "tv",
@@ -33,6 +34,7 @@
 		"privateKey": {
 			"openSsh": "webos"
 		},
-		"files":"stream"
+		"files":"stream",
+		"noPortForwarding":true
 	}
 ]
