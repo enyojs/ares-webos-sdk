@@ -288,7 +288,7 @@ function BdOpenwebOS(config, next) {
 	function debug(req, res, next) {
 		log.info("debug()", req.body.id);
 		res.status(200).send();
-		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.appId, chromium:true}, null, function(err, result) {
+		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.appId}, null, function(err, result) {
 			log.verbose("debug()", err, result);
 			next(err);
 		});

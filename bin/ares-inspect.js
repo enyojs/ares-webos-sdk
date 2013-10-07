@@ -43,6 +43,10 @@ process.on('uncaughtException', function (err) {
 	process.exit(1);
 });
 
+if (process.env['ARES_BUNDLE_BROWSER'] && !argv['bundledbrowser']) {
+	delete process.env['ARES_BUNDLE_BROWSER'];
+}
+
 /**********************************************************************/
 
 var log = npmlog;
@@ -72,7 +76,7 @@ var options = {
 	appId: argv.app,
 	serviceId: argv.service,
 	browser: argv.browser,
-	chromium: argv.bundledbrowser
+	bundledBrowser: argv.bundledbrowser
 };
 
 /**********************************************************************/
