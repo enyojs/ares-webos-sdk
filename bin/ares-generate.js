@@ -295,8 +295,6 @@ PalmGenerate.prototype = {
 		}
 		var configContent = fs.readFileSync(configFile, 'utf8');
 		try {
-			var pluginDir = path.dirname(configFile);
-			configContent = configContent.replace(/@PLUGINDIR@/g, pluginDir);
 			this.plugin = JSON.parse(configContent);
 		} catch(e) {
 			throw "Improper JSON: "+configContent;
@@ -312,6 +310,20 @@ PalmGenerate.prototype = {
 			proxyUrl: this.argv["proxy-url"]
 		};
 		genConfig = util._extend(genConfig, this.plugin.services[0]);
+
+		//Change @PLUGINDIR@ to real path
+		var pluginDir = path.dirname(configFile);
+		genConfig.sources.forEach(function(source) {
+			if (source.files) {
+				source.files.forEach(function(file) {
+					file.url = file.url.replace(/@PLUGINDIR@/g, pluginDir);
+					if (process.platform === 'win32') {
+						file.url = file.url.replace(/\\/g,'/');
+					}
+				});
+			}
+		});
+
 		this.generator = new prjgen.Generator(genConfig, next);
 	}
 };
