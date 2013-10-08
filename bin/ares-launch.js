@@ -15,6 +15,7 @@ var knownOpts = {
 	"inspect":	Boolean,
 	"device-list":	Boolean,
 	"close":	String,
+	"running":	Boolean,
 	"relaunch":	Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
@@ -25,6 +26,7 @@ var shortHands = {
 	"I": ["--inspect"],
 	"f": ["--relaunch"],
 	"c": ["--close"],
+	"r": ["--running"],
 	"l": ["--list"],
 	"V": ["--version"],
 	"h": ["--help"],
@@ -60,6 +62,8 @@ log.verbose("argv", argv);
 var op;
 if (argv.close) {
 	op = close;
+} else if (argv.running) {
+	op = running;
 } else if (argv.relaunch) {
 	throw new Error('Not implemented');
 } else if (argv['version']) {
@@ -87,6 +91,7 @@ function help() {
 			"\t" + processName + " [OPTIONS] <APP_ID>\n" +
 			"\t" + processName + " [OPTIONS] --close <APP_ID>\n" +
 			"\t" + processName + " [OPTIONS] --relaunch <APP_ID>\n" +
+			"\t" + processName + " [OPTIONS] --running\n" +
 			"\t" + processName + " [OPTIONS] --version|-V\n" +
 			"\t" + processName + " [OPTIONS] --help|-h\n" +
 			"\n" +
@@ -113,6 +118,17 @@ function close() {
 		process.exit(1);
 	}
 	ipkg.launcher.close(options, pkgId, null, finish);
+}
+
+function running() {
+	ipkg.launcher.listRunningApp(options, null, function(err, runningApps) {
+		var strRunApps = "";
+		if (runningApps instanceof Array) runningApps.forEach(function (runApp) {
+			strRunApps = strRunApps.concat(runApp.id).concat('\n');
+		});
+		console.log(strRunApps);
+		finish(err);
+	});
 }
 
 function finish(err, value) {
