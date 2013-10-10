@@ -286,16 +286,16 @@ enyo.kind({
 		if (this.debug) this.log('launching');
 
 	    async.waterfall([
-	    	//this._checkAppInfo.bind(this, project, next),
+	    	this._checkAppInfo.bind(this, project, next),
 	    	//Build
-			// this._getFilesData.bind(this, project),
-			// this._submitBuildRequest.bind(this, "run", project),
-			// this._prepareStore.bind(this, project),
-			// this._storePkg.bind(this, project),
-			// //Install
-			 this._getAppInfo.bind(this, project),
-			 this._getAppId.bind(this, project),
-			// this._installPkg.bind(this, project, null),
+			this._getFilesData.bind(this, project),
+			this._submitBuildRequest.bind(this, "run", project),
+			this._prepareStore.bind(this, project),
+			this._storePkg.bind(this, project),
+			//Install
+			this._getAppInfo.bind(this, project),
+			this._getAppId.bind(this, project),
+			this._installPkg.bind(this, project, null),
 			//Run
 			this._runApp.bind(this, project)
 
@@ -494,16 +494,16 @@ enyo.kind({
 	    async.waterfall([
 	    	this._checkAppInfo.bind(this, project, next),
 			//Build
-			// this._getFilesData.bind(this, project),
-			// this._submitBuildRequest.bind(this, "debug", project),
-			// this._prepareStore.bind(this, project),
-			// this._storePkg.bind(this, project),
-			// //Install
-			 this._getAppInfo.bind(this, project),
-			 this._getAppId.bind(this, project),
-			// this._installPkg.bind(this, project, null),
-			// //Run
-			 this._runApp.bind(this, project),
+			this._getFilesData.bind(this, project),
+			this._submitBuildRequest.bind(this, "debug", project),
+			this._prepareStore.bind(this, project),
+			this._storePkg.bind(this, project),
+			//Install
+			this._getAppInfo.bind(this, project),
+			this._getAppId.bind(this, project),
+			this._installPkg.bind(this, project, null),
+			//Run
+			this._runApp.bind(this, project),
 			//Debug
 			this._debugApp.bind(this, project),
 			this.debugService.bind(this, project)
