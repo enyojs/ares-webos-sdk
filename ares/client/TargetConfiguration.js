@@ -139,7 +139,7 @@ enyo.kind({
         var devicesData = this.getDevicesList();
         var newDevice = "new Device" + this.newDeviceIndex;
         this.newDeviceIndex++;
-        devicesData.push({name: newDevice, description:"new Device", host:"127.0.0.1", port:"22", type:"starfish", privateKey:false, privateKeyName:""});
+        devicesData.push({name: newDevice, description:"new Device", host:"127.0.0.1", port:"22", type:"starfish", username:"root", privateKey:false, privateKeyName:""});
         this.$.deviceList.createComponent({kind:"TargetButton", keyData: newDevice});
         this.$.deviceList.render();
         var target = this.findTarget(newDevice);
@@ -190,7 +190,7 @@ enyo.kind({
                     devicesData[index]["privateKey"].openSsh = devicesData[index]["privateKeyName"];
                     if(devicesData[index]["privateKeyName"])
                         delete devicesData[index]["privateKeyName"];
-                } else if(key === "privateKey" && && devicesData[index]["privateKey"] == false){
+                } else if(key === "privateKey" && devicesData[index]["privateKey"] == false){
                     delete devicesData[index]["privateKey"];
                     if(devicesData[index]["privateKeyName"])
                         delete devicesData[index]["privateKeyName"];
