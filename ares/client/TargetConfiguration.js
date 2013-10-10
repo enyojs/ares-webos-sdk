@@ -3,6 +3,8 @@ enyo.kind({
     kind: "FittableColumns",
     published: {
         devicesList: null,
+        selectedTarget: null,
+        selectedButton: null,
         provider: null,
         isModified:false,
         newDeviceIndex:0
@@ -10,21 +12,11 @@ enyo.kind({
     events:{
         onError:""
     },
-    bindings: [
-        {from: ".model.name", to: ".$.nameInput.value", oneWay:false},
-        {from: ".model.description", to: ".$.descInput.value", oneWay:false},
-        {from: ".model.host", to: ".$.ipInput.value", oneWay:false},
-        {from: ".model.port", to: ".$.portInput.value", oneWay:false},
-        {from: ".model.privateKey", to: ".$.keyCheckbox.checked"},
-        {from: ".model.privateKeyName", to: ".$.privateKeyName.value"},
-        {from: ".model.privateKey", to: ".$.deco_passphrase.showing"},
-        {from: ".model.privateKey", to: ".$.title_passphrase.showing"},
-        {from: ".model.privateKey", to: ".$.requestKeyButton.showing", transform: function(val) {return !val}, oneWay:false},
-        {from: ".model.privateKey", to: ".$.deco_privateKey.showing",oneWay:false},
-        {from: ".model.passphrase", to: ".$.passphrase.value", oneWay:false},
-        {from: ".$.saveButton.disabled", to: ".$.requestKeyButton.disabled", transform: function(val) {return !val}, oneWay:false},
-        {from: ".isModified", to: ".$.saveButton.disabled", transform: function(val) {return !val}},
-        {from: ".isModified", to: ".$.modifiedContent.showing"}
+    bindings:[
+        {from: ".isModified", to:".$.saveButton.disabled", transform: function(val) {return !val}},
+        {from: ".$.requestKeyButton.showing", to:".$.deco_privateKey.showing", oneWay:false, transform: function(val) {return !val}},
+        {from: ".isModified", to: ".$.modifiedContent.showing"},
+        {from: ".$.nameInput.value", to:".selectedButton.content"}
     ],
     components: [           
         {kind: "FittableRows", fit:true,  components: [
@@ -33,30 +25,16 @@ enyo.kind({
                 {name:"modifiedContent", tag:"span", content:" (modified)"},
                 {kind:"onyx.Button", content:"Save", style:"float:right;", ontap:"save", name:"saveButton"},
                 {kind:"onyx.Button", content:"Remove", style:"float:right;", ontap:"remove", name:"removeButton"},
-                {kind:"onyx.Button", content:"Add", style:"float:right;", ontap:"add"}                
+                {kind:"onyx.Button", content:"Add", style:"float:right;", ontap:"add", name:"addButton"}                
             ]},
             {kind:"FittableColumns", fit:true, components:[
-                {kind: "enyo.Group",  fit:true, onActivate:"selectDevice", components:[
-                    {kind: "enyo.DataList", name:"deviceList", components: [
-                        {kind:"onyx.Button", style:"width:85%; margin:5px;", bindings:[
-                            {from:".model.name", to:".name"}
-                        ],
-                        components: [
-                            {tag:"span", content:"* ", bindings:[
-                                {from:".model.modified", to:".showing"}
-                            ]},
-                            {tag:"span", bindings:[
-                                {from:".model.name", to:".content"}
-                            ]}
-                        ]}                    
-                    ]}
-                ]},
+                {kind: "enyo.Group", name:"deviceList", fit:true, onActivate:"selectDevice"},
                 {kind:"enyo.Table", name:"selectedTable", oninput:"modified", components: [
                     {components: [
                         {content:"Name"},
                         {components: [
                             {kind:"onyx.InputDecorator", components: [
-                                {kind:"onyx.Input", name:"nameInput"}
+                                {kind:"onyx.Input", name:"nameInput", deviceData:"name"}
                             ]}
                         ]}
                     ]},
@@ -64,7 +42,7 @@ enyo.kind({
                         {content:"Description"},
                         {components: [
                             {kind:"onyx.InputDecorator", components: [
-                                {kind:"onyx.Input", name:"descInput"}
+                                {kind:"onyx.Input", name:"descInput", deviceData:"description"}
                             ]}
                         ]}
                     ]},
@@ -72,7 +50,7 @@ enyo.kind({
                         {content:"IP Address"},
                         {components: [
                             {kind:"onyx.InputDecorator", components: [
-                                {kind:"onyx.Input", name:"ipInput"}
+                                {kind:"onyx.Input", name:"ipInput", deviceData:"host"}
                             ]}
                         ]}
                     ]},
@@ -80,7 +58,7 @@ enyo.kind({
                         {content:"Port"},
                         {components: [
                             {kind:"onyx.InputDecorator", components: [
-                                {kind:"onyx.Input", name:"portInput"}
+                                {kind:"onyx.Input", name:"portInput", deviceData:"port"}
                             ]}
                         ]}
                     ]},
@@ -94,11 +72,11 @@ enyo.kind({
                             {kind:"onyx.Button", name:"requestKeyButton", ontap:"requestPrivateKey", content:"Request Private Key"}
                         ]}
                     ]},
-                    {components: [
+                    {name:"passphrase", components: [
                         {content:"Passphrase", name:"title_passphrase"},
                         {components: [
                             {kind:"onyx.InputDecorator", name:"deco_passphrase",components: [
-                                {kind:"onyx.Input", name:"passphrase"}
+                                {kind:"onyx.Input", name:"passphraseInput"}
                             ]}
                         ]}
                     ]}
@@ -107,128 +85,223 @@ enyo.kind({
             
         ]}
     ],
+    create:function(){
+        this.inherited(arguments);
+        var self = this;
+        this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
+        this.provider.loadDevicesList(function(inData) {
+            var devices = enyo.json.parse(inData);
+            self.setDevicesList(devices);
+        });
+    },
 
     rendered: function() {
         this.inherited(arguments);
-        //Get the Devices List from novacom-device.json
         var devicesData = this.getDevicesList();
-        this.devicesBackupData = enyo.clone(devicesData);
+        for(var index=0; index < devicesData.length; index++){
+            this.$.deviceList.createComponent({kind:"TargetButton", keyData: devicesData[index].name});
+        }
+        this.$.deviceList.render();
+        this.devicesBackupData = enyo.json.parse(enyo.json.stringify(this.devicesList));
         this.devicesBackupData.lastselected = "emulator"
+
         var defaultTarget = this.devicesBackupData.lastselected;
-        this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
-        this.devices = new enyo.Collection(devicesData);
-        this.$.deviceList.set("controller", this.devices);
-        this.defaultTarget = this.findKindBy("name", defaultTarget); //set "WebOS Emulator " as default target
+
+        this.defaultTarget = this.findTarget(defaultTarget); //set "WebOS Emulator " as default target
         if (this.defaultTarget) {
-            this.defaultTarget.setActive(true);
-            this.provider.setDevice(defaultTarget);
+             this.defaultTarget.setActive(true);
+             this.provider.setDevice(defaultTarget.name);
         }
     },
 
     selectDevice: function(inSender, inEvent) {
-        if(inEvent.model){
-            this.set("model", inEvent.model);
-            this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
-            this.provider.setDevice(inEvent.model.name);
-        }
+        var deviceData = this.getDeviceData(inEvent.originator.keyData);
+        if(deviceData){
+            this.setSelectedTarget(deviceData);
+            this.setSelectedButton(this.findTarget(inEvent.originator.keyData));
+            this.$.nameInput.setValue(deviceData.name);
+            this.$.descInput.setValue(deviceData.description);
+            this.$.ipInput.setValue(deviceData.host);
+            this.$.portInput.setValue(deviceData.port);
+            if(deviceData.privateKey){
+                this.$.privateKeyName.setValue(deviceData.privateKeyName);
+                this.$.requestKeyButton.setShowing(false);
+                this.$.passphrase.setShowing(true);
+            } else{
+                this.$.requestKeyButton.setShowing(true);
+                this.$.passphrase.setShowing(false);
+            }
+            this.provider.setDevice(this.getSelectedTarget().name);
+        }        
     },
 
     add: function(inSender, inEvent) {
-        this.set("model", new enyo.Model({name:"new Devices"+this.newDeviceIndex, host:"127.0.0.1", port:"6622", description:"New Device", type:"starfish", privateKey:false, privateKeyName:"", passphrase:""}));
-        this.model.set("modified", true);
-        this.devices.add(this.model);
-        this.setIsModified(true);
-        this.targetDevice = this.findKindBy("name", "new Devices"+this.newDeviceIndex);
-        this.targetDevice.setActive(true);
+        var devicesData = this.getDevicesList();
+        var newDevice = "new Device" + this.newDeviceIndex;
         this.newDeviceIndex++;
+        devicesData.push({name: newDevice, description:"new Device", host:"127.0.0.1", port:"22", type:"starfish", username:"root", privateKey:false, privateKeyName:""});
+        this.$.deviceList.createComponent({kind:"TargetButton", keyData: newDevice});
+        this.$.deviceList.render();
+        var target = this.findTarget(newDevice);
+        if(target){
+            target.setActive(true);
+            this.provider.setDevice(target.name);
+            this.getSelectedButton().dataChanged();
+        }
+        this.setIsModified(true);
     },
 
     remove: function(inSender, inEvent) {
-        this.devices.remove(this.model);
-        this.set("model", this.devicesList[0]);
-        this.targetDevice = this.findKindBy("name", this.model.name);
-        this.targetDevice.setActive(true);
-        this.setIsModified(true);
+        this.setIsModified(true);  
+        var devicesData = this.getDevicesList();
+        for(index in devicesData){
+            if(devicesData[index].name === this.getSelectedTarget().name){
+                devicesData.splice(index,1);
+            }
+        }
+        var target = this.findTarget(this.getSelectedTarget().name);
+        if(target){
+            target.destroy();
+            target = this.findTarget(devicesData[0].name);
+            target.setActive(true);
+            this.provider.setDevice(target.name);   
+        }
     },
 
-    modified: function() {
+    modified: function(inSender, inEvent) {
+        var targetButton = this.getSelectedButton();
+        var deviceData = this.getDeviceData(this.selectedTarget.name);
         this.setIsModified(true);
-        this.model.set("modified", true);
+        deviceData[inEvent.originator.deviceData] = inEvent.originator.value;
+        if(inEvent.originator.name === "nameInput"){
+            targetButton.targetNameChanged(inEvent.originator.value);
+        } else {
+            targetButton.dataChanged();    
+        }
     },
 
     save: function() {
-        var self = this;
-        var devicesList = this.devices.raw();
-        var devicesData = [];
-        var deviceInfo = {};
-        for(index in devicesList){
-            for(key in devicesList[index]){
-                if(devicesList[index][key]){
-                    if(key === "privateKey" && devicesList[index]["privateKey"] == true){
-                        deviceInfo.privateKey = {};
-                        deviceInfo.privateKey.openSsh = devicesList[index]["privateKeyName"];
-                    } else if (key !== "privateKeyName"){
-                        deviceInfo[key] = devicesList[index][key];
-                    }
+        var devicesList = this.getDevicesList();
+        var devicesData = enyo.json.parse(enyo.json.stringify(devicesList));
+        for(index in devicesData){
+            for(key in devicesData[index]){
+                if(key==="privateKey" && devicesData[index]["privateKey"] == true){
+                    devicesData[index]["privateKey"] = {};
+                    devicesData[index]["privateKey"].openSsh = devicesData[index]["privateKeyName"];
+                    if(devicesData[index]["privateKeyName"])
+                        delete devicesData[index]["privateKeyName"];
+                } else if(key === "privateKey" && devicesData[index]["privateKey"] == false){
+                    delete devicesData[index]["privateKey"];
+                    if(devicesData[index]["privateKeyName"])
+                        delete devicesData[index]["privateKeyName"];
+                } else {
+                    if(devicesData[index][key] === "")
+                        delete devicesData[index][key];
                 }
             }
-            devicesData.push(deviceInfo);
-            deviceInfo = {};
-            this.devicesList[index].modified = false;
         }
-        this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
+        var self = this;
         this.provider['saveDevicesList'](devicesData, function(inError) {
             if(inError){
                 self.doError({msg:"Cannot save the Devices Data"});
             } else {
-                self.devicesBackupData = devicesList;
-                self.devicesBackupData.lastselected = self.model.name;
-                self.devices.data(self.devicesBackupData);
-                self.targetDevice = self.findKindBy("name", self.devicesBackupData.lastselected);
-                self.targetDevice.setActive(false);
-                self.targetDevice.setActive(true);
+                self.devicesBackupData = enyo.json.parse(enyo.json.stringify(self.devicesList));
+                self.devicesBackupData.lastselected = self.getSelectedTarget().name;
                 self.setIsModified(false);
+                for(index in self.$.deviceList.$){
+                    self.$.deviceList.$[index].saved();
+                }
             }
-        });
-        
+        });        
     },
 
+    
     requestPrivateKey: function() {
-        var self = this;
-        self.provider = self.provider || ServiceRegistry.instance.resolveServiceId('webos');
-        self.provider['requestPrivateKey']({"device":this.model.name}, function(inError) {
-            if(inError)
-                self.doError({msg:"Cannot get the privateKey"});
-            else {
-                self.model.set("privateKey", true);
-                self.model.set("privateKeyName", self.model.name +"_webos");
-                self.model.set("passphrase", "webos");
-                self.model.set("password", "lgsmarttvsdk");
-                self.save();
-            }
-        });   
+        //FIXME : not implemented yet
+        // var self = this;
+        // self.provider = self.provider || ServiceRegistry.instance.resolveServiceId('webos');
+        // self.provider['requestPrivateKey']({"device":this.model.name}, function(inError) {
+        //     if(inError)
+        //         self.doError({msg:"Cannot get the privateKey"});
+        //     else {
+        //         self.model.set("privateKey", true);
+        //         self.model.set("privateKeyName", self.model.name +"_webos");
+        //         self.model.set("passphrase", "webos");
+        //         self.model.set("password", "lgsmarttvsdk");
+        //         self.save();
+        //     }
+        // });   
     },
 
-    findKindBy: function(index, value){
-        for(i in this.$){
-            if(this.$[i][index] === value)
-                return this.$[i];
+    findTarget: function(value){
+        for(index in this.$.deviceList.$)
+            if(value === this.$.deviceList.$[index].getKeyData()){
+                return this.$.deviceList.$[index];
+            }
+    },
+
+    getDeviceData:function(value){
+        for (i in this.devicesList){
+            if(this.devicesList[i].name === value)
+                return this.devicesList[i];
         }
     },
 
     checkModified:function(){
-        if (this.$.saveButton.disabled){
-            this.devicesBackupData.lastselected = this.model.name;
-            return false;
-        }
-        else {
-            return true;
-        }
+        return this.getIsModified();
     },
     revertData:function(){
-        this.devices.data(this.devicesBackupData);
-        this.targetDevice = this.findKindBy("name", this.devicesBackupData.lastselected);
-        this.targetDevice.setActive(true);
+        var target;
+        for(index in this.$.deviceList.$){
+            this.$.deviceList.$[index].destroy();
+        }
+        
+        this.devicesList = {};
+        this.devicesList = enyo.json.parse(enyo.json.stringify(this.devicesBackupData));
+        delete this.devicesList.lastselected;
+
+        for(var index=0; index < this.devicesBackupData.length; index++){
+            this.$.deviceList.createComponent({kind:"TargetButton", keyData: this.devicesBackupData[index].name});
+        }
+        this.$.deviceList.render();
+
+        target = this.findTarget(this.devicesBackupData.lastselected);
+        
+        this.setSelectedButton(target);
+        this.setSelectedTarget(this.getDeviceData(this.devicesBackupData.lastselected));
+        target.setActive(true);
         this.setIsModified(false);
+    }
+});
+
+enyo.kind({
+    name: "TargetButton",
+    kind: "onyx.Button",
+    published:{
+        targetName :"",
+        keyData:""
+    },
+    style:"width:85%; margin:5px;", 
+    components:[
+        {tag:"span", name:"modified", content:"* ", showing:false},
+        {tag:"span", name:"targetName"}
+    ],
+    create:function(){
+        this.inherited(arguments);
+        this.setTargetName(this.keyData);
+    },
+    setTargetName:function(value){
+        this.$.targetName.setContent(value);
+    },
+    targetNameChanged:function(value){
+        this.$.modified.setShowing(true);
+        this.setTargetName(value);
+    },
+    saved:function(){
+        this.$.modified.setShowing(false);
+        this.setKeyData(this.$.targetName.content);
+    },
+    dataChanged:function(){
+        this.$.modified.setShowing(true);
     }
 });

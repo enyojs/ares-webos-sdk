@@ -19,22 +19,7 @@ enyo.kind({
 	
 	create: function() {
 		this.inherited(arguments);
-		this.loadDevicesList();
 		this.targetSavePopupInit();
-	},
-	loadDevicesList: function (){
-		var self = this;
-		this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
-		this.provider.loadDevicesList(function(inData) {
-			var devices = enyo.json.parse(inData);
-			for(index in devices){
-				if(!devices[index]["passphrase"])
-					devices[index]["passphrase"] = "";
-				if(!devices[index]["password"])
-					devices[index]["password"] = "";
-			}
-			self.$.targetConfiguration.setDevicesList(devices);
-		});
 	},
 	okButtonAction: function(){
 		var modified = this.$.targetConfiguration.checkModified();
