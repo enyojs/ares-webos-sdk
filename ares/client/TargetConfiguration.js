@@ -156,7 +156,7 @@ enyo.kind({
         var devicesData = this.getDevicesList();
         for(index in devicesData){
             if(devicesData[index].name === this.getSelectedTarget().name){
-                delete devicesData[index];
+                devicesData.splice(index,1);
             }
         }
         var target = this.findTarget(this.getSelectedTarget().name);
