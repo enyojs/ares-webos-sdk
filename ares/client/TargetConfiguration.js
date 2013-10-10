@@ -91,12 +91,6 @@ enyo.kind({
         this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
         this.provider.loadDevicesList(function(inData) {
             var devices = enyo.json.parse(inData);
-            for(index in devices){
-                if(!devices[index]["passphrase"])
-                    devices[index]["passphrase"] = "";
-                if(!devices[index]["password"])
-                    devices[index]["password"] = "";
-            }
             self.setDevicesList(devices);
         });
     },
@@ -145,7 +139,7 @@ enyo.kind({
         var devicesData = this.getDevicesList();
         var newDevice = "new Device" + this.newDeviceIndex;
         this.newDeviceIndex++;
-        devicesData.push({name: newDevice, description:"new Device", host:"127.0.0.1", port:"6622", type:"starfish", privateKey:false, privateKeyName:"", passphrase:""});
+        devicesData.push({name: newDevice, description:"new Device", host:"127.0.0.1", port:"22", type:"starfish", privateKey:false, privateKeyName:""});
         this.$.deviceList.createComponent({kind:"TargetButton", keyData: newDevice});
         this.$.deviceList.render();
         var target = this.findTarget(newDevice);
@@ -158,6 +152,7 @@ enyo.kind({
     },
 
     remove: function(inSender, inEvent) {
+        this.setIsModified(true);  
         var devicesData = this.getDevicesList();
         for(index in devicesData){
             if(devicesData[index].name === this.getSelectedTarget().name){
@@ -186,13 +181,22 @@ enyo.kind({
     },
 
     save: function() {
-        var devicesData = this.getDevicesList();
+        var devicesList = this.getDevicesList();
+        var devicesData = enyo.json.parse(enyo.json.stringify(devicesList));
         for(index in devicesData){
             for(key in devicesData[index]){
                 if(key==="privateKey" && devicesData[index]["privateKey"] == true){
                     devicesData[index]["privateKey"] = {};
                     devicesData[index]["privateKey"].openSsh = devicesData[index]["privateKeyName"];
-                    delete devicesData[index]["privateKeyName"];
+                    if(devicesData[index]["privateKeyName"])
+                        delete devicesData[index]["privateKeyName"];
+                } else if(key === "privateKey" && && devicesData[index]["privateKey"] == false){
+                    delete devicesData[index]["privateKey"];
+                    if(devicesData[index]["privateKeyName"])
+                        delete devicesData[index]["privateKeyName"];
+                } else {
+                    if(devicesData[index][key] === "")
+                        delete devicesData[index][key];
                 }
             }
         }
