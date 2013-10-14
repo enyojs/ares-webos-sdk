@@ -98,6 +98,7 @@ enyo.kind({
     rendered: function() {
         this.inherited(arguments);
         var devicesData = this.getDevicesList();
+        this.sortDevice(devicesData);
         for(var index=0; index < devicesData.length; index++){
             this.$.deviceList.createComponent({kind:"TargetButton", keyData: devicesData[index].name});
         }
@@ -114,6 +115,14 @@ enyo.kind({
         }
     },
 
+    sortDevice: function(devicesData){
+
+        function _orderByDeviceOrder(firstDevice, secondDevice) {
+            return (Number(firstDevice.order) - Number(secondDevice.order));
+        }
+        devicesData.sort(_orderByDeviceOrder);
+    },
+    
     selectDevice: function(inSender, inEvent) {
         var deviceData = this.getDeviceData(inEvent.originator.keyData);
         if(deviceData){
@@ -136,10 +145,22 @@ enyo.kind({
     },
 
     add: function(inSender, inEvent) {
+
+        function _findMaxOrder(devicesList) {
+            var max = 0;
+            for (idx in devicesList) {
+                if (devicesList[idx].order >= max) {
+                    max = Number(devicesList[idx].order) + 1;
+                }
+            }
+            return max;
+        }
+        var maxIndex = _findMaxOrder(this.devicesList);
+
         var devicesData = this.getDevicesList();
         var newDevice = "new Device" + this.newDeviceIndex;
         this.newDeviceIndex++;
-        devicesData.push({name: newDevice, description:"new Device", host:"127.0.0.1", port:"22", type:"starfish", username:"root", privateKey:false, privateKeyName:""});
+        devicesData.push({order:maxIndex ,name: newDevice, description:"new Device", host:"127.0.0.1", port:"22", type:"starfish", username:"root", privateKey:false, privateKeyName:""});
         this.$.deviceList.createComponent({kind:"TargetButton", keyData: newDevice});
         this.$.deviceList.render();
         var target = this.findTarget(newDevice);
@@ -153,10 +174,17 @@ enyo.kind({
 
     remove: function(inSender, inEvent) {
         this.setIsModified(true);  
+        var rmIdx;
         var devicesData = this.getDevicesList();
         for(index in devicesData){
             if(devicesData[index].name === this.getSelectedTarget().name){
+                rmIdx = devicesData[index].order;
                 devicesData.splice(index,1);
+            }
+        }
+        for(idx in devicesData) {
+            if (devicesData[idx].order > rmIdx) {
+                --devicesData[idx].order;
             }
         }
         var target = this.findTarget(this.getSelectedTarget().name);
