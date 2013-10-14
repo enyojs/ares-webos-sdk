@@ -1,5 +1,6 @@
 [
 	{
+		"order":"0",
 		"name": "webos3",
 		"type": "webos3",
 		"description": "HP webOS 3 Emulator",
@@ -12,6 +13,7 @@
 		"files":"stream"
 	},
 	{
+		"order":"1",
 		"name": "emulator",
 		"type": "starfish",
 		"description": "LG webOS TV Emulator",
@@ -25,6 +27,7 @@
 		"noPortForwarding":true
 	},
 	{
+		"order":"2",
 		"name": "tv",
 		"type": "starfish",
 		"description": "LG webOS TV",
