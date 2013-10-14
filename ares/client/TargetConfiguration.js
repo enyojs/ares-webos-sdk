@@ -6,8 +6,7 @@ enyo.kind({
         selectedTarget: null,
         selectedButton: null,
         provider: null,
-        isModified:false,
-        newDeviceIndex:0
+        isModified:false
     },
     events:{
         onError:""
@@ -85,7 +84,8 @@ enyo.kind({
             
         ]}
     ],
-    create:function(){
+    
+    create: function() {
         this.inherited(arguments);
         var self = this;
         this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('webos');
@@ -115,7 +115,7 @@ enyo.kind({
         }
     },
 
-    sortDevice: function(devicesData){
+    sortDevice: function(devicesData) {
 
         function _orderByDeviceOrder(firstDevice, secondDevice) {
             return (Number(firstDevice.order) - Number(secondDevice.order));
@@ -143,8 +143,33 @@ enyo.kind({
             this.provider.setDevice(this.getSelectedTarget().name);
         }        
     },
+    
+    findMaxOrder: function(devicesList) {
+        var devicesData = this.getDevicesList();
+        var max = 0;
+        for (idx in devicesData) {
+            if (devicesData[idx].order >= max) {
+                max = Number(devicesData[idx].order) + 1;
+            }
+        }
+        return max;
+    },
 
     add: function(inSender, inEvent) {
+        var maxIndex = this.findMaxOrder(this.devicesList);
+        var devicesData = this.getDevicesList();
+        var newDevice = "new Device" + maxIndex;
+        devicesData.push({order:maxIndex ,name: newDevice, description: newDevice + " description", 
+            host:"127.0.0.1", port:"22", type:"starfish", username:"root", privateKey:false, privateKeyName:""});
+        this.$.deviceList.createComponent({kind:"TargetButton", keyData: newDevice});
+        this.$.deviceList.render();
+        var target = this.findTarget(newDevice);
+        if(target){
+            target.setActive(true);
+            this.provider.setDevice(target.keyData);
+            this.getSelectedButton().dataChanged();
+        }
+        this.setIsModified(true);
 
         function _findMaxOrder(devicesList) {
             var max = 0;
@@ -155,45 +180,37 @@ enyo.kind({
             }
             return max;
         }
-        var maxIndex = _findMaxOrder(this.devicesList);
-
-        var devicesData = this.getDevicesList();
-        var newDevice = "new Device" + this.newDeviceIndex;
-        this.newDeviceIndex++;
-        devicesData.push({order:maxIndex ,name: newDevice, description:"new Device", host:"127.0.0.1", port:"22", type:"starfish", username:"root", privateKey:false, privateKeyName:""});
-        this.$.deviceList.createComponent({kind:"TargetButton", keyData: newDevice});
-        this.$.deviceList.render();
-        var target = this.findTarget(newDevice);
-        if(target){
-            target.setActive(true);
-            this.provider.setDevice(target.name);
-            this.getSelectedButton().dataChanged();
-        }
-        this.setIsModified(true);
     },
 
     remove: function(inSender, inEvent) {
-        this.setIsModified(true);  
-        var rmIdx;
+        var rmIdx = -1;
         var devicesData = this.getDevicesList();
-        for(index in devicesData){
-            if(devicesData[index].name === this.getSelectedTarget().name){
-                rmIdx = devicesData[index].order;
-                devicesData.splice(index,1);
+        for (idx in devicesData){
+            if (devicesData[idx].name === this.getSelectedTarget().name) {
+                rmIdx = Number(idx);
+                break;
             }
         }
-        for(idx in devicesData) {
-            if (devicesData[idx].order > rmIdx) {
-                --devicesData[idx].order;
+        if (rmIdx === -1) {
+            return;
+        }
+        var rmOrder = devicesData[rmIdx].order;
+        devicesData.splice(rmIdx, 1);
+        if (rmOrder) {
+            for (idx in devicesData) {
+                if (devicesData[idx].order > rmOrder) {
+                    devicesData[idx].order--;
+                }
             }
         }
         var target = this.findTarget(this.getSelectedTarget().name);
-        if(target){
+        if (target){
             target.destroy();
             target = this.findTarget(devicesData[0].name);
             target.setActive(true);
-            this.provider.setDevice(target.name);   
+            this.provider.setDevice(target.keyData);   
         }
+        this.setIsModified(true);  
     },
 
     modified: function(inSender, inEvent) {
@@ -201,7 +218,7 @@ enyo.kind({
         var deviceData = this.getDeviceData(this.selectedTarget.name);
         this.setIsModified(true);
         deviceData[inEvent.originator.deviceData] = inEvent.originator.value;
-        if(inEvent.originator.name === "nameInput"){
+        if (inEvent.originator.name === "nameInput") {
             targetButton.targetNameChanged(inEvent.originator.value);
         } else {
             targetButton.dataChanged();    
@@ -211,32 +228,32 @@ enyo.kind({
     save: function() {
         var devicesList = this.getDevicesList();
         var devicesData = enyo.json.parse(enyo.json.stringify(devicesList));
-        for(index in devicesData){
-            for(key in devicesData[index]){
-                if(key==="privateKey" && devicesData[index]["privateKey"] == true){
+        for (index in devicesData) {
+            for (key in devicesData[index]) {
+                if (key==="privateKey" && devicesData[index]["privateKey"] == true) {
                     devicesData[index]["privateKey"] = {};
                     devicesData[index]["privateKey"].openSsh = devicesData[index]["privateKeyName"];
-                    if(devicesData[index]["privateKeyName"])
+                    if (devicesData[index]["privateKeyName"])
                         delete devicesData[index]["privateKeyName"];
-                } else if(key === "privateKey" && devicesData[index]["privateKey"] == false){
+                } else if (key === "privateKey" && devicesData[index]["privateKey"] == false) {
                     delete devicesData[index]["privateKey"];
-                    if(devicesData[index]["privateKeyName"])
+                    if (devicesData[index]["privateKeyName"])
                         delete devicesData[index]["privateKeyName"];
                 } else {
-                    if(devicesData[index][key] === "")
+                    if (devicesData[index][key] === "")
                         delete devicesData[index][key];
                 }
             }
         }
         var self = this;
         this.provider['saveDevicesList'](devicesData, function(inError) {
-            if(inError){
+            if (inError){
                 self.doError({msg:"Cannot save the Devices Data"});
             } else {
                 self.devicesBackupData = enyo.json.parse(enyo.json.stringify(self.devicesList));
                 self.devicesBackupData.lastselected = self.getSelectedTarget().name;
                 self.setIsModified(false);
-                for(index in self.$.deviceList.$){
+                for (index in self.$.deviceList.$){
                     self.$.deviceList.$[index].saved();
                 }
             }
@@ -261,26 +278,26 @@ enyo.kind({
         // });   
     },
 
-    findTarget: function(value){
-        for(index in this.$.deviceList.$)
-            if(value === this.$.deviceList.$[index].getKeyData()){
+    findTarget: function(value) {
+        for (index in this.$.deviceList.$)
+            if (value === this.$.deviceList.$[index].getKeyData()) {
                 return this.$.deviceList.$[index];
             }
     },
 
-    getDeviceData:function(value){
-        for (i in this.devicesList){
-            if(this.devicesList[i].name === value)
+    getDeviceData:function(value) {
+        for (i in this.devicesList) {
+            if (this.devicesList[i].name === value)
                 return this.devicesList[i];
         }
     },
 
-    checkModified:function(){
+    checkModified:function() {
         return this.getIsModified();
     },
-    revertData:function(){
+    revertData:function() {
         var target;
-        for(index in this.$.deviceList.$){
+        for (index in this.$.deviceList.$) {
             this.$.deviceList.$[index].destroy();
         }
         
@@ -288,7 +305,7 @@ enyo.kind({
         this.devicesList = enyo.json.parse(enyo.json.stringify(this.devicesBackupData));
         delete this.devicesList.lastselected;
 
-        for(var index=0; index < this.devicesBackupData.length; index++){
+        for (var index=0; index < this.devicesBackupData.length; index++) {
             this.$.deviceList.createComponent({kind:"TargetButton", keyData: this.devicesBackupData[index].name});
         }
         this.$.deviceList.render();
