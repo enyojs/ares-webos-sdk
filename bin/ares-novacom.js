@@ -60,7 +60,10 @@ var shortHands = {
 	"f": ["forward"],
 	"d": ["--device"],
 	"p": ["--port"],
-	"k": ["getkey"]
+	"k": ["getkey"],
+	"a": ["add"],
+	"r": ["remove"],
+	"m": ["modify"]
 };
 
 var helpString = [
@@ -71,6 +74,9 @@ var helpString = [
 	"\t" + processName + " [OPTIONS] put file://DEVICE_PATH < HOST_FILE",
 	"\t" + processName + " [OPTIONS] get file://DEVICE_PATH > HOST_FILE",
 	"\t" + processName + " [OPTIONS] run DEVICE_COMMAND",
+	"\t" + processName + " [OPTIONS] add|-a ",
+	"\t" + processName + " [OPTIONS] remove|-r ",
+	"\t" + processName + " [OPTIONS] modify|-m ",
 	"\t" + processName + " [OPTIONS] [--port DEVICE_PORT1[:HOST_PORT1]][--port DEVICE_PORT2[:HOST_PORT2]][...] forward",
 	"\t" + processName + " [OPTIONS] --version|-V",
 	"\t" + processName + " [OPTIONS] --help|-h",
@@ -112,6 +118,12 @@ if (command === 'list') {
 	op = get;
 } else if (command === 'run') {
 	op = run;
+} else if (command === 'add') {
+	op = add;
+} else if (command === 'remove') {
+	op = remove;
+} else if (command === 'modify') {
+	op = modify;
 } else if (command === 'forward') {
 	op = forward;
 } else if (argv.version) {
@@ -155,6 +167,72 @@ function list(next) {
 	], next);
 }
 
+var defaultDeviceInfo = {
+	type: "starfish",
+	host: "127.0.0.1",
+	port: 22,
+	username: "root",
+	description: "new device description"
+};
+
+function _parseDeviceInfo(inDevice) {
+	return inDevice.toString().replace(/["]/g, "")
+								.replace(/[']/g, "")
+								.replace(/ /g, "")
+								.replace("{", "{\"")
+								.replace("}","\"}")
+								.replace(/,/g, "\",\"")
+								.replace(/:/g,"\":\"");	
+}
+
+function add(next) {
+	try {
+		var deviceInfoContent = _parseDeviceInfo(argv.argv.remain);
+		var inDevice = JSON.parse(deviceInfoContent);
+		var keys = Object.keys(defaultDeviceInfo);
+		keys.forEach(function(key) {
+				if (!inDevice[key]) {
+					inDevice[key] = defaultDeviceInfo[key];
+				}
+			}.bind(this));
+		var resolver = new novacom.Resolver();
+		async.series([
+			resolver.load.bind(resolver),
+			resolver.modifyDeviceFile.bind(resolver, inDevice, command)
+		], next);
+	} catch (err) {
+		next(err);
+	}
+}
+
+function remove(next) {
+	try {
+		var deviceInfoContent = _parseDeviceInfo(argv.argv.remain);
+		var inDevice = JSON.parse(deviceInfoContent);
+		var resolver = new novacom.Resolver();
+		async.series([
+			resolver.load.bind(resolver),
+			resolver.modifyDeviceFile.bind(resolver, inDevice, command)
+		], next);
+	} catch (err) {
+		next(err);
+	}
+}
+
+function modify(next) {
+	try {
+		var deviceInfoContent = _parseDeviceInfo(argv.argv.remain);
+		var inDevice = JSON.parse(deviceInfoContent);
+		var resolver = new novacom.Resolver();
+		async.series([
+			resolver.load.bind(resolver),
+			resolver.modifyDeviceFile.bind(resolver, inDevice, command)
+		], next);
+	} catch (err) {
+		next(err);
+	}
+}
+
 function getkey(next) {
 	var resolver = new novacom.Resolver();
 	async.waterfall([
@@ -179,7 +257,7 @@ function getkey(next) {
 				next(null, null);
 			}
 		},
-		resolver.modifyDeviceFile.bind(resolver)
+		resolver.modifyDeviceFile.bind(resolver, argv)
 	], next);
 }
 
