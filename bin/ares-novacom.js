@@ -198,7 +198,7 @@ function add(next) {
 		var resolver = new novacom.Resolver();
 		async.series([
 			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, inDevice, command)
+			resolver.modifyDeviceFile.bind(resolver, command, inDevice)
 		], next);
 	} catch (err) {
 		next(err);
@@ -212,7 +212,7 @@ function remove(next) {
 		var resolver = new novacom.Resolver();
 		async.series([
 			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, inDevice, command)
+			resolver.modifyDeviceFile.bind(resolver, command, inDevice)
 		], next);
 	} catch (err) {
 		next(err);
@@ -226,7 +226,7 @@ function modify(next) {
 		var resolver = new novacom.Resolver();
 		async.series([
 			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, inDevice, command)
+			resolver.modifyDeviceFile.bind(resolver, command, inDevice)
 		], next);
 	} catch (err) {
 		next(err);
@@ -257,7 +257,7 @@ function getkey(next) {
 				next(null, null);
 			}
 		},
-		resolver.modifyDeviceFile.bind(resolver, argv)
+		resolver.modifyDeviceFile.bind(resolver, 'modify')
 	], next);
 }
 
