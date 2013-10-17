@@ -56,9 +56,13 @@ function PalmGenerate() {
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.helpString = [
-		"Usage: ares-generate [OPTIONS] APP_DIR",
+		"Usage:",
+		"\t" + processName + " [OPTIONS] <APP_DIR>",
+		"\t" + processName + " [OPTIONS] --list|-l",
 		"",
 		"Options:",
+		util.format("\t%s\t%s", "--help, -h","Display this help and exit"),
+		util.format("\t%s\t%s", "--help, -h","Display this help and exit"),
 		"  --help, -h          Display this help and exit     ",
 		"  --version           Display version info and exit  ",
 		"  --list, -l          List the available sources       [string]  [default: " + this.defaultSourceType + "]",
