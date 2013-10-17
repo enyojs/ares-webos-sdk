@@ -8,6 +8,7 @@ var fs = require("fs"),
     log = require('npmlog'),
     versionTool = require('./../lib/version-tools'),
     console = require('./../lib/consoleSync'),
+    help = require('./../lib/helpFormat'),
     prjgen = require('ares-generator');
 
 /**********************************************************************/
@@ -57,7 +58,9 @@ function PalmGenerate() {
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.helpString = [
 		"Usage:",
-		"\t" + processName + " [OPTIONS] <APP_DIR>",
+		help.format(processName + " [OPTIONS] <APP_DIR>", "Display this help and exit"),
+		help.format(processName + " [OPTIONS] --list|-l [string]", "List the available sources [default:" + this.defaultSourceType + "]"),
+		//"\t" + processName + " [OPTIONS] <APP_DIR>",
 		"\t" + processName + " [OPTIONS] --list|-l",
 		"",
 		"Options:",
