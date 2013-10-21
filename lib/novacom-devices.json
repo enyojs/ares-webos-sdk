@@ -21,7 +21,7 @@
 		"port": 6622,
 		"username": "root",
 		"privateKey": {
-			"openSsh": "webos"
+			"openSsh": "webos_emul"
 		},
 		"files":"sftp",
 		"noPortForwarding":true
