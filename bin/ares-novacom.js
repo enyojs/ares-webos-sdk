@@ -80,6 +80,9 @@ var helpString = [
 	"\t" + processName + " [OPTIONS] [--port DEVICE_PORT1[:HOST_PORT1]][--port DEVICE_PORT2[:HOST_PORT2]][...] forward",
 	"\t" + processName + " [OPTIONS] --version|-V",
 	"\t" + processName + " [OPTIONS] --help|-h",
+	"\t" + processName + " [OPTIONS] add|-a The name key must contain the means.If there is no name error.Properties can be specified JSON objects of the form '{\"name\":\"value1\",\"key2\":\"value2\"...}'.",
+	"\t" + processName + " [OPTIONS] remove|-r Can be removed only in name value or JSON object. ex) remove|-r value or '{\"name\":\"value\"}'.",
+	"\t" + processName + " [OPTIONS] modify|-m Can be modify only in JSON object ex) modify|-m '{\"name\":\"value1\",\"key2\":\"modfy value\"}'." ,	
 	"",
 	"OPTIONS:",
 	"\t--device|-d: device name to connect to default]",
@@ -175,8 +178,8 @@ var defaultDeviceInfo = {
 	description: "new device description"
 };
 
-function _parseDeviceInfo(inDevice) {
-	return inDevice.toString().replace(/["]/g, "")
+function _replaceDeviceInfo(inDevice) {
+	return inDevice.join(' ').replace(/["]/g, "")
 								.replace(/[']/g, "")
 								.replace(/ /g, "")
 								.replace("{", "{\"")
@@ -187,7 +190,7 @@ function _parseDeviceInfo(inDevice) {
 
 function add(next) {
 	try {
-		var deviceInfoContent = _parseDeviceInfo(argv.argv.remain);
+		var deviceInfoContent = _replaceDeviceInfo(argv.argv.remain);
 		var inDevice = JSON.parse(deviceInfoContent);
 		var keys = Object.keys(defaultDeviceInfo);
 		keys.forEach(function(key) {
@@ -207,9 +210,17 @@ function add(next) {
 
 function remove(next) {
 	try {
-		var deviceInfoContent = _parseDeviceInfo(argv.argv.remain);
-		var inDevice = JSON.parse(deviceInfoContent);
+		var deviceInfoContent = _replaceDeviceInfo(argv.argv.remain);
 		var resolver = new novacom.Resolver();
+		var argvCheck = deviceInfoContent.indexOf("{");	
+		var inDevice;	
+		
+		if (argvCheck === 0) {
+			 inDevice = JSON.parse(deviceInfoContent);
+		}else {
+			inDevice = {name: deviceInfoContent};
+		}
+		
 		async.series([
 			resolver.load.bind(resolver),
 			resolver.modifyDeviceFile.bind(resolver, command, inDevice)
@@ -221,7 +232,7 @@ function remove(next) {
 
 function modify(next) {
 	try {
-		var deviceInfoContent = _parseDeviceInfo(argv.argv.remain);
+		var deviceInfoContent = _replaceDeviceInfo(argv.argv.remain);
 		var inDevice = JSON.parse(deviceInfoContent);
 		var resolver = new novacom.Resolver();
 		async.series([
