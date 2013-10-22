@@ -258,7 +258,9 @@ function getkey(next) {
 		resolver.getSshPrvKey.bind(resolver, options),
 		function(keyFileName, next) {
 			if (keyFileName) {
-				options.privateKey = { "openSsh": keyFileName };
+				var target = {};
+				target.name = options.name;
+				target.privateKey = { "openSsh": keyFileName };
 				process.stdin.resume();
 				process.stdin.setEncoding('utf8');
 				process.stdout.write('input passphrase [default: webos]:');
@@ -268,8 +270,8 @@ function getkey(next) {
 						passphrase = 'webos';
 					}
 					log.info('registed passphrase is ', passphrase);
-					options.passphrase = passphrase;
-					next(null, options);
+					target.passphrase = passphrase;
+					next(null, target);
 				});
 			} else {
 				next(null, null);
