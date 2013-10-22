@@ -4,13 +4,13 @@ var fs 		= require('fs'),
     path 	= require("path"),
     async 	= require('async'),
     sprintf = require('sprintf').sprintf,
-    ipkg 	= require('./../lib/ipkg-tools'),
     npmlog 	= require('npmlog'),
+    nopt 	= require('nopt'),
+    ipkg 		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
     console 	= require('./../lib/consoleSync'),
-    help 	= require('./../lib/helpFormat'),
-	novacom = require('./../lib/novacom'),
-    nopt 	= require('nopt');
+    help 		= require('./../lib/helpFormat'),
+	novacom 	= require('./../lib/novacom');
 
 /**********************************************************************/
 
@@ -26,10 +26,10 @@ var knownOpts = {
 };
 var shortHands = {
 	"d": ["--device"],
-	"I": ["--inspect"],
+	"i": ["--inspect"],
+	"D": ["--device-list"],
 	"c": ["--close"],
 	"r": ["--running"],
-	"D": ["--device-list"],
 	"V": ["--version"],
 	"h": ["--help"],
 	"v": ["--level", "verbose"]

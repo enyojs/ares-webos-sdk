@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
-var fs = require('fs'),
-    path = require("path"),
-    async = require('async'),
-    npmlog = require('npmlog'),
+var fs 		= require('fs'),
+    path 	= require("path"),
+    async 	= require('async'),
+    npmlog 	= require('npmlog'),
     sprintf = require('sprintf').sprintf,
-    ipkg = require('./../lib/ipkg-tools'),
+    nopt 	= require('nopt'),
+    ipkg 		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
-    console = require('./../lib/consoleSync'),
-    help = require('./../lib/helpFormat'),
-	novacom = require('./../lib/novacom'),
-    nopt = require('nopt');
+    console 	= require('./../lib/consoleSync'),
+    help 		= require('./../lib/helpFormat'),
+	novacom 	= require('./../lib/novacom');
 
 /**********************************************************************/
 
@@ -70,7 +70,6 @@ if (argv.list) {
 } else if (argv.remove) {
 	op = remove;
 } else if (argv['device-list']) {
-	//throw new Error('Not implemented');
 	op = deviceList;
 } else if (argv['version']) {
 	versionTool.showVersionAndExit();
@@ -105,16 +104,15 @@ function showUsage() {
 			help.format("--device, -d", "device name to connect"),
 			help.format("--level, -l", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 			"",
-			"APP_ID is a application app id decribed in appinfo.json",
+			"APP_ID is an application id decribed in appinfo.json",
 			"",
-			"To install .ipk package into TARGET DEVICE, user have to specify the TARGET DEVICE",
+			"To install .ipk package into TARGET DEVICE, user have to specify the TARGET DEVICE using '--device, -d' option",
 			""
 	];
 
 	helpString.forEach(function(line) {
 		console.log(line);
 	});
-	
 }
 
 function install() {

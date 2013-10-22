@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-var fs = require("fs"),
-    url = require("url"),
-    util = require('util'),
-    async = require('async'),
-    path = require('path'),
-    log = require('npmlog'),
+var fs 		= require("fs"),
+    url 	= require("url"),
+    util 	= require('util'),
+    async 	= require('async'),
+    path 	= require('path'),
+    log 	= require('npmlog'),
+    prjgen 		= require('ares-generator'),
     versionTool = require('./../lib/version-tools'),
-    console = require('./../lib/consoleSync'),
-    help = require('./../lib/helpFormat'),
-    prjgen = require('ares-generator');
+    console 	= require('./../lib/consoleSync'),
+    help 		= require('./../lib/helpFormat');
 
 /**********************************************************************/
 
@@ -57,14 +57,14 @@ function PalmGenerate() {
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.helpString = [
-		"Usage:",
+		"USAGE:",
 		help.format(processName + " [OPTIONS] <APP_DIR>", "Generate APP in <APP_DIR>"),
 		help.format(processName + " --list, -l [string]", "List the available templates corresponeded with TYPE [default: " + this.defaultSourceType + "]"),
 		help.format("", "available TYPE is 'template', 'webosConfig', 'webosService'"),
 		help.format(processName + " --help, -h", "Display this help"),
 		help.format(processName + " --version, -V", "Display version info"),
 		"",
-		"Options:",
+		"OPTIONS:",
 		help.format("--template, -t", "Use the template named TEMPLATE [string]"),
 		help.format("", "TEMPLATE can be searched via " + processName + " --list, -l"),
 		help.format("--property, -p", "Set the property PROPERTY [string]"),
