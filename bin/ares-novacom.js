@@ -85,6 +85,7 @@ var helpString = [
 	"OPTIONS:",
 	help.format("--device, -d", "device name to connect"),
 	help.format("--level", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+	help.format("-v", "tracing level 'verbose'"),
 	"",
 //	"Options (Not implmeneted) :",
 //	help.format(processName + " [OPTIONS] --put file://DEVICE_PATH < HOST_FILE"),

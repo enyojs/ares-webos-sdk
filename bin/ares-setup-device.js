@@ -112,6 +112,7 @@ var helpString = [
 	"",
 	"OPTIONS:",
 	help.format("--level", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+	help.format("-v", "tracing level 'verbose'"),
 	""
 ];
 

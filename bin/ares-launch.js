@@ -96,7 +96,7 @@ function showUsage() {
 			help.format(processName + " [OPTIONS] --running, -r <APP_ID>", "List running apps"),
 			help.format(processName + " --help, -h", "Display this help"),
 			help.format(processName + " --version, -V", "Display version info"),
-			help.format(processName + " --device-list, -D", "List TARGET DEVICEs"),
+			help.format(processName + " --device-list, -D", "List TARGET DEVICE"),
 			"",
 			"OPTIONS:",
 			help.format("--device, -d", "device name to connect"),
