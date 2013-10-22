@@ -69,7 +69,8 @@ function PalmGenerate() {
 		help.format("", "TEMPLATE can be searched via " + processName + " --list, -l"),
 		help.format("--property, -p", "Set the property PROPERTY [string]"),
 		help.format("", "PROPERTY (e.g.) '{\"id\": \"com.examples.helloworld\", \"version\":\"1.0.0\", \"type\":\"web\"}'"),
-		help.format("--level, -l", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+		help.format("--level", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+		help.format("-v", "tracing level 'verbose'"),
 		"",
 		"Options (Not implmeneted) :",
 		help.format("--overwrite, -f", "Overwrite existing files [boolean]"),
@@ -161,6 +162,16 @@ PalmGenerate.prototype = {
 		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
 	},
 
+	convertToJsonFormat: function(str) {
+		return str.replace(/["]/g, "")
+				.replace(/[']/g, "")
+				.replace(/ /g, "")
+				.replace("{", "{\"")
+				.replace("}","\"}")
+				.replace(/,/g, "\",\"")
+				.replace(/:/g,"\":\"");  
+	},
+
 	isJson: function(str) {
 		try {
 			JSON.parse(str);
@@ -181,6 +192,7 @@ PalmGenerate.prototype = {
 		var properties = {};
 		if (this.argv.property) {
 			if (typeof this.argv.property === 'string') {
+				this.argv.property = this.convertToJsonFormat(this.argv.property);
 				if (isJson(this.argv.property)) {
 					properties = JSON.parse(this.argv.property);
 				} else {
@@ -188,6 +200,7 @@ PalmGenerate.prototype = {
 				}
 			} else {
 				this.argv.property.forEach(function(prop) {
+					prop = this.convertToJsonFormat(prop);
 					if (this.isJson(prop)) {
 						properties = JSON.parse(prop);
 					} else {
