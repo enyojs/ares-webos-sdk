@@ -202,6 +202,7 @@ function BdOpenwebOS(config, next) {
 
 	app.post(makeExpressRoute('/op/launch'), function(req, res, next) {
 		async.series([
+			close.bind(this, req, res),
 			launch.bind(this, req, res),
 			answerOk.bind(this, req, res)
 		], function (err, results) {
@@ -256,16 +257,17 @@ function BdOpenwebOS(config, next) {
 	function install(req, res, next) {
 		log.info("install()", req.appDir.packageFile);
 
-		tools.installer.install({verbose: true, appId:req.body.appId, device:req.body.device}, req.appDir.packageFile, function(err, result) {
+		tools.installer.install({verbose: true, appId:req.body.appId, device:req.body.device, installMode:req.body.installMode}, req.appDir.packageFile, function(err, result) {
 			log.verbose("install()", err, result);
 			next(err);
 		});
 	}
 
 	function launch(req, res, next) {
+		var userhome = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+		var hostedurl = userhome + req.body.hostedurl;
 		log.info("launch()", req.body.id);
-
-		tools.launcher.launch({verbose: true, device: req.body.device}, req.body.id, null, function(err, result) {
+		tools.launcher.launch({verbose: true, device: req.body.device, installMode:req.body.installMode, hostedurl:hostedurl}, req.body.id, null, function(err, result) {
 			log.verbose("launch()", err, result);
 			next(err);
 		});
@@ -288,7 +290,7 @@ function BdOpenwebOS(config, next) {
 	function debug(req, res, next) {
 		log.info("debug()", req.body.id);
 		res.status(200).send();
-		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.appId}, null, function(err, result) {
+		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.appId, installMode:req.body.installMode}, null, function(err, result) {
 			log.verbose("debug()", err, result);
 			next(err);
 		});
@@ -297,6 +299,7 @@ function BdOpenwebOS(config, next) {
 	function fetchPackage(req, res, next) {
 		try {
 			var packageUrl = req.body.package;
+			console.log(packageUrl);
 			log.http("fetch()", packageUrl);
 
 			req.appDir.packageFile = path.join(req.appDir.root, 'package.ipk');
