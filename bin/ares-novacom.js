@@ -51,9 +51,6 @@ var knownOpts = {
 	"port":		[String, Array],
 	"getkey":   Boolean, 
 	"device":	[String, null],
-	"add":		[String, null],
-	"remove":	[String, null],
-	"modify":	[String, null],
 	// no shortHands
 	"run":		[String, null],
 	"put":	[String, null],
@@ -70,10 +67,7 @@ var shortHands = {
 	"f": ["--forward"],
 	"p": ["--port"],
 	"k": ["--getkey"],
-	"d": ["--device"],
-	"a": ["--add"],
-	"r": ["--remove"],
-	"m": ["--modify"]
+	"d": ["--device"]
 };
 
 var helpString = [
@@ -84,9 +78,6 @@ var helpString = [
 	"\t" + processName + " [OPTIONS] --put file://DEVICE_PATH < HOST_FILE",
 	"\t" + processName + " [OPTIONS] --get file://DEVICE_PATH > HOST_FILE",
 	"\t" + processName + " [OPTIONS] --run DEVICE_COMMAND",
-	"\t" + processName + " [OPTIONS] --add, -a The name key must contain the means.If there is no name error.Properties can be specified JSON objects of the form '{\"name\":\"value1\",\"key2\":\"value2\"...}'.",
-	"\t" + processName + " [OPTIONS] --remove, -r Can be removed only in name value or JSON object. ex) remove|-r value or '{\"name\":\"value\"}'.",
-	"\t" + processName + " [OPTIONS] --modify, -m Can be modify only in JSON object ex) modify|-m '{\"name\":\"value1\",\"key2\":\"modfy value\"}'.",	
 	"\t" + processName + " [OPTIONS] --forward, -f [--port, -p DEVICE_PORT1[:HOST_PORT1]][--port, -p DEVICE_PORT2[:HOST_PORT2]][...]",
 	"\t" + processName + " [OPTIONS] --version|-V",
 	"\t" + processName + " [OPTIONS] --help|-h",
@@ -128,12 +119,6 @@ if (argv.list) {
 	op = get;
 } else if (argv.run) {
 	op = run;
-} else if (argv.add) {
-	op = add;
-} else if (argv.remove) {
-	op = remove;
-} else if (argv.modify) {
-	op = modify;
 } else if (argv.forward) {
 	op = forward;
 } else if (argv.version) {
@@ -175,80 +160,6 @@ function list(next) {
 			next();
 		}
 	], next);
-}
-
-var defaultDeviceInfo = {
-	type: "starfish",
-	host: "127.0.0.1",
-	port: 22,
-	username: "root",
-	description: "new device description"
-};
-
-function _replaceDeviceInfo(inDevice) {
-	return inDevice.replace(/["]/g, "")
-				.replace(/[']/g, "")
-				.replace(/ /g, "")
-				.replace("{", "{\"")
-				.replace("}","\"}")
-				.replace(/,/g, "\",\"")
-				.replace(/:/g,"\":\"");	
-}
-
-function add(next) {
-	try {
-		var deviceInfoContent = _replaceDeviceInfo(argv.add);
-		var inDevice = JSON.parse(deviceInfoContent);
-		var keys = Object.keys(defaultDeviceInfo);
-		keys.forEach(function(key) {
-			if (!inDevice[key]) {
-				inDevice[key] = defaultDeviceInfo[key];
-			}
-		}.bind(this));
-		var resolver = new novacom.Resolver();
-		async.series([
-			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, 'add', inDevice)
-		], next);
-	} catch (err) {
-		next(err);
-	}
-}
-
-function remove(next) {
-	try {
-		var deviceInfoContent = _replaceDeviceInfo(argv.remove);
-		var resolver = new novacom.Resolver();
-		var argvCheck = deviceInfoContent.indexOf("{");	
-		var inDevice;	
-		
-		if (argvCheck === 0) {
-			 inDevice = JSON.parse(deviceInfoContent);
-		}else {
-			inDevice = {name: deviceInfoContent};
-		}
-		
-		async.series([
-			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, 'remove', inDevice)
-		], next);
-	} catch (err) {
-		next(err);
-	}
-}
-
-function modify(next) {
-	try {
-		var deviceInfoContent = _replaceDeviceInfo(argv.modify);
-		var inDevice = JSON.parse(deviceInfoContent);
-		var resolver = new novacom.Resolver();
-		async.series([
-			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, 'modify', inDevice)
-		], next);
-	} catch (err) {
-		next(err);
-	}
 }
 
 function getkey(next) {
