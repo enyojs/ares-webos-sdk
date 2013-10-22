@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 
-var fs = require("fs"),
-    url = require("url"),
-    util = require('util'),
-    async = require('async'),
-    path = require('path'),
-    log = require('npmlog'),
+var fs 		= require("fs"),
+    url 	= require("url"),
+    util 	= require('util'),
+    async 	= require('async'),
+    path 	= require('path'),
+    log 	= require('npmlog'),
+    prjgen 		= require('ares-generator'),
     versionTool = require('./../lib/version-tools'),
-    console = require('./../lib/consoleSync'),
-    prjgen = require('ares-generator');
+    console 	= require('./../lib/consoleSync'),
+    help 		= require('./../lib/helpFormat');
 
 /**********************************************************************/
 
@@ -56,17 +57,24 @@ function PalmGenerate() {
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.helpString = [
-		"Usage: ares-generate [OPTIONS] APP_DIR",
+		"USAGE:",
+		help.format(processName + " [OPTIONS] <APP_DIR>", "Generate APP in <APP_DIR>"),
+		help.format(processName + " --list, -l [string]", "List the available templates corresponeded with TYPE [default: " + this.defaultSourceType + "]"),
+		help.format("", "available TYPE is 'template', 'webosConfig', 'webosService'"),
+		help.format(processName + " --help, -h", "Display this help"),
+		help.format(processName + " --version, -V", "Display version info"),
 		"",
-		"Options:",
-		"  --help, -h          Display this help and exit     ",
-		"  --version           Display version info and exit  ",
-		"  --list, -l          List the available sources       [string]  [default: " + this.defaultSourceType + "]",
-		"  --overwrite, -f     Overwrite existing files         [boolean]",
-		"  --template, -t      Use the template named TEMPLATE  [path]",
-		"  --proxy-url, -P     Use the given HTTP/S proxy URL   [url]",
-		"  --property, -p      Set the property PROPERTY        [string]",
-		"  --debug, -d         Enable debug mode                [boolean]",
+		"OPTIONS:",
+		help.format("--template, -t [string]", "Use the template named TEMPLATE"),
+		help.format("", "TEMPLATE can be searched via " + processName + " --list, -l"),
+		help.format("--property, -p [string]", "Set the property PROPERTY"),
+		help.format("", "PROPERTY (e.g.) '{\"id\": \"com.examples.helloworld\", \"version\":\"1.0.0\", \"type\":\"web\"}'"),
+		help.format("--level", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+		help.format("-v", "tracing level 'verbose'"),
+//		"",
+//		"Options (Not implmeneted) :",
+//		help.format("--overwrite, -f", "Overwrite existing files [boolean]"),
+//		help.format("--proxy-url, -P", "Use the given HTTP/S proxy URL [url]"),
 		"",
 		"APP_DIR is the application directory. It will be created if it does not exist.",
 		"",
@@ -76,7 +84,8 @@ function PalmGenerate() {
 		"in both cases.",
 		"",
 		"TEMPLATE is the application template to use. If not specified, the default",
-		"template (the firstone marked with `isDefault: true`)."
+		"template (the firstone marked with `isDefault: true`).",
+		"",
 	];
 
 	log.heading = processName;
@@ -153,6 +162,16 @@ PalmGenerate.prototype = {
 		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
 	},
 
+	convertToJsonFormat: function(str) {
+		return str.replace(/["]/g, "")
+				.replace(/[']/g, "")
+				.replace(/ /g, "")
+				.replace("{", "{\"")
+				.replace("}","\"}")
+				.replace(/,/g, "\",\"")
+				.replace(/:/g,"\":\"");  
+	},
+
 	isJson: function(str) {
 		try {
 			JSON.parse(str);
@@ -173,6 +192,7 @@ PalmGenerate.prototype = {
 		var properties = {};
 		if (this.argv.property) {
 			if (typeof this.argv.property === 'string') {
+				this.argv.property = this.convertToJsonFormat(this.argv.property);
 				if (isJson(this.argv.property)) {
 					properties = JSON.parse(this.argv.property);
 				} else {
@@ -180,6 +200,7 @@ PalmGenerate.prototype = {
 				}
 			} else {
 				this.argv.property.forEach(function(prop) {
+					prop = this.convertToJsonFormat(prop);
 					if (this.isJson(prop)) {
 						properties = JSON.parse(prop);
 					} else {
