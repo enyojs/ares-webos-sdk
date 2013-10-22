@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-var fs = require('fs'),
-    path = require("path"),
-    npmlog = require('npmlog'),
-    nopt = require('nopt'),
-    async = require('async'),
+var fs  	= require('fs'),
+    path 	= require("path"),
+    npmlog 	= require('npmlog'),
+    nopt 	= require('nopt'),
+    async 	= require('async'),
     sprintf = require('sprintf').sprintf,
     versionTool = require('./../lib/version-tools'),
-    console = require('./../lib/consoleSync'),
-    novacom = require('./../lib/novacom');
+    console 	= require('./../lib/consoleSync'),
+    novacom 	= require('./../lib/novacom');
 
 /**********************************************************************/
 
@@ -145,6 +145,7 @@ function list(next) {
 		function(devices, next) {
 			log.info("list()", "devices:", devices);
 			if (Array.isArray(devices)) {
+				console.log(sprintf("%-16s %-16s %-24s %s", "<DEVICE NAME>", "<PLATFORM>", "<DESCRIPTION>", "<SSH ADDRESS>"));
 				devices.forEach(function(device) {
 					console.log(sprintf("%-16s %-16s %-24s (%s)", device.name, device.type, device.description, device.addr));
 				});
