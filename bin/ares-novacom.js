@@ -46,8 +46,18 @@ var knownOpts = {
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 	"version":	Boolean,
 	// command-specific options
+	"list":		Boolean,
+	"forward":  Boolean, 
+	"port":		[String, Array],
+	"getkey":   Boolean, 
 	"device":	[String, null],
-	"port":		[String, Array]
+	"add":		[String, null],
+	"remove":	[String, null],
+	"modify":	[String, null],
+	// no shortHands
+	"run":		[String, null],
+	"put":	[String, null],
+	"get":	[String, null]
 };
 
 var shortHands = {
@@ -56,33 +66,33 @@ var shortHands = {
 	"v": ["--level", "verbose"],
 	"V": ["--version"],
 	// command-specific aliases
-	"l": ["list"],
-	"f": ["forward"],
-	"d": ["--device"],
+	"l": ["--list"],
+	"f": ["--forward"],
 	"p": ["--port"],
-	"k": ["getkey"],
-	"a": ["add"],
-	"r": ["remove"],
-	"m": ["modify"]
+	"k": ["--getkey"],
+	"d": ["--device"],
+	"a": ["--add"],
+	"r": ["--remove"],
+	"m": ["--modify"]
 };
 
 var helpString = [
 	"",
 	"USAGE:",
-	"\t" + processName + " [OPTIONS] list",
-	"\t" + processName + " [OPTIONS] getkey",
-	"\t" + processName + " [OPTIONS] put file://DEVICE_PATH < HOST_FILE",
-	"\t" + processName + " [OPTIONS] get file://DEVICE_PATH > HOST_FILE",
-	"\t" + processName + " [OPTIONS] run DEVICE_COMMAND",
-	"\t" + processName + " [OPTIONS] add|-a The name key must contain the means.If there is no name error.Properties can be specified JSON objects of the form '{\"name\":\"value1\",\"key2\":\"value2\"...}'.",
-	"\t" + processName + " [OPTIONS] remove|-r Can be removed only in name value or JSON object. ex) remove|-r value or '{\"name\":\"value\"}'.",
-	"\t" + processName + " [OPTIONS] modify|-m Can be modify only in JSON object ex) modify|-m '{\"name\":\"value1\",\"key2\":\"modfy value\"}'.",	
-	"\t" + processName + " [OPTIONS] [--port DEVICE_PORT1[:HOST_PORT1]][--port DEVICE_PORT2[:HOST_PORT2]][...] forward",
+	"\t" + processName + " [OPTIONS] --list",
+	"\t" + processName + " [OPTIONS] --getkey",
+	"\t" + processName + " [OPTIONS] --put file://DEVICE_PATH < HOST_FILE",
+	"\t" + processName + " [OPTIONS] --get file://DEVICE_PATH > HOST_FILE",
+	"\t" + processName + " [OPTIONS] --run DEVICE_COMMAND",
+	"\t" + processName + " [OPTIONS] --add, -a The name key must contain the means.If there is no name error.Properties can be specified JSON objects of the form '{\"name\":\"value1\",\"key2\":\"value2\"...}'.",
+	"\t" + processName + " [OPTIONS] --remove, -r Can be removed only in name value or JSON object. ex) remove|-r value or '{\"name\":\"value\"}'.",
+	"\t" + processName + " [OPTIONS] --modify, -m Can be modify only in JSON object ex) modify|-m '{\"name\":\"value1\",\"key2\":\"modfy value\"}'.",	
+	"\t" + processName + " [OPTIONS] --forward, -f [--port, -p DEVICE_PORT1[:HOST_PORT1]][--port, -p DEVICE_PORT2[:HOST_PORT2]][...]",
 	"\t" + processName + " [OPTIONS] --version|-V",
 	"\t" + processName + " [OPTIONS] --help|-h",
 	"",
 	"OPTIONS:",
-	"\t--device|-d: device name to connect to default]",
+	"\t--device, -d: device name to connect",
 	"\t--level: tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]",
 	""
 ];
@@ -96,6 +106,7 @@ log.heading = processName;
 log.level = argv.level || 'warn';
 
 /**********************************************************************/
+var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
 	log.info('exit', err);
@@ -104,27 +115,26 @@ process.on('uncaughtException', function (err) {
 });
 
 /**********************************************************************/
-
 log.verbose("argv", argv);
 
-var op, command = argv.argv.remain.shift();
-if (command === 'list') {
+var op;
+if (argv.list) {
 	op = list;
-} else if (command === 'getkey') {
+} else if (argv.getkey) {
 	op = getkey;
-} else if (command === 'put') {
+} else if (argv.put) {
 	op = put;
-} else if (command === 'get') {
+} else if (argv.get) {
 	op = get;
-} else if (command === 'run') {
+} else if (argv.run) {
 	op = run;
-} else if (command === 'add') {
+} else if (argv.add) {
 	op = add;
-} else if (command === 'remove') {
+} else if (argv.remove) {
 	op = remove;
-} else if (command === 'modify') {
+} else if (argv.modify) {
 	op = modify;
-} else if (command === 'forward') {
+} else if (argv.forward) {
 	op = forward;
 } else if (argv.version) {
 	versionTool.showVersionAndExit();
@@ -176,29 +186,29 @@ var defaultDeviceInfo = {
 };
 
 function _replaceDeviceInfo(inDevice) {
-	return inDevice.join(' ').replace(/["]/g, "")
-								.replace(/[']/g, "")
-								.replace(/ /g, "")
-								.replace("{", "{\"")
-								.replace("}","\"}")
-								.replace(/,/g, "\",\"")
-								.replace(/:/g,"\":\"");	
+	return inDevice.replace(/["]/g, "")
+				.replace(/[']/g, "")
+				.replace(/ /g, "")
+				.replace("{", "{\"")
+				.replace("}","\"}")
+				.replace(/,/g, "\",\"")
+				.replace(/:/g,"\":\"");	
 }
 
 function add(next) {
 	try {
-		var deviceInfoContent = _replaceDeviceInfo(argv.argv.remain);
+		var deviceInfoContent = _replaceDeviceInfo(argv.add);
 		var inDevice = JSON.parse(deviceInfoContent);
 		var keys = Object.keys(defaultDeviceInfo);
 		keys.forEach(function(key) {
-				if (!inDevice[key]) {
-					inDevice[key] = defaultDeviceInfo[key];
-				}
-			}.bind(this));
+			if (!inDevice[key]) {
+				inDevice[key] = defaultDeviceInfo[key];
+			}
+		}.bind(this));
 		var resolver = new novacom.Resolver();
 		async.series([
 			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, command, inDevice)
+			resolver.modifyDeviceFile.bind(resolver, 'add', inDevice)
 		], next);
 	} catch (err) {
 		next(err);
@@ -207,7 +217,7 @@ function add(next) {
 
 function remove(next) {
 	try {
-		var deviceInfoContent = _replaceDeviceInfo(argv.argv.remain);
+		var deviceInfoContent = _replaceDeviceInfo(argv.remove);
 		var resolver = new novacom.Resolver();
 		var argvCheck = deviceInfoContent.indexOf("{");	
 		var inDevice;	
@@ -220,7 +230,7 @@ function remove(next) {
 		
 		async.series([
 			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, command, inDevice)
+			resolver.modifyDeviceFile.bind(resolver, 'remove', inDevice)
 		], next);
 	} catch (err) {
 		next(err);
@@ -229,12 +239,12 @@ function remove(next) {
 
 function modify(next) {
 	try {
-		var deviceInfoContent = _replaceDeviceInfo(argv.argv.remain);
+		var deviceInfoContent = _replaceDeviceInfo(argv.modify);
 		var inDevice = JSON.parse(deviceInfoContent);
 		var resolver = new novacom.Resolver();
 		async.series([
 			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, command, inDevice)
+			resolver.modifyDeviceFile.bind(resolver, 'modify', inDevice)
 		], next);
 	} catch (err) {
 		next(err);
@@ -279,18 +289,23 @@ function get(next) {
 
 function run(next) {
 	var session = new novacom.Session(options, function(err, result) {
-		log.verbose("run()", "argv:", argv.argv.remain);
+		log.verbose("run()", "argv:", argv.run);
 		log.verbose("run()", "options:", options);
 		if (err) {
 			next(err);
 			return;
 		}
-		session.run(argv.argv.remain.join(" "), process.stdin, process.stdout, process.stderr, next);
+		session.run(argv.run, process.stdin, process.stdout, process.stderr, next);
 	});
 }
 
 function forward(next) {
 	log.info('forward', "ports:", argv.port);
+	if (!argv.port || argv.port == 'true') {
+		next(new Error("forward option needs port value to forward via '--port, -p DEVICE_PORT:HOST_PORT'"));
+		return;
+	}
+
 	var tasks = [
 		function(next) {
 			options.session = new novacom.Session(options, next);
