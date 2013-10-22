@@ -214,7 +214,7 @@ function run(next) {
 
 function forward(next) {
 	log.info('forward', "ports:", argv.port);
-	if (!argv.port || argv.port == 'true') {
+	if (!argv.port || argv.port.toString() === 'true') {
 		next(new Error("forward option needs port value to forward via '--port, -p DEVICE_PORT:HOST_PORT'"));
 		return;
 	}

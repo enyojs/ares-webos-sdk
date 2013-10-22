@@ -47,9 +47,17 @@ var knownOpts = {
 	"version":	Boolean,
 	// command-specific options
 	"list":		Boolean,
-	"add":		[String, null],
+	"add":		Boolean,
 	"remove":	[String, null],
 	"modify":	[String, null],
+	// params for device info
+	"name":		[String, null],
+	"type":		[String, null],
+	"descriptoin":		[String, null],
+	"host":		[String, null],
+	"port":		[String, null],
+	"username":		[String, null],
+	"files":		[String, null]
 };
 
 var shortHands = {
@@ -61,7 +69,15 @@ var shortHands = {
 	"l": ["--list"],
 	"a": ["--add"],
 	"r": ["--remove"],
-	"m": ["--modify"]
+	"m": ["--modify"],
+	// params for device info
+	"n": ["--name"],
+	"t": ["--type"],
+	"d": ["--description"],
+	"H": ["--host"],
+	"p": ["--port"],
+	"u": ["--username"],
+	"f": ["--files"]
 };
 
 var helpString = [
@@ -140,7 +156,7 @@ function list(next) {
 			log.info("list()", "devices:", devices);
 			if (Array.isArray(devices)) {
 				devices.forEach(function(device) {
-					console.log(sprintf("%-16s %-16s %-24s (%s)", device.name, device.type, device.description, device.addr));
+					console.log(sprintf("%-16s %-16s %-16s %-24s (%s)", device.name, device.type, device.files, device.description, device.addr));
 				});
 			}
 			log.info("list()", "Success");
@@ -154,13 +170,32 @@ var defaultDeviceInfo = {
 	host: "127.0.0.1",
 	port: 22,
 	username: "root",
-	description: "new device description"
+	description: "new device description",
+	files: "stream"
 };
 
-function _replaceDeviceInfo(inDevice) {
-	return inDevice.replace(/["]/g, "")
+function replaceDefaultDeviceInfo(inDevice) {
+	if (inDevice) {
+		if (inDevice.type && inDevice.type == "emulator") {
+			inDevice.type = defaultDeviceInfo.type;
+			inDevice.host = "127.0.0.1";
+			inDevice.port = 6622;
+			inDevice.username = "root";
+			inDevice.privateKey = { "openSsh": "webos_emul" };
+			inDevice.files = "sftp";
+		} else if (inDevice.type && inDevice.type == "starfish") {
+			if (inDevice.port == 22) {
+				inDevice.username = "root";
+			} else if(inDevice.port == 9922) {
+				inDevice.username = "prisoner";
+			}
+		}
+	}
+}
+
+function convertJsonForm(str) {
+	return str.replace(/["]/g, "")
 				.replace(/[']/g, "")
-				.replace(/ /g, "")
 				.replace("{", "{\"")
 				.replace("}","\"}")
 				.replace(/,/g, "\",\"")
@@ -169,7 +204,27 @@ function _replaceDeviceInfo(inDevice) {
 
 function add(next) {
 	try {
-		var deviceInfoContent = _replaceDeviceInfo(argv.add);
+		var taget = {};
+		if (!argv.argv.remain[0]) {
+			if (!argv.name) {
+				next(new Error("Need a target device name to add."));
+				return;
+			} else {
+				target = {
+					"name": argv.name || defaultDeviceInfo.name,
+					"type": argv.type || defaultDeviceInfo.type,
+					"host": argv.host || defaultDeviceInfo.host,
+					"port": argv.port || defaultDeviceInfo.port,
+					"username": argv.username || defaultDeviceInfo.username,
+					"description": argv.description || defaultDeviceInfo.description,
+					"files": argv.files || defaultDeviceInfo.files
+				};
+				target = JSON.stringify(target);
+			}
+		} else {
+			target = argv.argv.remain[0];
+		}
+		var deviceInfoContent = convertJsonForm(target);
 		var inDevice = JSON.parse(deviceInfoContent);
 		var keys = Object.keys(defaultDeviceInfo);
 		keys.forEach(function(key) {
@@ -177,6 +232,7 @@ function add(next) {
 				inDevice[key] = defaultDeviceInfo[key];
 			}
 		}.bind(this));
+		replaceDefaultDeviceInfo(inDevice);
 		var resolver = new novacom.Resolver();
 		async.series([
 			resolver.load.bind(resolver),
@@ -189,7 +245,7 @@ function add(next) {
 
 function remove(next) {
 	try {
-		var deviceInfoContent = _replaceDeviceInfo(argv.remove);
+		var deviceInfoContent = convertJsonForm(argv.remove);
 		var resolver = new novacom.Resolver();
 		var argvCheck = deviceInfoContent.indexOf("{");	
 		var inDevice;	
@@ -211,7 +267,7 @@ function remove(next) {
 
 function modify(next) {
 	try {
-		var deviceInfoContent = _replaceDeviceInfo(argv.modify);
+		var deviceInfoContent = convertJsonForm(argv.modify);
 		var inDevice = JSON.parse(deviceInfoContent);
 		var resolver = new novacom.Resolver();
 		async.series([
