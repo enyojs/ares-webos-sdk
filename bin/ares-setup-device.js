@@ -47,14 +47,17 @@ var knownOpts = {
 	"version":	Boolean,
 	// command-specific options
 	"list":		Boolean,
-	"forward":  Boolean, 
-	"port":		[String, Array],
-	"getkey":   Boolean, 
-	"device":	[String, null],
-	// no shortHands
-	"run":		[String, null],
-	"put":	[String, null],
-	"get":	[String, null]
+	"add":		Boolean,
+	"remove":	[String, null],
+	"modify":	[String, null],
+	// params for device info
+	"name":		[String, null],
+	"type":		[String, null],
+	"descriptoin":		[String, null],
+	"host":		[String, null],
+	"port":		[String, null],
+	"username":		[String, null],
+	"files":		[String, null]
 };
 
 var shortHands = {
@@ -64,26 +67,30 @@ var shortHands = {
 	"V": ["--version"],
 	// command-specific aliases
 	"l": ["--list"],
-	"f": ["--forward"],
+	"a": ["--add"],
+	"r": ["--remove"],
+	"m": ["--modify"],
+	// params for device info
+	"n": ["--name"],
+	"t": ["--type"],
+	"d": ["--description"],
+	"H": ["--host"],
 	"p": ["--port"],
-	"k": ["--getkey"],
-	"d": ["--device"]
+	"u": ["--username"],
+	"f": ["--files"]
 };
 
 var helpString = [
 	"",
 	"USAGE:",
 	"\t" + processName + " [OPTIONS] --list",
-	"\t" + processName + " [OPTIONS] --getkey",
-	"\t" + processName + " [OPTIONS] --put file://DEVICE_PATH < HOST_FILE",
-	"\t" + processName + " [OPTIONS] --get file://DEVICE_PATH > HOST_FILE",
-	"\t" + processName + " [OPTIONS] --run DEVICE_COMMAND",
-	"\t" + processName + " [OPTIONS] --forward, -f [--port, -p DEVICE_PORT1[:HOST_PORT1]][--port, -p DEVICE_PORT2[:HOST_PORT2]][...]",
+	"\t" + processName + " [OPTIONS] --add, -a The name key must contain the means.If there is no name error.Properties can be specified JSON objects of the form '{\"name\":\"value1\",\"key2\":\"value2\"...}'.",
+	"\t" + processName + " [OPTIONS] --remove, -r Can be removed only in name value or JSON object. ex) remove|-r value or '{\"name\":\"value\"}'.",
+	"\t" + processName + " [OPTIONS] --modify, -m Can be modify only in JSON object ex) modify|-m '{\"name\":\"value1\",\"key2\":\"modfy value\"}'.",	
 	"\t" + processName + " [OPTIONS] --version|-V",
 	"\t" + processName + " [OPTIONS] --help|-h",
 	"",
 	"OPTIONS:",
-	"\t--device, -d: device name to connect",
 	"\t--level: tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]",
 	""
 ];
@@ -111,16 +118,12 @@ log.verbose("argv", argv);
 var op;
 if (argv.list) {
 	op = list;
-} else if (argv.getkey) {
-	op = getkey;
-} else if (argv.put) {
-	op = put;
-} else if (argv.get) {
-	op = get;
-} else if (argv.run) {
-	op = run;
-} else if (argv.forward) {
-	op = forward;
+} else if (argv.add) {
+	op = add;
+} else if (argv.remove) {
+	op = remove;
+} else if (argv.modify) {
+	op = modify;
 } else if (argv.version) {
 	versionTool.showVersionAndExit();
 } else if (argv.help) {
@@ -153,7 +156,7 @@ function list(next) {
 			log.info("list()", "devices:", devices);
 			if (Array.isArray(devices)) {
 				devices.forEach(function(device) {
-					console.log(sprintf("%-16s %-16s %-24s (%s)", device.name, device.type, device.description, device.addr));
+					console.log(sprintf("%-16s %-16s %-16s %-24s (%s)", device.name, device.type, device.files, device.description, device.addr));
 				});
 			}
 			log.info("list()", "Success");
@@ -162,86 +165,118 @@ function list(next) {
 	], next);
 }
 
-function getkey(next) {
-	var resolver = new novacom.Resolver();
-	async.waterfall([
-		resolver.load.bind(resolver),
-		resolver.getSshPrvKey.bind(resolver, options),
-		function(keyFileName, next) {
-			if (keyFileName) {
-				var target = {};
-				target.name = options.name;
-				target.privateKey = { "openSsh": keyFileName };
-				process.stdin.resume();
-				process.stdin.setEncoding('utf8');
-				process.stdout.write('input passphrase [default: webos]:');
-				process.stdin.on('data', function (text) {
-					var passphrase = text.toString().trim();
-					if (passphrase === '') {
-						passphrase = 'webos';
-					}
-					log.info('registed passphrase is ', passphrase);
-					target.passphrase = passphrase;
-					next(null, target);
-				});
-			} else {
-				next(null, null);
+var defaultDeviceInfo = {
+	type: "starfish",
+	host: "127.0.0.1",
+	port: 22,
+	username: "root",
+	description: "new device description",
+	files: "stream"
+};
+
+function replaceDefaultDeviceInfo(inDevice) {
+	if (inDevice) {
+		if (inDevice.type && inDevice.type == "emulator") {
+			inDevice.type = defaultDeviceInfo.type;
+			inDevice.host = "127.0.0.1";
+			inDevice.port = 6622;
+			inDevice.username = "root";
+			inDevice.privateKey = { "openSsh": "webos_emul" };
+			inDevice.files = "sftp";
+		} else if (inDevice.type && inDevice.type == "starfish") {
+			if (inDevice.port == 22) {
+				inDevice.username = "root";
+			} else if(inDevice.port == 9922) {
+				inDevice.username = "prisoner";
 			}
-		},
-		resolver.modifyDeviceFile.bind(resolver, 'modify')
-	], next);
-}
-
-function put(next) {
-	next(new Error("Not yet implemented"));
-}
-
-function get(next) {
-	next(new Error("Not yet implemented"));
-}
-
-function run(next) {
-	var session = new novacom.Session(options, function(err, result) {
-		log.verbose("run()", "argv:", argv.run);
-		log.verbose("run()", "options:", options);
-		if (err) {
-			next(err);
-			return;
 		}
-		session.run(argv.run, process.stdin, process.stdout, process.stderr, next);
-	});
-}
-
-function forward(next) {
-	log.info('forward', "ports:", argv.port);
-	if (!argv.port || argv.port.toString() === 'true') {
-		next(new Error("forward option needs port value to forward via '--port, -p DEVICE_PORT:HOST_PORT'"));
-		return;
 	}
+}
 
-	var tasks = [
-		function(next) {
-			options.session = new novacom.Session(options, next);
-		}
-	];
+function convertJsonForm(str) {
+	return str.replace(/["]/g, "")
+				.replace(/[']/g, "")
+				.replace("{", "{\"")
+				.replace("}","\"}")
+				.replace(/,/g, "\",\"")
+				.replace(/:/g,"\":\"");	
+}
+
+function add(next) {
 	try {
-		argv.port.forEach(function(portStr) {
-			var portArr = portStr.split(':'),
-			    devicePort, localPort, deviceAddr;
-			devicePort = parseInt(portArr[0], 10);
-			localPort = parseInt(portArr[1], 10) || devicePort;
-			tasks.push(function(next) {
-				options.session.forward(devicePort, localPort, next);
-			});
-			tasks.push(function(next) {
-				log.info('forward','running...');
-			});
-		});
-	} catch(err) {
+		var taget = {};
+		if (!argv.argv.remain[0]) {
+			if (!argv.name) {
+				next(new Error("Need a target device name to add."));
+				return;
+			} else {
+				target = {
+					"name": argv.name || defaultDeviceInfo.name,
+					"type": argv.type || defaultDeviceInfo.type,
+					"host": argv.host || defaultDeviceInfo.host,
+					"port": argv.port || defaultDeviceInfo.port,
+					"username": argv.username || defaultDeviceInfo.username,
+					"description": argv.description || defaultDeviceInfo.description,
+					"files": argv.files || defaultDeviceInfo.files
+				};
+				target = JSON.stringify(target);
+			}
+		} else {
+			target = argv.argv.remain[0];
+		}
+		var deviceInfoContent = convertJsonForm(target);
+		var inDevice = JSON.parse(deviceInfoContent);
+		var keys = Object.keys(defaultDeviceInfo);
+		keys.forEach(function(key) {
+			if (!inDevice[key]) {
+				inDevice[key] = defaultDeviceInfo[key];
+			}
+		}.bind(this));
+		replaceDefaultDeviceInfo(inDevice);
+		var resolver = new novacom.Resolver();
+		async.series([
+			resolver.load.bind(resolver),
+			resolver.modifyDeviceFile.bind(resolver, 'add', inDevice)
+		], next);
+	} catch (err) {
 		next(err);
-		return;
 	}
-	async.series(tasks, next);
+}
+
+function remove(next) {
+	try {
+		var deviceInfoContent = convertJsonForm(argv.remove);
+		var resolver = new novacom.Resolver();
+		var argvCheck = deviceInfoContent.indexOf("{");	
+		var inDevice;	
+		
+		if (argvCheck === 0) {
+			 inDevice = JSON.parse(deviceInfoContent);
+		}else {
+			inDevice = {name: deviceInfoContent};
+		}
+		
+		async.series([
+			resolver.load.bind(resolver),
+			resolver.modifyDeviceFile.bind(resolver, 'remove', inDevice)
+		], next);
+	} catch (err) {
+		next(err);
+	}
+}
+
+function modify(next) {
+	try {
+		var deviceInfoContent = convertJsonForm(argv.modify);
+		var inDevice = JSON.parse(deviceInfoContent);
+		var resolver = new novacom.Resolver();
+		async.series([
+			resolver.load.bind(resolver),
+			resolver.modifyDeviceFile.bind(resolver, 'modify', inDevice)
+		], next);
+	} catch (err) {
+		next(err);
+	}
 }
 
 /**********************************************************************/
