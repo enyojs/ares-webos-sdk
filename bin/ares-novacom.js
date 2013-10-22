@@ -46,8 +46,15 @@ var knownOpts = {
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 	"version":	Boolean,
 	// command-specific options
+	"list":		Boolean,
+	"forward":  Boolean, 
+	"port":		[String, Array],
+	"getkey":   Boolean, 
 	"device":	[String, null],
-	"port":		[String, Array]
+	// no shortHands
+	"run":		[String, null],
+	"put":	[String, null],
+	"get":	[String, null]
 };
 
 var shortHands = {
@@ -56,27 +63,27 @@ var shortHands = {
 	"v": ["--level", "verbose"],
 	"V": ["--version"],
 	// command-specific aliases
-	"l": ["list"],
-	"f": ["forward"],
-	"d": ["--device"],
+	"l": ["--list"],
+	"f": ["--forward"],
 	"p": ["--port"],
-	"k": ["getkey"]
+	"k": ["--getkey"],
+	"d": ["--device"]
 };
 
 var helpString = [
 	"",
 	"USAGE:",
-	"\t" + processName + " [OPTIONS] list",
-	"\t" + processName + " [OPTIONS] getkey",
-	"\t" + processName + " [OPTIONS] put file://DEVICE_PATH < HOST_FILE",
-	"\t" + processName + " [OPTIONS] get file://DEVICE_PATH > HOST_FILE",
-	"\t" + processName + " [OPTIONS] run DEVICE_COMMAND",
-	"\t" + processName + " [OPTIONS] [--port DEVICE_PORT1[:HOST_PORT1]][--port DEVICE_PORT2[:HOST_PORT2]][...] forward",
+	"\t" + processName + " [OPTIONS] --list",
+	"\t" + processName + " [OPTIONS] --getkey",
+	"\t" + processName + " [OPTIONS] --put file://DEVICE_PATH < HOST_FILE",
+	"\t" + processName + " [OPTIONS] --get file://DEVICE_PATH > HOST_FILE",
+	"\t" + processName + " [OPTIONS] --run DEVICE_COMMAND",
+	"\t" + processName + " [OPTIONS] --forward, -f [--port, -p DEVICE_PORT1[:HOST_PORT1]][--port, -p DEVICE_PORT2[:HOST_PORT2]][...]",
 	"\t" + processName + " [OPTIONS] --version|-V",
 	"\t" + processName + " [OPTIONS] --help|-h",
 	"",
 	"OPTIONS:",
-	"\t--device|-d: device name to connect to default]",
+	"\t--device, -d: device name to connect",
 	"\t--level: tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]",
 	""
 ];
@@ -90,6 +97,7 @@ log.heading = processName;
 log.level = argv.level || 'warn';
 
 /**********************************************************************/
+var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
 	log.info('exit', err);
@@ -98,21 +106,20 @@ process.on('uncaughtException', function (err) {
 });
 
 /**********************************************************************/
-
 log.verbose("argv", argv);
 
-var op, command = argv.argv.remain.shift();
-if (command === 'list') {
+var op;
+if (argv.list) {
 	op = list;
-} else if (command === 'getkey') {
+} else if (argv.getkey) {
 	op = getkey;
-} else if (command === 'put') {
+} else if (argv.put) {
 	op = put;
-} else if (command === 'get') {
+} else if (argv.get) {
 	op = get;
-} else if (command === 'run') {
+} else if (argv.run) {
 	op = run;
-} else if (command === 'forward') {
+} else if (argv.forward) {
 	op = forward;
 } else if (argv.version) {
 	versionTool.showVersionAndExit();
@@ -163,7 +170,9 @@ function getkey(next) {
 		resolver.getSshPrvKey.bind(resolver, options),
 		function(keyFileName, next) {
 			if (keyFileName) {
-				options.privateKey = { "openSsh": keyFileName };
+				var target = {};
+				target.name = options.name;
+				target.privateKey = { "openSsh": keyFileName };
 				process.stdin.resume();
 				process.stdin.setEncoding('utf8');
 				process.stdout.write('input passphrase [default: webos]:');
@@ -173,14 +182,14 @@ function getkey(next) {
 						passphrase = 'webos';
 					}
 					log.info('registed passphrase is ', passphrase);
-					options.passphrase = passphrase;
-					next(null, options);
+					target.passphrase = passphrase;
+					next(null, target);
 				});
 			} else {
 				next(null, null);
 			}
 		},
-		resolver.modifyDeviceFile.bind(resolver)
+		resolver.modifyDeviceFile.bind(resolver, 'modify')
 	], next);
 }
 
@@ -194,18 +203,23 @@ function get(next) {
 
 function run(next) {
 	var session = new novacom.Session(options, function(err, result) {
-		log.verbose("run()", "argv:", argv.argv.remain);
+		log.verbose("run()", "argv:", argv.run);
 		log.verbose("run()", "options:", options);
 		if (err) {
 			next(err);
 			return;
 		}
-		session.run(argv.argv.remain.join(" "), process.stdin, process.stdout, process.stderr, next);
+		session.run(argv.run, process.stdin, process.stdout, process.stderr, next);
 	});
 }
 
 function forward(next) {
 	log.info('forward', "ports:", argv.port);
+	if (!argv.port || argv.port.toString() === 'true') {
+		next(new Error("forward option needs port value to forward via '--port, -p DEVICE_PORT:HOST_PORT'"));
+		return;
+	}
+
 	var tasks = [
 		function(next) {
 			options.session = new novacom.Session(options, next);
