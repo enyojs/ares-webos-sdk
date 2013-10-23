@@ -32,6 +32,7 @@ var shortHands = {
 	"r": ["--running"],
 	"V": ["--version"],
 	"h": ["--help"],
+	"H": ["--hosted"],
 	"v": ["--level", "verbose"]
 };
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-install.js'*/);
@@ -61,6 +62,12 @@ if (argv.help) {
 
 log.verbose("argv", argv);
 
+var installMode = "Installed";
+var hostedurl = "";
+if(argv.hosted){
+	installMode = "Hosted";
+}
+
 var op;
 if (argv.close) {
 	op = close;
@@ -70,13 +77,18 @@ if (argv.close) {
 	op = deviceList;
 } else if (argv['version']) {
 	versionTool.showVersionAndExit();
+} else if (argv.hosted){
+	op = launchHostedApp;
 } else {
 	op = launch;
 }
 
+
+
 var options = {
 	device: argv.device,
-	inspect: argv.inspect
+	inspect: argv.inspect,
+	installMode: installMode,
 };
 
 /**********************************************************************/
@@ -93,6 +105,7 @@ function showUsage() {
 			help.format(processName + " [OPTIONS] <APP_ID>", "Launch an app having <APP_ID> on the TARGET DEVICE"),
 			help.format(processName + " [OPTIONS] --close, -c <APP_ID>", "Close an app having <APP_ID>"),
 			help.format(processName + " [OPTIONS] --running, -r <APP_ID>", "List running apps"),
+			help.format(processName + " [OPTIONS] --hosted, -H <APP_DIR>", "Launch an app as hosted mode"),
 			help.format(processName + " --help, -h", "Display this help"),
 			help.format(processName + " --version, -V", "Display version info"),
 			help.format(processName + " --device-list, -D", "List TARGET DEVICE"),
@@ -116,6 +129,18 @@ function showUsage() {
 
 function launch() {
 	var pkgId = argv.argv.remain[0];
+	log.info("launch():", "pkgId:", pkgId);
+	if (!pkgId) {
+		help();
+		process.exit(1);
+	}
+	ipkg.launcher.launch(options, pkgId, null, finish);
+}
+
+function launchHostedApp() {
+	var hostedurl = fs.realpathSync(argv.argv.remain[0]);
+	var pkgId = "com.sdk.ares.hostedapp";
+	options.hostedurl = hostedurl;
 	log.info("launch():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
