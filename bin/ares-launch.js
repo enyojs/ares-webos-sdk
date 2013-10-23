@@ -82,9 +82,8 @@ var options = {
 /**********************************************************************/
 
 if (op) {
-	var self = this;
 	versionTool.checkNodeVersion(function(err) {
-		op.bind(self, finish);
+		op(finish);
 	});
 }
 
@@ -126,7 +125,6 @@ function launch() {
 }
 
 function close() {
-	console.log("[ByJunil]")
 	var pkgId = (argv.close === 'true')? argv.argv.remain[0] : argv.close;
 	log.info("close():", "pkgId:", pkgId);
 	if (!pkgId) {
@@ -176,8 +174,8 @@ function finish(err, value) {
 			console.log(value.msg);
 		}
 		process.exit(0);
-	}}
-
+	}
+}
 
 process.on('uncaughtException', function (err) {
 	console.log('Caught exception: ' + err);
