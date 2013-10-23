@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 
-var fs = require('fs'),
-    path = require("path"),
-    npmlog = require('npmlog'),
-    nopt = require('nopt'),
-    async = require('async'),
+var fs  	= require('fs'),
+    path 	= require("path"),
+    npmlog 	= require('npmlog'),
+    nopt 	= require('nopt'),
+    async 	= require('async'),
     sprintf = require('sprintf').sprintf,
     versionTool = require('./../lib/version-tools'),
-    console = require('./../lib/consoleSync'),
-    novacom = require('./../lib/novacom');
+    console 	= require('./../lib/consoleSync'),
+    novacom 	= require('./../lib/novacom'),
+    help 		= require('./../lib/helpFormat');
 
 /**********************************************************************/
 
@@ -73,18 +74,33 @@ var shortHands = {
 var helpString = [
 	"",
 	"USAGE:",
-	"\t" + processName + " [OPTIONS] --list",
-	"\t" + processName + " [OPTIONS] --getkey",
-	"\t" + processName + " [OPTIONS] --put file://DEVICE_PATH < HOST_FILE",
-	"\t" + processName + " [OPTIONS] --get file://DEVICE_PATH > HOST_FILE",
-	"\t" + processName + " [OPTIONS] --run DEVICE_COMMAND",
-	"\t" + processName + " [OPTIONS] --forward, -f [--port, -p DEVICE_PORT1[:HOST_PORT1]][--port, -p DEVICE_PORT2[:HOST_PORT2]][...]",
-	"\t" + processName + " [OPTIONS] --version|-V",
-	"\t" + processName + " [OPTIONS] --help|-h",
+	help.format(processName + " --list, -l", "List TARGET DEVICE"),
+	help.format(processName + " [OPTIONS] --getkey, -k", "Get ssh private key from a secure developer mode app running on target device"),
+	help.format(processName + " [OPTIONS] --run, -r DEVICE_COMMAND", "Run a command on target device"),
+	help.format(processName + " [OPTIONS] --forward, -f [--port, -p DEVICE_PORT1[:HOST_PORT1]][--port, -p DEVICE_PORT2[:HOST_PORT2]][...]"),
+	help.format("", "Run a port forwarding between a Host PC and the target device"),
+	help.format(processName + " --help, -h", "Display this help"),
+	help.format(processName + " --version, -V", "Display version info"),
 	"",
 	"OPTIONS:",
-	"\t--device, -d: device name to connect",
-	"\t--level: tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]",
+	help.format("--device, -d", "device name to connect"),
+	help.format("--level", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+	help.format("-v", "tracing level 'verbose'"),
+	"",
+//	"Options (Not implmeneted) :",
+//	help.format(processName + " [OPTIONS] --put file://DEVICE_PATH < HOST_FILE"),
+//	help.format(processName + " [OPTIONS] --get file://DEVICE_PATH > HOST_FILE"),
+//	"",
+	"'--getkey' option is available only when TARGET DEVICE runs Secure Developer Mode App.",
+	"",
+	"(e.g.) '--run' option ",
+	"       " + processName + "--run \"ls -al\" --devive TARGET_DEVICE",
+	"",
+	"(e.g.) '--forward' option ",
+	"       " + processName + "--forward --port 22:3030 --devive TARGET",
+	"       " + "After running the port forwarding between TARGET_DEVICE(22) and HOST_PC(3030), ",
+	"       " + "User can connect to TARGET_DEVICE via 3030 port",
+	"       " + "(Linux/Mac) $ ssh -p 3030 root@127.0.0.1 ",
 	""
 ];
 
@@ -152,6 +168,7 @@ function list(next) {
 		function(devices, next) {
 			log.info("list()", "devices:", devices);
 			if (Array.isArray(devices)) {
+				console.log(sprintf("%-16s %-16s %-24s %s", "<DEVICE NAME>", "<PLATFORM>", "<DESCRIPTION>", "<SSH ADDRESS>"));
 				devices.forEach(function(device) {
 					console.log(sprintf("%-16s %-16s %-24s (%s)", device.name, device.type, device.description, device.addr));
 				});

@@ -8,7 +8,8 @@ var fs = require('fs'),
     sprintf = require('sprintf').sprintf,
     versionTool = require('./../lib/version-tools'),
     console = require('./../lib/consoleSync'),
-    novacom = require('./../lib/novacom');
+    novacom = require('./../lib/novacom'),
+    help 	= require('./../lib/helpFormat');
 
 /**********************************************************************/
 
@@ -73,7 +74,7 @@ var shortHands = {
 	// params for device info
 	"n": ["--name"],
 	"t": ["--type"],
-	"d": ["--description"],
+	"D": ["--description"],
 	"H": ["--host"],
 	"p": ["--port"],
 	"u": ["--username"],
@@ -83,15 +84,35 @@ var shortHands = {
 var helpString = [
 	"",
 	"USAGE:",
-	"\t" + processName + " [OPTIONS] --list",
-	"\t" + processName + " [OPTIONS] --add, -a The name key must contain the means.If there is no name error.Properties can be specified JSON objects of the form '{\"name\":\"value1\",\"key2\":\"value2\"...}'.",
-	"\t" + processName + " [OPTIONS] --remove, -r Can be removed only in name value or JSON object. ex) remove|-r value or '{\"name\":\"value\"}'.",
-	"\t" + processName + " [OPTIONS] --modify, -m Can be modify only in JSON object ex) modify|-m '{\"name\":\"value1\",\"key2\":\"modfy value\"}'.",	
-	"\t" + processName + " [OPTIONS] --version|-V",
-	"\t" + processName + " [OPTIONS] --help|-h",
+	help.format(processName + " --list, -l", "List TARGET DEVICE"),
+	help.format(processName + " --add, -a [string]", "Add TARGET_DEVICE_INFO"),
+	help.format("", "TARGET_DEVICE_INFO can be JSON Form."),
+	help.format("", " (e.g.) --add '{\"name\": \"tv2\", \"type\":\"starfish\", \"host\":\"127.0.0.1\"}'"),
+	help.format("", "Or TARGET_DEVICE_INFO can be specified by the following additional options."),
+	help.format("", "--name, -n [string]   device name"),
+	help.format("", "--type, -n [string]   platform type can be 'starfish' or 'emulator'"),
+	help.format("", "--description, -D [string]   description of target device"),
+	help.format("", "--host, -H [string]   ip address"),
+	help.format("", "--port, -p [string]   port number"),
+	help.format("", "--username, -u [string]   user name can be 'root' or 'prisoner'"),
+	help.format("", "--files, -f [string]   file stream type can be 'stream' or 'sftp'"),
+	help.format("", "                       if target device support sft-server,"),
+	help.format("", "                       sftp is more stable than general stream"),
+	help.format("", " (e.g.) --add --name \"tv2\" --type \"starfish\" "),
+	help.format(processName + " --remove, -r [string]", "Remove TARGET_DEVICE_INFO"),
+	help.format("", "TARGET_DEVICE_INFO can be JSON Form."),
+	help.format("", " (e.g.) --remove '{\"name\": \"tv2\"'}"),
+	help.format("", "Or TARGET_DEVICE_INFO can be only NAME of target device"),
+	help.format("", " (e.g.) --remove tv2"),
+	help.format(processName + " --modify, -m [string]", "Modify TARGET_DEVICE_INFO"),
+	help.format("", "TARGET_DEVICE_INFO should be JSON Form."),
+	help.format("", " (e.g.) --modify '{\"name\": \"tv2\", \"type\":\"starfish\", \"host\":\"192.168.0.123\"}'"),
+	help.format(processName + " --help, -h", "Display this help"),
+	help.format(processName + " --version, -V", "Display version info"),
 	"",
 	"OPTIONS:",
-	"\t--level: tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]",
+	help.format("--level", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+	help.format("-v", "tracing level 'verbose'"),
 	""
 ];
 
@@ -155,6 +176,7 @@ function list(next) {
 		function(devices, next) {
 			log.info("list()", "devices:", devices);
 			if (Array.isArray(devices)) {
+				console.log(sprintf("%-16s %-16s %-16s %-24s %s", "<DEVICE NAME>", "<PLATFORM>", "<FILE STREAM>", "<DESCRIPTION>", "<SSH ADDRESS>"));
 				devices.forEach(function(device) {
 					console.log(sprintf("%-16s %-16s %-16s %-24s (%s)", device.name, device.type, device.files, device.description, device.addr));
 				});

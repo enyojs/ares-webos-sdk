@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 
-var fs = require('fs'),
-    path = require("path"),
-    ipkg = require('./../lib/ipkg-tools'),
-    npmlog = require('npmlog'),
+var fs 		= require('fs'),
+    path 	= require("path"),
+    async 	= require('async'),
+    npmlog 	= require('npmlog'),
+    sprintf = require('sprintf').sprintf,
+    nopt 	= require('nopt'),
+    ipkg 		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
-    console = require('./../lib/consoleSync'),
-    nopt = require('nopt');
+    console 	= require('./../lib/consoleSync'),
+    help 		= require('./../lib/helpFormat'),
+	novacom 	= require('./../lib/novacom');
 
 /**********************************************************************/
 
@@ -52,7 +56,7 @@ process.on('uncaughtException', function (err) {
 /**********************************************************************/
 
 if (argv.help) {
-	help();
+	showUsage();
 	process.exit(0);
 }
 
@@ -66,7 +70,7 @@ if (argv.list) {
 } else if (argv.remove) {
 	op = remove;
 } else if (argv['device-list']) {
-	throw new Error('Not implemented');
+	op = deviceList;
 } else if (argv['version']) {
 	versionTool.showVersionAndExit();
 } else {
@@ -74,7 +78,7 @@ if (argv.list) {
 }
 
 var options = {
-	appId: 'com.lge.ares.defaultName',
+	appId: 'com.ares.defaultName',
 	device: argv.device
 };
 
@@ -86,19 +90,30 @@ if (op) {
 	});
 }
 
-function help() {
-	console.log("\n" +
-			"USAGE:\n" +
-			"\t" + processName + " [OPTIONS] <PACKAGE_FILE>\n" +
-			"\t" + processName + " [OPTIONS] --remove|-r <APP_ID>\n" +
-			"\t" + processName + " [OPTIONS] --list|-l\n" +
-			"\t" + processName + " [OPTIONS] --device-list|-D\n" +
-			"\t" + processName + " [OPTIONS] --version|-V\n" +
-			"\t" + processName + " [OPTIONS] --help|-h\n" +
-			"\n" +
-			"OPTIONS:\n" +
-			"\t--device|-d: device name to connect to default]\n" +
-			"\t--level: tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]\n");
+function showUsage() {
+	var helpString = [
+			"USAGE:",
+			help.format(processName + " [OPTIONS] <PACKAGE_FILE>", "Install .ipk package into TARGET DEVICE"),
+			help.format(processName + " [OPTIONS] --remove, -r <APP_ID>", "Remove an installed app having <APP_ID>"),
+			help.format(processName + " [OPTIONS] --list, -l", "List installed apps"),
+			help.format(processName + " --help, -h", "Display this help"),
+			help.format(processName + " --version, -V", "Display version info"),
+			help.format(processName + " --device-list, -D", "List TARGET DEVICE"),
+			"",
+			"OPTIONS:",
+			help.format("--device, -d", "device name to connect"),
+			help.format("--level", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+			help.format("-v", "tracing level 'verbose'"),
+			"",
+			"APP_ID is an application id decribed in appinfo.json",
+			"",
+			"To install .ipk package into TARGET DEVICE, user have to specify the TARGET DEVICE using '--device, -d' option",
+			""
+	];
+
+	helpString.forEach(function(line) {
+		console.log(line);
+	});
 }
 
 function install() {
@@ -130,6 +145,25 @@ function remove() {
 		process.exit(1);
 	}
 	ipkg.installer.remove(options, pkgId, finish);
+}
+
+function deviceList() {
+	var resolver = new novacom.Resolver();
+	async.waterfall([
+		resolver.load.bind(resolver),
+		resolver.list.bind(resolver),
+		function(devices, next) {
+			log.info("list()", "devices:", devices);
+			if (Array.isArray(devices)) {
+				console.log(sprintf("%-16s %-16s %-24s %s", "<DEVICE NAME>", "<PLATFORM>", "<DESCRIPTION>", "<SSH ADDRESS>"));
+				devices.forEach(function(device) {
+					console.log(sprintf("%-16s %-16s %-24s (%s)", device.name, device.type, device.description, device.addr));
+				});
+			}
+			log.info("list()", "Success");
+			next();
+		}
+	], finish);
 }
 
 /**********************************************************************/
