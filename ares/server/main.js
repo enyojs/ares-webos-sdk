@@ -202,7 +202,6 @@ function BdOpenwebOS(config, next) {
 
 	app.post(makeExpressRoute('/op/launch'), function(req, res, next) {
 		async.series([
-			close.bind(this, req, res),
 			launch.bind(this, req, res),
 			answerOk.bind(this, req, res)
 		], function (err, results) {
