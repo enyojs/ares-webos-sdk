@@ -134,7 +134,7 @@ PalmGenerate.prototype = {
 		if (this.argv.argv.remain.length != 1) {
 			this.showUsage();
 		}
-		this.destination = this.argv.argv.remain[0];
+		this.destination = this.argv.argv.remain.splice(0,1).join("");
 
 		// Create the directorie if it does not exist
 		if (fs.existsSync(this.destination)) {
@@ -163,13 +163,12 @@ PalmGenerate.prototype = {
 	},
 
 	convertToJsonFormat: function(str) {
-		return str.replace(/["]/g, "")
-				.replace(/[']/g, "")
-				.replace(/ /g, "")
+		return str.replace(/\s*"/g, "")
+				.replace(/\s*'/g, "")
 				.replace("{", "{\"")
 				.replace("}","\"}")
-				.replace(/,/g, "\",\"")
-				.replace(/:/g,"\":\"");  
+				.replace(/\s*,\s*/g, "\",\"")
+				.replace(/\s*:\s*/g, "\":\"");
 	},
 
 	isJson: function(str) {
@@ -200,9 +199,10 @@ PalmGenerate.prototype = {
 				}
 			} else {
 				this.argv.property.forEach(function(prop) {
-					prop = this.convertToJsonFormat(prop);
-					if (this.isJson(prop)) {
-						properties = JSON.parse(prop);
+					var jsonFromArgv = prop + this.argv.argv.remain.join("");
+					jsonFromArgv = this.convertToJsonFormat(jsonFromArgv);
+					if (this.isJson(jsonFromArgv)) {
+						properties = JSON.parse(jsonFromArgv);
 					} else {
 						this.insertProperty(prop, properties);
 					}

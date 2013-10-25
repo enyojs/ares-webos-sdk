@@ -10,6 +10,7 @@
 		"ares-launch": "./bin/ares-launch.js",
 		"ares-inspect": "./bin/ares-inspect.js",
 		"ares-gdbserver": "./bin/ares-gdbserver.js",
+		"ares-novacom": "./bin/ares-novacom.js",
 		"ares-setup-device": "./bin/ares-setup-device.js"
 	},
 	"dependencies": {

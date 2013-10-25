@@ -92,7 +92,7 @@ function showUsage() {
 			"USAGE:",
 			help.format(processName + " [OPTIONS] <APP_ID>", "Launch an app having <APP_ID> on the TARGET DEVICE"),
 			help.format(processName + " [OPTIONS] --close, -c <APP_ID>", "Close an app having <APP_ID>"),
-			help.format(processName + " [OPTIONS] --running, -r <APP_ID>", "List running apps"),
+			help.format(processName + " [OPTIONS] --running, -r", "List running apps"),
 			help.format(processName + " --help, -h", "Display this help"),
 			help.format(processName + " --version, -V", "Display version info"),
 			help.format(processName + " --device-list, -D", "List TARGET DEVICE"),
