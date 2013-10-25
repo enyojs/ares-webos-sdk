@@ -143,7 +143,14 @@ PalmGenerate.prototype = {
 				log.error('checkCreateAppDir', "'" + this.destination + "' is not a directory");
 				process.exit(1);
 			}
-			this.existed = true;
+			var childFiles = fs.readdirSync(this.destination).filter(function(file){
+				return (['.', '..'].indexOf(file) === -1);
+			});
+			if (childFiles.length > 0 ) {
+				this.existed = true;
+			} else {
+				this.existed = false;
+			}
 		} else {
 			fs.mkdirSync(this.destination);
 			this.existed = false;
