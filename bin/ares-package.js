@@ -52,7 +52,14 @@ function PalmPackage() {
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.helpString = [
 		"USAGE:",
-		help.format(processName + " [OPTIONS] <APP_DIR>", "Make .ipk package"),
+		help.format(processName + " [OPTIONS] APP_DIR [SERVICE_DIR] [PKG_DIR]", "Make .ipk package"),
+		help.format("", "APP_DIR means a directory path having app source"),
+		help.format("", "SERVICE_DIR means a directory path having service source"),
+		help.format("", " if service source path is locating under APP_DIR, "),
+		help.format("", " don't have to specify SERVICE_DIR"),
+		help.format("", "PKG_DIR means a directory path having packageinfo.json file"),
+		help.format("", " if no specified PKG_DIR, "),
+		help.format("", " " + processName +" makes packageinfo.json from appinfo.json"),
 		help.format(processName + " --help, -h", "Display this help"),
 		help.format(processName + " --version, -V", "Display version info"),
 		"",

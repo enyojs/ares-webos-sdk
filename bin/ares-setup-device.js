@@ -50,11 +50,11 @@ var knownOpts = {
 	"list":		Boolean,
 	"add":		Boolean,
 	"remove":	[String, null],
-	"modify":	[String, null],
+	"modify":	Boolean,
 	// params for device info
 	"name":		[String, null],
 	"type":		[String, null],
-	"descriptoin":		[String, null],
+	"description":		[String, null],
 	"host":		[String, null],
 	"port":		[String, null],
 	"username":		[String, null],
@@ -85,10 +85,10 @@ var helpString = [
 	"",
 	"USAGE:",
 	help.format(processName + " --list, -l", "List TARGET DEVICE"),
-	help.format(processName + " --add, -a [string]", "Add TARGET_DEVICE_INFO"),
-	help.format("", "TARGET_DEVICE_INFO can be JSON Form."),
-	help.format("", " (e.g.) --add '{\"name\": \"tv2\", \"type\":\"starfish\", \"host\":\"127.0.0.1\"}'"),
-	help.format("", "Or TARGET_DEVICE_INFO can be specified by the following additional options."),
+	help.format(processName + " --add, -a <TARGET_INFO>", "Add TARGET_DEVICE_INFO"),
+	help.format("", "<TARGET_INFO> can be JSON Form."),
+	help.format("", " (e.g.) --add '{\"name\": \"tv2\", \"type\":\"starfish\", \"host\":\"127.0.0.1\",\"port\":\"22\"}'"),
+	help.format("", "Or <TARGET_INFO> can be specified by the following additional options."),
 	help.format("", "--name, -n [string]   device name"),
 	help.format("", "--type, -n [string]   platform type can be 'starfish' or 'emulator'"),
 	help.format("", "--description, -D [string]   description of target device"),
@@ -99,14 +99,15 @@ var helpString = [
 	help.format("", "                       if target device support sft-server,"),
 	help.format("", "                       sftp is more stable than general stream"),
 	help.format("", " (e.g.) --add --name \"tv2\" --type \"starfish\" "),
-	help.format(processName + " --remove, -r [string]", "Remove TARGET_DEVICE_INFO"),
-	help.format("", "TARGET_DEVICE_INFO can be JSON Form."),
+	help.format(processName + " --remove, -r <TARGET_INFO>", "Remove TARGET_DEVICE_INFO"),
+	help.format("", "<TARGET_INFO> can be JSON Form."),
 	help.format("", " (e.g.) --remove '{\"name\": \"tv2\"'}"),
-	help.format("", "Or TARGET_DEVICE_INFO can be only NAME of target device"),
+	help.format("", "Or <TARGET_INFO> can be only NAME of target device"),
 	help.format("", " (e.g.) --remove tv2"),
-	help.format(processName + " --modify, -m [string]", "Modify TARGET_DEVICE_INFO"),
-	help.format("", "TARGET_DEVICE_INFO should be JSON Form."),
-	help.format("", " (e.g.) --modify '{\"name\": \"tv2\", \"type\":\"starfish\", \"host\":\"192.168.0.123\"}'"),
+	help.format(processName + " --modify, -m <TARGET_INFO>", "Modify TARGET_DEVICE_INFO"),
+	help.format("", "<TARGET_INFO> can be JSON Form."),
+	help.format("", " (e.g.) --modify '{\"name\":\"tv2\",\"type\":\"starfish\",\"host\":\"192.168.0.123\",\"port\":\"22\"}'"),
+	help.format("", "Or <TARGET_INFO> can be specified by the additional options. (please refer to '--add' Usage)"),
 	help.format(processName + " --help, -h", "Display this help"),
 	help.format(processName + " --version, -V", "Display version info"),
 	"",
@@ -216,17 +217,17 @@ function replaceDefaultDeviceInfo(inDevice) {
 }
 
 function convertJsonForm(str) {
-	return str.replace(/["]/g, "")
-				.replace(/[']/g, "")
-				.replace("{", "{\"")
-				.replace("}","\"}")
-				.replace(/,/g, "\",\"")
-				.replace(/:/g,"\":\"");	
+	return str.replace(/\s*"/g, "")
+			.replace(/\s*'/g, "")
+			.replace("{", "{\"")
+			.replace("}","\"}")
+			.replace(/\s*,\s*/g, "\",\"")
+			.replace(/\s*:\s*/g, "\":\"");
 }
 
 function add(next) {
 	try {
-		var taget = {};
+		var target = {};
 		if (!argv.argv.remain[0]) {
 			if (!argv.name) {
 				next(new Error("Need a target device name to add."));
@@ -244,7 +245,7 @@ function add(next) {
 				target = JSON.stringify(target);
 			}
 		} else {
-			target = argv.argv.remain[0];
+			target = argv.argv.remain.join("");
 		}
 		var deviceInfoContent = convertJsonForm(target);
 		var inDevice = JSON.parse(deviceInfoContent);
@@ -289,8 +290,26 @@ function remove(next) {
 
 function modify(next) {
 	try {
-		var deviceInfoContent = convertJsonForm(argv.modify);
+		var target = {};
+		if (!argv.argv.remain[0]) {
+			if (!argv.name) {
+				next(new Error("Need a target device name to add."));
+				return;
+			} else {
+				var keys = ["name", "type", "host", "port", "username", "description", "files"];
+				keys.forEach( function(key) {
+					if (argv[key]) {
+						target[key] = argv[key];
+					}
+				});
+				target = JSON.stringify(target);
+			}
+		} else {
+			target = argv.argv.remain.join("");
+		}
+		var deviceInfoContent = convertJsonForm(target);
 		var inDevice = JSON.parse(deviceInfoContent);
+		replaceDefaultDeviceInfo(inDevice);
 		var resolver = new novacom.Resolver();
 		async.series([
 			resolver.load.bind(resolver),
