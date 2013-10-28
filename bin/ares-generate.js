@@ -68,12 +68,12 @@ function PalmGenerate() {
 		help.format("--template, -t [string]", "Use the template named TEMPLATE"),
 		help.format("", "TEMPLATE can be searched via " + processName + " --list, -l"),
 		help.format("--property, -p [string]", "Set the property PROPERTY"),
+		help.format("--overwrite, -f", "Overwrite existing files [boolean]"),
 		help.format("", "PROPERTY (e.g.) '{\"id\": \"com.examples.helloworld\", \"version\":\"1.0.0\", \"type\":\"web\"}'"),
 		help.format("--level", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-v", "tracing level 'verbose'"),
 //		"",
 //		"Options (Not implmeneted) :",
-//		help.format("--overwrite, -f", "Overwrite existing files [boolean]"),
 //		help.format("--proxy-url, -P", "Use the given HTTP/S proxy URL [url]"),
 		"",
 		"APP_DIR is the application directory. It will be created if it does not exist.",
@@ -134,7 +134,7 @@ PalmGenerate.prototype = {
 		if (this.argv.argv.remain.length != 1) {
 			this.showUsage();
 		}
-		this.destination = this.argv.argv.remain[0];
+		this.destination = this.argv.argv.remain.splice(0,1).join("");
 
 		// Create the directorie if it does not exist
 		if (fs.existsSync(this.destination)) {
@@ -143,7 +143,14 @@ PalmGenerate.prototype = {
 				log.error('checkCreateAppDir', "'" + this.destination + "' is not a directory");
 				process.exit(1);
 			}
-			this.existed = true;
+			var childFiles = fs.readdirSync(this.destination).filter(function(file){
+				return (['.', '..'].indexOf(file) === -1);
+			});
+			if (childFiles.length > 0 ) {
+				this.existed = true;
+			} else {
+				this.existed = false;
+			}
 		} else {
 			fs.mkdirSync(this.destination);
 			this.existed = false;
@@ -163,13 +170,12 @@ PalmGenerate.prototype = {
 	},
 
 	convertToJsonFormat: function(str) {
-		return str.replace(/["]/g, "")
-				.replace(/[']/g, "")
-				.replace(/ /g, "")
+		return str.replace(/\s*"/g, "")
+				.replace(/\s*'/g, "")
 				.replace("{", "{\"")
 				.replace("}","\"}")
-				.replace(/,/g, "\",\"")
-				.replace(/:/g,"\":\"");  
+				.replace(/\s*,\s*/g, "\",\"")
+				.replace(/\s*:\s*/g, "\":\"");
 	},
 
 	isJson: function(str) {
@@ -200,9 +206,10 @@ PalmGenerate.prototype = {
 				}
 			} else {
 				this.argv.property.forEach(function(prop) {
-					prop = this.convertToJsonFormat(prop);
-					if (this.isJson(prop)) {
-						properties = JSON.parse(prop);
+					var jsonFromArgv = prop + this.argv.argv.remain.join("");
+					jsonFromArgv = this.convertToJsonFormat(jsonFromArgv);
+					if (this.isJson(jsonFromArgv)) {
+						properties = JSON.parse(jsonFromArgv);
 					} else {
 						this.insertProperty(prop, properties);
 					}
