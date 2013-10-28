@@ -298,7 +298,6 @@ function BdOpenwebOS(config, next) {
 	function fetchPackage(req, res, next) {
 		try {
 			var packageUrl = req.body.package;
-			console.log(packageUrl);
 			log.http("fetch()", packageUrl);
 
 			req.appDir.packageFile = path.join(req.appDir.root, 'package.ipk');
