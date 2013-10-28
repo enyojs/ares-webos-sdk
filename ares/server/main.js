@@ -13,6 +13,7 @@ var fs = require("fs"),
     mkdirp = require("mkdirp"),
     request = require('request'),
     tools = require('../../lib/ipkg-tools'),
+    novacom = require('../../lib/novacom'),
     rimraf = require("rimraf"),
     CombinedStream = require('combined-stream');
 
@@ -43,6 +44,7 @@ function BdOpenwebOS(config, next) {
 	var app, server;
 	app = express();
 	server = http.createServer(app);
+	server.setTimeout(config.timeout);
 
 	/*
 	 * Middleware -- applied to every verbs
@@ -102,6 +104,52 @@ function BdOpenwebOS(config, next) {
 	// express-3.x: middleware with arity === 4 is detected as the error handler
 	app.use(errorHandler);
 
+	// load Devices List
+	app.post(makeExpressRoute('/devices/load'), function(req, res, next) {
+		async.series([
+			loadDevices.bind(this, req, res),
+			returnDevicesData.bind(this, req, res)
+		], function (err, results) {
+			if (err) {
+				cleanup.bind(this)(req, res, function() {
+					log.error('/devices/load', err.stack);
+					err.stack = null;
+					next(err);
+				});
+			}
+		});
+	});
+
+	// save Devices Data
+	app.post(makeExpressRoute('/devices/save'), function(req, res, next) {
+		async.series([
+			saveDevices.bind(this, req, res),
+			answerOk.bind(this, req, res)
+		], function (err, results) {
+			if (err) {
+				cleanup.bind(this)(req, res, function() {
+					log.error('/devices/save', err.stack);
+					err.stack = null;
+					next(err);
+				});
+			}
+		});
+	});
+
+	app.post(makeExpressRoute('/devices/requestKey'), function(req, res, next) {
+		async.series([
+			getSshPrvKey.bind(this, req, res),
+			answerOk.bind(this, req, res)
+		], function (err, results) {
+			if (err) {
+				cleanup.bind(this)(req, res, function() {
+					log.error('/devices/requestKey', err.stack);
+					err.stack = null;
+					next(err);
+				});
+			}
+		});
+	});
 	/*
 	 * Verbs
 	 */
@@ -116,6 +164,8 @@ function BdOpenwebOS(config, next) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
 				cleanup.bind(this)(req, res, function() {
+					log.error('/op/build', err.stack);
+					err.stack = null;
 					next(err);
 				});
 			}
@@ -128,6 +178,7 @@ function BdOpenwebOS(config, next) {
 
 	app.post(makeExpressRoute('/op/install'), function(req, res, next) {
 		async.series([
+			close.bind(this, req, res),
 			prepare.bind(this, req, res),
 			fetchPackage.bind(this, req, res),
 			install.bind(this, req, res),
@@ -137,6 +188,8 @@ function BdOpenwebOS(config, next) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
 				cleanup.bind(this)(req, res, function() {
+					log.error('/op/install', err.stack);
+					err.stack = null;
 					next(err);
 				});
 			}
@@ -149,13 +202,14 @@ function BdOpenwebOS(config, next) {
 
 	app.post(makeExpressRoute('/op/launch'), function(req, res, next) {
 		async.series([
-			close.bind(this, req, res),
 			launch.bind(this, req, res),
 			answerOk.bind(this, req, res)
 		], function (err, results) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
 				cleanup.bind(this)(req, res, function() {
+					log.error('/op/launch', err.stack);
+					err.stack = null;
 					next(err);
 				});
 			}
@@ -173,6 +227,8 @@ function BdOpenwebOS(config, next) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
 				cleanup.bind(this)(req, res, function() {
+					log.error('/op/debug', err.stack);
+					err.stack = null;
 					next(err);
 				});
 			}
@@ -216,9 +272,10 @@ function BdOpenwebOS(config, next) {
 	}
 
 	function close(req, res, next) {
-		log.info("close()", req.body.id);
+		var appId = req.body.id || req.body.appId;
+		log.info("close()", appId);
 
-		tools.launcher.close({verbose: true, device: req.body.device}, req.body.id, null, function(err, result) {
+		tools.launcher.close({verbose: true, device: req.body.device}, appId, null, function(err, result) {
 			log.verbose("close()", err, result);
 			//FIXME: Currently new webos doesn't support re-launch, 
 			//       so alternatively use 'close->lauch'
@@ -231,9 +288,7 @@ function BdOpenwebOS(config, next) {
 	function debug(req, res, next) {
 		log.info("debug()", req.body.id);
 		res.status(200).send();
-		var app = req.body.appId;
-		var service = req.body.serviceId && req.body.serviceId.split("%2C");
-		tools.inspector.inspect({verbose: true, device: req.body.device, appId: app, serviceId: service}, null, function(err, result) {
+		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.appId}, null, function(err, result) {
 			log.verbose("debug()", err, result);
 			next(err);
 		});
@@ -333,8 +388,11 @@ function BdOpenwebOS(config, next) {
 
 	function build(req, res, next) {
 		log.info("build()", req.appDir.source, req.appDir.build);
+		var minifymode = true;
+		if(req.query.minifymode !== "true")
+			minifymode = false;
 
-		tools.packageApp([req.appDir.source], req.appDir.build, {verbose: true}, function(err, result) {
+		tools.packageApp([req.appDir.source], req.appDir.build, {verbose: true, minify: minifymode}, function(err, result) {
 			log.verbose("build()", err, result);
 			if (err) {
 				next(err);
@@ -432,6 +490,52 @@ function BdOpenwebOS(config, next) {
 	function getLastPartFooter(boundary) {
 		return '--' + boundary + '--';
 	}
+
+	function loadDevices(req, res, next){
+		var resolver = new novacom.Resolver();
+		async.waterfall([
+			resolver.load.bind(resolver),
+			resolver.list.bind(resolver),
+			function(devices, next) {
+				log.info("loadDevices()", "devices:", devices);
+				for(var i in devices){
+					// delete unused data
+					if(devices[i]["privateKey"])
+						devices[i]["privateKey"] = true;
+					else
+						devices[i]["privateKey"] = false;
+					delete devices[i]["addr"];
+				}
+				req.devices = devices;
+				next();
+			}
+		], next);
+	}
+
+	function saveDevices(req, res, next){
+		var resolver = new novacom.Resolver();
+		var devicesData = [];
+		for(var i in req.body){
+			devicesData.push(JSON.parse(req.body[i]));
+		}
+		async.waterfall([
+			resolver.save.bind(resolver, devicesData)
+		], next);
+	}
+
+	function returnDevicesData(req, res, next){
+		var devices = req.devices;
+		res.status(200);
+		res.send(devices);	
+	}
+
+	function getSshPrvKey(req, res, next){
+		var resolver = new novacom.Resolver();
+		async.waterfall([
+			resolver.load.bind(resolver),
+			resolver.getSshPrvKey.bind(resolver, {verbose: true, name: req.body.device})
+		], next);
+	}
 }
 
 BdOpenwebOS.prototype.onExit = function() {
@@ -447,12 +551,14 @@ if (path.basename(process.argv[1], '.js') === basename) {
 
 	var knownOpts = {
 		"port":		Number,
+		"timeout":	Number,
 		"pathname":	String,
 		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 		"help":		Boolean
 	};
 	var shortHands = {
 		"p": "port",
+		"t": "timeout",
 		"P": "pathname",
 		"l": "--level",
 		"v": "--level verbose",
@@ -461,12 +567,14 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	argv.pathname = argv.pathname || "/phonegap";
 	argv.port = argv.port || 0;
+	argv.timeout = argv.timeout || (4*60*1000); /* 4 mins as the default */
 	argv.level = argv.level || "http";
 	if (argv.help) {
 		console.log("Usage: node " + basename + "\n" +
-			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']\n" +
-			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                    [default: '/phonegap']\n" +
-			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']\n" +
+			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)                       [default: '0']\n" +
+			    "  -t, --timeout     milliseconds of inactivity before a server socket is presumed to have timed out [default: '240000']\n" +
+			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                                  [default: '/phonegap']\n" +
+			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')               [default: 'http']\n" +
 			    "  -h, --help        This message\n");
 		process.exit(0);
 	}
@@ -474,6 +582,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	var obj = new BdOpenwebOS({
 		pathname: argv.pathname,
 		port: argv.port,
+		timeout: argv.timeout,
 		enyoDir: path.resolve(__dirname, '..', 'enyo')
 	}, function(err, service){
 		if(err) process.exit(err);
