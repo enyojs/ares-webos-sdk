@@ -15,9 +15,7 @@ var fs = require("fs"),
     rimraf = require("rimraf"),
     CombinedStream = require('combined-stream'),
     tools = require('../../lib/ipkg-tools'),
-    novacom = require('../../lib/novacom'),
-    BdWebosBase = require('./bdWebOSBase'),
-    HttpError = require("./httpError");
+    novacom = require('../../lib/novacom');
 
 var basename = path.basename(__filename, '.js');
 log.heading = basename;
@@ -31,16 +29,19 @@ process.on('uncaughtException', function (err) {
 	process.exit(1);
 });
 
+var BdBase, HttpError;	// to be loaded from the Ares source tree
+var opt = parseParameters();
+
 function BdWebOS(config, next) {
 	config.timeout = config.timeout || (2*60*1000);
 	if (config.performCleanup === undefined) {
 		config.performCleanup = true;
 	}
 
-	BdWebosBase.call(this, config, next);
+	BdBase.call(this, config, next);
 	log.verbose('BdWebOS()', "config:",  this.config);
 }
-util.inherits(BdWebOS, BdWebosBase);
+util.inherits(BdWebOS, BdBase);
 
 BdWebOS.prototype.use = function() {
 	this.app.use(this.errorHandler);
@@ -438,10 +439,12 @@ BdWebOS.prototype.fetchPackage = function(req, res, next) {
 	}
 };
 
+function parseParameters() {
 if (path.basename(process.argv[1], '.js') === basename) {
 	// We are main.js: create & run the object...
 
 	var knownOpts = {
+		"install-dir":	path,
 		"port":		Number,
 		"timeout":	Number,
 		"pathname":	String,
@@ -449,6 +452,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		"help":		Boolean
 	};
 	var shortHands = {
+		"I": "--install-dir",
 		"p": "--port",
 		"t": "--timeout",
 		"P": "--pathname",
@@ -458,6 +462,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	};
 	var helpString = [
 		"Usage: node " + basename,
+		"  -I, --install-dir location where the Ares server is runnig from                                   [default: '$CWD']",
 		"  -p, --port        port (o) local IP port of the express server (0: dynamic)                       [default: '0']",
 		"  -t, --timeout     milliseconds of inactivity before a server socket is presumed to have timed out [default: '240000']",
 		"  -P, --pathname    URL pathname prefix (before /minify and /build                                  [default: '/webos']",
@@ -472,14 +477,22 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		});
 		process.exit(0);
 	}
+	argv.aresDir = argv["install-dir"] || process.cwd();
+	argv["install-dir"] = null;
+	BdBase = require(path.resolve(argv.aresDir, 'hermes', 'lib', 'bdBase')),
+	HttpError = require(path.resolve(argv.aresDir, 'hermes', 'lib', 'httpError'));
+	return argv;
+}
+} // function parseParameters()
 
+if (path.basename(process.argv[1], '.js') === basename) {
 	new BdWebOS({
-		pathname: argv.pathname,
-		port: argv.port,
-		timeout: argv.timeout,
+		pathname: opt.pathname,
+		port: opt.port,
+		timeout: opt.timeout,
 		basename: basename,
-		enyoDir: path.resolve(__dirname, '..', 'enyo'),
-		level: argv.level
+		enyoDir: path.resolve(opt.aresDir, 'enyo'), // Use the Enyo version provided by Ares
+		level: opt.level
 	}, function(err, service){
 		if(err) {
 			process.exit(err);
@@ -490,7 +503,6 @@ if (path.basename(process.argv[1], '.js') === basename) {
 			process.send(service);
 		}
 	});
-
 } else {
 	// ... otherwise hook into commonJS module systems
 	module.exports = BdWebOS;
