@@ -33,7 +33,9 @@
 		"semver": "2.1.0",
 		"sprintf": "0.1.x",
 		"stream-buffers": "0.2.x",
-		"express": "~3.3.4"
+		"express": "~3.3.4",
+		"base64-stream": "~0.1.2",
+		"busboy": "~0.0.5"
 	},
 	"engines": {
 		"node": "~0.10.0",
