@@ -224,16 +224,16 @@ BdWebOS.prototype.build = function(req, res, next) {
 			minifymode = false;
 
 		tools.packageApp([req.appDir.source], req.appDir.build, {verbose: true, minify: minifymode}, 
-			function(err, result) {
-				log.verbose("build()", err, result);
-				if (err) {
-					next(err);
-				} else {
-					req.ipk = result.ipk;
-					next();
-				}
-			}
-		);
+				 function(err, result) {
+					 log.verbose("build()", err, result);
+					 if (err) {
+						 next(err);
+					 } else {
+						 req.ipk = result.ipk;
+						 next();
+					 }
+				 }
+				);
 	}
 
 	function _returnBody(req, res, next) {
@@ -440,49 +440,49 @@ BdWebOS.prototype.fetchPackage = function(req, res, next) {
 };
 
 function parseParameters() {
-if (path.basename(process.argv[1], '.js') === basename) {
-	// We are main.js: create & run the object...
+	if (path.basename(process.argv[1], '.js') === basename) {
+		// We are main.js: create & run the object...
 
-	var knownOpts = {
-		"install-dir":	path,
-		"port":		Number,
-		"timeout":	Number,
-		"pathname":	String,
-		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
-		"help":		Boolean
-	};
-	var shortHands = {
-		"I": "--install-dir",
-		"p": "--port",
-		"t": "--timeout",
-		"P": "--pathname",
-		"l": "--level",
-		"v": "--level verbose",
-		"h": "--help"
-	};
-	var helpString = [
-		"Usage: node " + basename,
-		"  -I, --install-dir location where the Ares server is runnig from                                   [default: '$CWD']",
-		"  -p, --port        port (o) local IP port of the express server (0: dynamic)                       [default: '0']",
-		"  -t, --timeout     milliseconds of inactivity before a server socket is presumed to have timed out [default: '240000']",
-		"  -P, --pathname    URL pathname prefix (before /minify and /build                                  [default: '/webos']",
-		"  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')               [default: 'http']",
-		"  -h, --help        This message"
-	];
-	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
-	log.level = argv.level || "http";
-	if (argv.help) {
-		helpString.forEach(function(line) {
-			console.log(line);
-		});
-		process.exit(0);
+		var knownOpts = {
+			"install-dir":	path,
+			"port":		Number,
+			"timeout":	Number,
+			"pathname":	String,
+			"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
+			"help":		Boolean
+		};
+		var shortHands = {
+			"I": "--install-dir",
+			"p": "--port",
+			"t": "--timeout",
+			"P": "--pathname",
+			"l": "--level",
+			"v": "--level verbose",
+			"h": "--help"
+		};
+		var helpString = [
+			"Usage: node " + basename,
+			"  -I, --install-dir location where the Ares server is runnig from                                   [default: '$CWD']",
+			"  -p, --port        port (o) local IP port of the express server (0: dynamic)                       [default: '0']",
+			"  -t, --timeout     milliseconds of inactivity before a server socket is presumed to have timed out [default: '240000']",
+			"  -P, --pathname    URL pathname prefix (before /minify and /build                                  [default: '/webos']",
+			"  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')               [default: 'http']",
+			"  -h, --help        This message"
+		];
+		var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
+		log.level = argv.level || "http";
+		if (argv.help) {
+			helpString.forEach(function(line) {
+				console.log(line);
+			});
+			process.exit(0);
+		}
+		argv.aresDir = argv["install-dir"] || process.cwd();
+		argv["install-dir"] = null;
+		BdBase = require(path.resolve(argv.aresDir, 'hermes', 'lib', 'bdBase')),
+		HttpError = require(path.resolve(argv.aresDir, 'hermes', 'lib', 'httpError'));
+		return argv;
 	}
-	argv.aresDir = argv["install-dir"] || process.cwd();
-	argv["install-dir"] = null;
-	BdBase = require(path.resolve(argv.aresDir, 'hermes', 'lib', 'bdBase')),
-	HttpError = require(path.resolve(argv.aresDir, 'hermes', 'lib', 'httpError'));
-	return argv;
-}
 } // function parseParameters()
 
 if (path.basename(process.argv[1], '.js') === basename) {
