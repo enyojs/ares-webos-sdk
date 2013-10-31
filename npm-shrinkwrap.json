@@ -219,8 +219,9 @@
               "from": "diff@1.0.2"
             },
             "debug": {
-              "version": "0.7.2",
-              "from": "debug@*"
+              "version": "0.7.3",
+              "from": "debug@*",
+              "resolved": "https://registry.npmjs.org/debug/-/debug-0.7.3.tgz"
             },
             "mkdirp": {
               "version": "0.3.3",
@@ -537,13 +538,16 @@
       }
     },
     "ssh2": {
-      "version": "0.2.11",
-      "from": "ssh2@0.2.11",
-      "resolved": "https://registry.npmjs.org/ssh2/-/ssh2-0.2.11.tgz",
+      "version": "0.2.12",
+      "from": "ssh2@0.2.12",
       "dependencies": {
         "streamsearch": {
           "version": "0.1.2",
           "from": "streamsearch@0.1.2"
+        },
+        "asn1": {
+          "version": "0.1.11",
+          "from": "asn1@0.1.11"
         }
       }
     },
