@@ -20,6 +20,10 @@ process.on('uncaughtException', function (err) {
 	process.exit(1);
 });
 
+if (process.argv.length === 2) {
+	process.argv.splice(2, 0, '--help');
+}
+
 /**********************************************************************/
 
 function PalmPackage() {
