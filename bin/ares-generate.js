@@ -126,12 +126,12 @@ PalmGenerate.prototype = {
 		}
 		// TODO: Verify the template exist
 		if (this.genConfigSourceIds.length === 0) {
-			return next(new Error("Not available sources..."));
+			return next(new Error("Not available templates..."));
 		} else {
 			var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
 			sources.forEach(function(source) {
 				if (this.genConfigSourceIds.indexOf(source) === -1) {
-					return next(new Error("Failed to find source named " + source));
+					return next(new Error("Not available template named " + source));
 				}
 			}.bind(this));
 		}
@@ -292,8 +292,8 @@ PalmGenerate.prototype = {
 		log.verbose("generateProject");
 		async.series([
 				versionTool.checkNodeVersion,
-				this.checkCreateAppDir.bind(this),
 				this.checkTemplateValid.bind(this),
+				this.checkCreateAppDir.bind(this),
 				this.manageProperties.bind(this),
 				this.instantiateProject.bind(this)
 			],
