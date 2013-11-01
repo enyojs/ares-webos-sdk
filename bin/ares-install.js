@@ -14,6 +14,19 @@ var fs 		= require('fs'),
 
 /**********************************************************************/
 
+var processName = path.basename(process.argv[1]).replace(/.js/, '');
+
+process.on('uncaughtException', function (err) {
+	log.error('uncaughtException', err.toString());
+	log.info('uncaughtException', err.stack);
+	process.exit(1);
+});
+
+if (process.argv.length === 2) {
+	process.argv.splice(2, 0, '--help');
+}
+/**********************************************************************/
+
 var knownOpts = {
 	"device":	[String, null],
 	"device-list":	Boolean,
@@ -42,16 +55,6 @@ var log = npmlog;
 log.heading = processName;
 log.level = argv.level || 'warn';
 ipkg.installer.log.level = log.level;
-
-/**********************************************************************/
-
-var processName = path.basename(process.argv[1]).replace(/.js/, '');
-
-process.on('uncaughtException', function (err) {
-	log.error('uncaughtException', err.toString());
-	log.info('uncaughtException', err.stack);
-	process.exit(1);
-});
 
 /**********************************************************************/
 

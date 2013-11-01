@@ -13,6 +13,20 @@ var fs = require('fs'),
 
 /**********************************************************************/
 
+var processName = path.basename(process.argv[1]).replace(/.js/, '');
+
+process.on('uncaughtException', function (err) {
+	log.info('exit', err);
+	log.error('exit', err.toString());
+	process.exit(1);
+});
+
+if (process.argv.length === 2) {
+	process.argv.splice(2, 0, '--help');
+}
+
+/**********************************************************************/
+
 /*
 $ novacom -h
 version: novacom-22
@@ -90,7 +104,7 @@ var helpString = [
 	help.format("", " (e.g.) --add '{\"name\": \"tv2\", \"type\":\"starfish\", \"host\":\"127.0.0.1\",\"port\":\"22\"}'"),
 	help.format("", "Or <TARGET_INFO> can be specified by the following additional options."),
 	help.format("", "--name, -n [string]   device name"),
-	help.format("", "--type, -n [string]   platform type can be 'starfish' or 'emulator'"),
+	help.format("", "--type, -t [string]   platform type can be 'starfish' or 'emulator'"),
 	help.format("", "--description, -D [string]   description of target device"),
 	help.format("", "--host, -H [string]   ip address"),
 	help.format("", "--port, -p [string]   port number"),
@@ -124,15 +138,6 @@ var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-*.j
 var log = npmlog;
 log.heading = processName;
 log.level = argv.level || 'warn';
-
-/**********************************************************************/
-var processName = path.basename(process.argv[1]).replace(/.js/, '');
-
-process.on('uncaughtException', function (err) {
-	log.info('exit', err);
-	log.error('exit', err.toString());
-	process.exit(1);
-});
 
 /**********************************************************************/
 log.verbose("argv", argv);

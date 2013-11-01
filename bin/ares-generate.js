@@ -21,6 +21,10 @@ process.on('uncaughtException', function (err) {
 	process.exit(1);
 });
 
+if (process.argv.length === 2) {
+	process.argv.splice(2, 0, '--help');
+}
+
 var plugin = {};
 
 /**********************************************************************/
@@ -31,6 +35,7 @@ function PalmGenerate() {
 	this.destination = undefined;
 	this.options = {};
 	this.substitutions = [];
+	this.genConfigSourceIds = [];
 
 	this.defaultSourceType = 'template';
 
@@ -124,7 +129,16 @@ PalmGenerate.prototype = {
 			this.showUsage();
 		}
 		// TODO: Verify the template exist
-
+		if (this.genConfigSourceIds.length === 0) {
+			return next(new Error("Not available templates..."));
+		} else {
+			var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
+			sources.forEach(function(source) {
+				if (this.genConfigSourceIds.indexOf(source) === -1) {
+					return next(new Error("Not available template named " + source));
+				}
+			}.bind(this));
+		}
 		next();
 	},
 
@@ -282,8 +296,8 @@ PalmGenerate.prototype = {
 		log.verbose("generateProject");
 		async.series([
 				versionTool.checkNodeVersion,
-				this.checkCreateAppDir.bind(this),
 				this.checkTemplateValid.bind(this),
+				this.checkCreateAppDir.bind(this),
 				this.manageProperties.bind(this),
 				this.instantiateProject.bind(this)
 			],
@@ -342,6 +356,9 @@ PalmGenerate.prototype = {
 		//Change @PLUGINDIR@ to real path
 		var pluginDir = path.dirname(configFile);
 		genConfig.sources.forEach(function(source) {
+			if (source.id) {
+				this.genConfigSourceIds.push(source.id);
+			}
 			if (source.files) {
 				source.files.forEach(function(file) {
 					file.url = file.url.replace(/@PLUGINDIR@/g, pluginDir);
@@ -350,7 +367,7 @@ PalmGenerate.prototype = {
 					}
 				});
 			}
-		});
+		}.bind(this));
 
 		this.generator = new prjgen.Generator(genConfig, next);
 	}

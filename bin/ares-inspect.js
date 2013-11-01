@@ -11,7 +11,23 @@ var fs = require('fs'),
     versionTool = require('./../lib/version-tools'),
     help 		= require('./../lib/helpFormat'),
     novacom 	= require('./../lib/novacom');
-    
+
+/**********************************************************************/
+
+var processName = path.basename(process.argv[1]).replace(/.js/, '');
+
+process.on('uncaughtException', function (err) {
+	log.error('uncaughtException', err.toString());
+	process.exit(1);
+});
+
+if (process.env['ARES_BUNDLE_BROWSER'] && !argv['bundledbrowser']) {
+	delete process.env['ARES_BUNDLE_BROWSER'];
+}
+
+if (process.argv.length === 2) {
+	process.argv.splice(2, 0, '--help');
+}
 
 /**********************************************************************/
 
@@ -39,19 +55,6 @@ var shortHands = {
 };
 
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-inspect.js'*/);
-
-/**********************************************************************/
-
-var processName = path.basename(process.argv[1]).replace(/.js/, '');
-
-process.on('uncaughtException', function (err) {
-	log.error('uncaughtException', err.toString());
-	process.exit(1);
-});
-
-if (process.env['ARES_BUNDLE_BROWSER'] && !argv['bundledbrowser']) {
-	delete process.env['ARES_BUNDLE_BROWSER'];
-}
 
 /**********************************************************************/
 
