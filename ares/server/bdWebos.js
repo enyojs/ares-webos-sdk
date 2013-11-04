@@ -344,7 +344,7 @@ BdWebOS.prototype.install = function(req, res, next) {
 	function _install(req, res, next) {
 		log.info("install()", req.appDir.packageFile);
 
-		tools.installer.install({verbose: true, appId:req.body.appId, device:req.body.device}, req.appDir.packageFile, function(err, result) {
+		tools.installer.install({verbose: true, appId:req.body.appId, device:req.body.device, installMode:req.body.installMode}, req.appDir.packageFile, function(err, result) {
 			log.verbose("install()", err, result);
 			next(err);
 		});
@@ -373,7 +373,9 @@ BdWebOS.prototype.launch = function(req, res, next) {
 	function _launch(req, res, next) {
 		log.info("launch()", req.body.id);
 
-		tools.launcher.launch({verbose: true, device: req.body.device}, req.body.id, null, function(err, result) {
+		var userhome = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+		var hostedurl = userhome + req.body.hostedurl;
+		tools.launcher.launch({verbose: true, device: req.body.device, installMode:req.body.installMode, hostedurl:hostedurl}, req.body.id, null, function(err, result) {
 			log.verbose("launch()", err, result);
 			next(err);
 		});
@@ -401,7 +403,7 @@ BdWebOS.prototype.debug = function(req, res, next) {
 	function _debug(req, res, next) {
 		log.info("debug()", req.body.id);
 		res.status(200).send();
-		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.appId}, null, function(err, result) {
+		tools.inspector.inspect({verbose: true, device: req.body.device, appId: req.body.appId, installMode:req.body.installMode}, null, function(err, result) {
 			log.verbose("debug()", err, result);
 			next(err);
 		});
