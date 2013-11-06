@@ -98,6 +98,7 @@ var shortHands = {
 var helpString = [
 	"",
 	"USAGE:",
+	help.format(processName + " --list, -l", "List TARGET DEVICE"),
 	help.format(processName + " --add, -a <TARGET_INFO>", "Add TARGET_DEVICE_INFO"),
 	help.format("", "<TARGET_INFO> can be JSON Form."),
 	help.format("", " (e.g.) --add '{\"name\": \"tv2\", \"type\":\"starfish\", \"host\":\"127.0.0.1\",\"port\":\"22\"}'"),
@@ -121,13 +122,12 @@ var helpString = [
 	help.format("", "<TARGET_INFO> can be JSON Form."),
 	help.format("", " (e.g.) --modify '{\"name\":\"tv2\",\"type\":\"starfish\",\"host\":\"192.168.0.123\",\"port\":\"22\"}'"),
 	help.format("", "Or <TARGET_INFO> can be specified by the additional options. (please refer to '--add' Usage)"),
-	help.format("-l, --list", "List TARGET DEVICE"),
-	help.format("-h, --help", "Display this help"),
-	help.format("-v, --version", "Display version info"),
+	help.format(processName + " --help, -h", "Display this help"),
+	help.format(processName + " --version, -V", "Display version info"),
 	"",
 	"OPTIONS:",
+	help.format("--level", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 	help.format("-v", "tracing level 'verbose'"),
-	help.format("    --level", "tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 	""
 ];
 
