@@ -52,7 +52,7 @@
 					]
 				},
 				{
-					"id": "bootplate-2.2.0",
+					"id": "bootplate-2.2.0-X",
 					"type": "template",
 					"description": "Enyo bootplate 2.2.0",
 					"deps": ["webos-app-config"],
@@ -67,7 +67,7 @@
 					]
 				},
 				{
-					"id": "bootplate-2.1.1",
+					"id": "bootplate-2.1.1-X",
 					"type": "template",
 					"description": "Enyo bootplate 2.1.1",
 					"deps": ["webos-app-config"],
