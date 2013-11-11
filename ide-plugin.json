@@ -15,10 +15,12 @@
 		},
 		{
 			"id": "genZip",
-			"sources": [{
+			"sources": [
+				{
 				"id": "WebOS-Ports",
 				"type": null
-			}, {
+				}, 
+				{
 					"id": "bootplate-sample-local",
 					"Xtype": "template",
 					"type": null,
@@ -52,7 +54,7 @@
 					]
 				},
 				{
-					"id": "bootplate-2.2.0-X",
+					"id": "bootplate-2.2.0",
 					"type": "template",
 					"description": "Enyo bootplate 2.2.0",
 					"deps": ["webos-app-config"],
@@ -67,7 +69,7 @@
 					]
 				},
 				{
-					"id": "bootplate-2.1.1-X",
+					"id": "bootplate-2.1.1",
 					"type": "template",
 					"description": "Enyo bootplate 2.1.1",
 					"deps": ["webos-app-config"],
