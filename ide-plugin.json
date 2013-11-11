@@ -17,6 +17,10 @@
 			"id": "genZip",
 			"sources": [
 				{
+				"id": "WebOS-Ports",
+				"type": null
+				}, 
+				{
 					"id": "bootplate-sample-local",
 					"Xtype": "template",
 					"type": null,
