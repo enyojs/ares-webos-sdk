@@ -7,3 +7,6 @@
 [submodule "node_modules/ares-generator"]
 	path = node_modules/ares-generator
 	url = git@github.com:enyojs/ares-generator.git
+[submodule "templates/bootplate-moonstone"]
+	path = templates/bootplate-moonstone
+	url = git@github.com:enyojs/bootplate-moonstone.git
