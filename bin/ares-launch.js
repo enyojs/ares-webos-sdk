@@ -128,8 +128,10 @@ function showUsage() {
 		help.format("To launch an app on the TARGET DEVICE, user have to specify"),
 		help.format("the TARGET DEVICE using '--device, -d' option"),
 		"",
-		help.format("Hosted mode means start a local server based on <APP_DIR>,"),
-		help.format("then give target the server URL of <APP_DIR> to run APP"),
+		help.format("Hosted app does not need packaging/installing."),
+		help.format("Hosted app means providing app via a local server based on <APP_DIR>,"),
+		help.format("user just needs to specify <APP_DIR> path"),
+		help.format("to run APP as a hosted app without packaging, installing."),
 		"",
 		help.format("APP_ID is an application id decribed in appinfo.json"),
 		""
