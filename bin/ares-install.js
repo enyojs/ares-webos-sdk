@@ -116,7 +116,7 @@ function showUsage() {
 		help.format("To install .ipk package into TARGET DEVICE,"),
 		help.format("user have to specify the TARGET DEVICE using '--device, -d' option"),
 		"",
-		help.format("APP_ID is an application id decribed in appinfo.json")
+		help.format("APP_ID is an application id decribed in appinfo.json"),
 		"", 
 		"Examples:",
 		"",
