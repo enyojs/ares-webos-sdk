@@ -265,7 +265,7 @@ enyo.kind({
 
 		req.response(this, function(inSender, inData) {
 			this.log("inData:", inData);
-			next(null, appId);
+			next(null, appId, null);
 		});
 		req.error(this, function(inSender, inError) {
 			var response = inSender.xhrResponse, contentType, details;
@@ -284,22 +284,29 @@ enyo.kind({
 	 */
 	run: function(project, next) {
 		if (this.debug) this.log('launching');
+		var installMode = project.attributes.config.data.providers.webos.installMode || "Installed";
+		if(installMode === "Hosted"){
+			async.waterfall([
+				this._getAppDir.bind(this, project),
+				this._runApp.bind(this, project, "com.sdk.ares.hostedapp")
+			], next);
+		} else {
+		    async.waterfall([
+		    	this._checkAppInfo.bind(this, project, next),
+		    	//Build
+				this._getFilesData.bind(this, project),
+				this._submitBuildRequest.bind(this, "run", project),
+				this._prepareStore.bind(this, project),
+				this._storePkg.bind(this, project),
+				//Install
+				this._getAppInfo.bind(this, project),
+				this._getAppId.bind(this, project),
+				this._installPkg.bind(this, project, null),
+				//Run
+				this._runApp.bind(this, project)
 
-	    async.waterfall([
-	    	this._checkAppInfo.bind(this, project, next),
-	    	//Build
-			this._getFilesData.bind(this, project),
-			this._submitBuildRequest.bind(this, "run", project),
-			this._prepareStore.bind(this, project),
-			this._storePkg.bind(this, project),
-			//Install
-			this._getAppInfo.bind(this, project),
-			this._getAppId.bind(this, project),
-			this._installPkg.bind(this, project, null),
-			//Run
-			this._runApp.bind(this, project)
-
-	    ], next);
+		    ], next);
+		}
 	},
 	/**
 	 * @private
@@ -345,6 +352,18 @@ enyo.kind({
 			req.go();
 		}
 	},
+	
+	_getAppDir: function(project, next) {
+		var appDir;
+		var req = project.getService().propfind(project.getFolderId(), 1);
+			req.response(this, function(inRequest, inData) {
+				this.log("_getAppDir#inData:", inData);
+				next(null, inData);
+			});
+			req.error(this, this._handleServiceError.bind(this, "Unable to list project service folder", next));
+			req.go();
+	},
+
 	/**
 	 * @private
 	 */
@@ -452,17 +471,22 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	_runApp: function(project, appId, next) {
+	_runApp: function(project, appId, appData, next) {
 		if (this.debug) this.log('launching ' + appId);
 		this.doShowWaitPopup({msg: $L("Launching application:" + appId)});
 		if (!appId) {
 			next(new Error("Did not find application id in appinfo"));
 			return;
 		}
+		var installMode = project.attributes.config.data.providers.webos.installMode || "Installed";
+		var hostedurl = (appData) ? appData.path : "";
 		var data = {
 			id: encodeURIComponent(appId),
-			device: this.device
+			device: this.device,
+			installMode: installMode,
+			hostedurl: hostedurl
 		};
+		
 		var req = new enyo.Ajax({
 			url: this.url + '/op/launch',
 			method: 'POST',
@@ -490,25 +514,34 @@ enyo.kind({
 	 */
 	runDebug: function(project, next) {
 		if (this.debug) this.log('launching');
+		var installMode = project.attributes.config.data.providers.webos.installMode || "Installed";
+		if(installMode === "Hosted"){
+			async.waterfall([
+				this._getAppDir.bind(this, project),
+				this._runApp.bind(this, project, "com.sdk.ares.hostedapp"),
+				this._debugApp.bind(this, project),
+				this.debugService.bind(this, project)
+			], next);
+		} else {
+		    async.waterfall([
+		    	this._checkAppInfo.bind(this, project, next),
+				//Build
+				this._getFilesData.bind(this, project),
+				this._submitBuildRequest.bind(this, "debug", project),
+				this._prepareStore.bind(this, project),
+				this._storePkg.bind(this, project),
+				//Install
+				this._getAppInfo.bind(this, project),
+				this._getAppId.bind(this, project),
+				this._installPkg.bind(this, project, null),
+				//Run
+				this._runApp.bind(this, project),
+				//Debug
+				this._debugApp.bind(this, project),
+				this.debugService.bind(this, project)
 
-	    async.waterfall([
-	    	this._checkAppInfo.bind(this, project, next),
-			//Build
-			this._getFilesData.bind(this, project),
-			this._submitBuildRequest.bind(this, "debug", project),
-			this._prepareStore.bind(this, project),
-			this._storePkg.bind(this, project),
-			//Install
-			this._getAppInfo.bind(this, project),
-			this._getAppId.bind(this, project),
-			this._installPkg.bind(this, project, null),
-			//Run
-			this._runApp.bind(this, project),
-			//Debug
-			this._debugApp.bind(this, project),
-			this.debugService.bind(this, project)
-
-	    ], next);		
+		    ], next);
+		}
 	},
 
 	_debugApp: function(project, appId, next) {
@@ -518,9 +551,11 @@ enyo.kind({
 			next(new Error("Did not find application id in appinfo"));
 			return;
 		}
+		var installMode = project.attributes.config.data.providers.webos.installMode || "Installed";
 		var data = {
 			appId: encodeURIComponent(appId),
-			device: this.device
+			device: this.device,
+			installMode: installMode
 		};
 		var req = new enyo.Ajax({
 			url: this.url + '/op/debug',

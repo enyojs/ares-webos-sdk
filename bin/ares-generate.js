@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 
-var fs = require("fs"),
-    url = require("url"),
-    util = require('util'),
-    async = require('async'),
-    path = require('path'),
-    log = require('npmlog'),
+var fs 		= require("fs"),
+    url 	= require("url"),
+    util 	= require('util'),
+    async 	= require('async'),
+    path 	= require('path'),
+    log 	= require('npmlog'),
+    sprintf 	= require('sprintf').sprintf,
+    prjgen 		= require('ares-generator'),
     versionTool = require('./../lib/version-tools'),
-    console = require('./../lib/consoleSync'),
-    prjgen = require('ares-generator');
+    console 	= require('./../lib/consoleSync'),
+    help 		= require('./../lib/helpFormat');
 
 /**********************************************************************/
 
@@ -20,6 +22,10 @@ process.on('uncaughtException', function (err) {
 	process.exit(1);
 });
 
+if (process.argv.length === 2) {
+	process.argv.splice(2, 0, '--help');
+}
+
 var plugin = {};
 
 /**********************************************************************/
@@ -30,6 +36,7 @@ function PalmGenerate() {
 	this.destination = undefined;
 	this.options = {};
 	this.substitutions = [];
+	this.genConfigSourceIds = [];
 
 	this.defaultSourceType = 'template';
 
@@ -56,27 +63,38 @@ function PalmGenerate() {
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.helpString = [
-		"Usage: ares-generate [OPTIONS] APP_DIR",
 		"",
-		"Options:",
-		"  --help, -h          Display this help and exit     ",
-		"  --version           Display version info and exit  ",
-		"  --list, -l          List the available sources       [string]  [default: " + this.defaultSourceType + "]",
-		"  --overwrite, -f     Overwrite existing files         [boolean]",
-		"  --template, -t      Use the template named TEMPLATE  [path]",
-		"  --proxy-url, -P     Use the given HTTP/S proxy URL   [url]",
-		"  --property, -p      Set the property PROPERTY        [string]",
-		"  --debug, -d         Enable debug mode                [boolean]",
+		"NAME",
+		help.format(processName + " - Creates the project and displays the template list"),
 		"",
-		"APP_DIR is the application directory. It will be created if it does not exist.",
+		"SYNOPSIS",
+		help.format(processName + " [OPTION...] <APP_DIR>"),
+		help.format("\t APP_DIR is the application directory. It will be created if it does not exist."),
 		"",
-		"PROPERTY defines properties to be used during generation. Properties can be",
-		"specified as key-value pairs of the form \"key=value\" or as JSON objects of the",
-		"form '{\"key1\":\"value1\", \"key2\":\"value2\", ...}'. Surrounding quotes are required",
-		"in both cases.",
+		"OPTION",
+		help.format("-t,--template <TEMPLATE>", "specify TEMPLATE to use"),
+		help.format("", "TEMPLATE can be searched via " + processName + " --list, -l"),
 		"",
-		"TEMPLATE is the application template to use. If not specified, the default",
-		"template (the firstone marked with `isDefault: true`)."
+		help.format("-l, --list <TYPE>"),
+		help.format("\t List the available templates corresponeded with TYPE [default: " + this.defaultSourceType + "]"),
+		help.format("\t Available TYPE is 'template', 'webosConfig', 'webosService'"),
+		"",
+		help.format("-p, --property <PROPERTY>", "Set the property PROPERTY"),
+		help.format("\t PROPERTY (e.g.) '{\"id\": \"com.examples.helloworld\", \"version\":\"1.0.0\", \"type\":\"web\"}'"),
+		"",
+		help.format("-f, --overwrite", "Overwrite existing files [boolean]"),
+		help.format("--level <LEVEL>", "Tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+		help.format("-h, --help", "Display this help"),
+		help.format("-V, --version", "Display version info"),
+//		help.format("--proxy-url, -P", "Use the given HTTP/S proxy URL [url]"),
+		"",
+		"DESCRIPTION",
+		"",
+		help.format("PROPERTY defines properties to be used during generation."),
+		help.format("Properties can be specified as key-value pairs of the form \"key=value\""),
+		help.format("or as JSON objects of the form '{\"key1\":\"value1\", \"key2\":\"value2\", ...}'."),
+		help.format("Surrounding quotes are required in both cases."),
+		""
 	];
 
 	log.heading = processName;
@@ -115,7 +133,16 @@ PalmGenerate.prototype = {
 			this.showUsage();
 		}
 		// TODO: Verify the template exist
-
+		if (this.genConfigSourceIds.length === 0) {
+			return next(new Error("Not available templates..."));
+		} else {
+			var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
+			sources.forEach(function(source) {
+				if (this.genConfigSourceIds.indexOf(source) === -1) {
+					return next(new Error("Not available template named " + source));
+				}
+			}.bind(this));
+		}
 		next();
 	},
 
@@ -125,7 +152,7 @@ PalmGenerate.prototype = {
 		if (this.argv.argv.remain.length != 1) {
 			this.showUsage();
 		}
-		this.destination = this.argv.argv.remain[0];
+		this.destination = this.argv.argv.remain.splice(0,1).join("");
 
 		// Create the directorie if it does not exist
 		if (fs.existsSync(this.destination)) {
@@ -134,7 +161,14 @@ PalmGenerate.prototype = {
 				log.error('checkCreateAppDir', "'" + this.destination + "' is not a directory");
 				process.exit(1);
 			}
-			this.existed = true;
+			var childFiles = fs.readdirSync(this.destination).filter(function(file){
+				return (['.', '..'].indexOf(file) === -1);
+			});
+			if (childFiles.length > 0 ) {
+				this.existed = true;
+			} else {
+				this.existed = false;
+			}
 		} else {
 			fs.mkdirSync(this.destination);
 			this.existed = false;
@@ -151,6 +185,15 @@ PalmGenerate.prototype = {
 
 		var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
 		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
+	},
+
+	convertToJsonFormat: function(str) {
+		return str.replace(/\s*"/g, "")
+				.replace(/\s*'/g, "")
+				.replace("{", "{\"")
+				.replace("}","\"}")
+				.replace(/\s*,\s*/g, "\",\"")
+				.replace(/\s*:\s*/g, "\":\"");
 	},
 
 	isJson: function(str) {
@@ -173,6 +216,7 @@ PalmGenerate.prototype = {
 		var properties = {};
 		if (this.argv.property) {
 			if (typeof this.argv.property === 'string') {
+				this.argv.property = this.convertToJsonFormat(this.argv.property);
 				if (isJson(this.argv.property)) {
 					properties = JSON.parse(this.argv.property);
 				} else {
@@ -180,8 +224,10 @@ PalmGenerate.prototype = {
 				}
 			} else {
 				this.argv.property.forEach(function(prop) {
-					if (this.isJson(prop)) {
-						properties = JSON.parse(prop);
+					var jsonFromArgv = prop + this.argv.argv.remain.join("");
+					jsonFromArgv = this.convertToJsonFormat(jsonFromArgv);
+					if (this.isJson(jsonFromArgv)) {
+						properties = JSON.parse(jsonFromArgv);
 					} else {
 						this.insertProperty(prop, properties);
 					}
@@ -213,7 +259,7 @@ PalmGenerate.prototype = {
 				sourceIds.forEach(function(sourceId){
 					var source = sources[sourceId];
 					log.info("displayTemplateList()", "source:", source);
-					console.log(util.format("%s\t%s %s", source.id, source.description, source.isDefault ? "(default)" : ""));
+					console.log(sprintf("%-40s\t%s %s", source.id, source.description, source.isDefault ? "(default)" : ""));
 				});
 				next();
 			}
@@ -254,8 +300,8 @@ PalmGenerate.prototype = {
 		log.verbose("generateProject");
 		async.series([
 				versionTool.checkNodeVersion,
-				this.checkCreateAppDir.bind(this),
 				this.checkTemplateValid.bind(this),
+				this.checkCreateAppDir.bind(this),
 				this.manageProperties.bind(this),
 				this.instantiateProject.bind(this)
 			],
@@ -314,6 +360,9 @@ PalmGenerate.prototype = {
 		//Change @PLUGINDIR@ to real path
 		var pluginDir = path.dirname(configFile);
 		genConfig.sources.forEach(function(source) {
+			if (source.id) {
+				this.genConfigSourceIds.push(source.id);
+			}
 			if (source.files) {
 				source.files.forEach(function(file) {
 					file.url = file.url.replace(/@PLUGINDIR@/g, pluginDir);
@@ -322,7 +371,7 @@ PalmGenerate.prototype = {
 					}
 				});
 			}
-		});
+		}.bind(this));
 
 		this.generator = new prjgen.Generator(genConfig, next);
 	}

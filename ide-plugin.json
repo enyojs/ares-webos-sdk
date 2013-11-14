@@ -6,7 +6,7 @@
 			"name":"webOS",
 			"type": ["build", "test"],
 			"command":"@NODE@", "params":[
-				"@PLUGINDIR@/ares/server/main.js", "-P", "/webos", "-p", "0", "-t", "240000"
+				"@PLUGINDIR@/ares/server/bdWebos.js", "-l", "http", "-I", "@INSTALLDIR@", "-P", "/webos", "-p", "0", "-t", "240000"
 			],
 			"pluginClient": "@PLUGINURL@/ares/client/package.js",
 			"useJsonp":false,
@@ -16,6 +16,10 @@
 		{
 			"id": "genZip",
 			"sources": [
+				{
+				"id": "WebOS-Ports",
+				"type": null
+				}, 
 				{
 					"id": "bootplate-sample-local",
 					"Xtype": "template",
@@ -34,9 +38,95 @@
 					]
 				},
 				{
-					"id": "bootplate-2.3.0-pre.9",
+					"id": "bootplate-moonstone",
 					"type": "template",
 					"isDefault": true,
+					"description": "Enyo moonstone bootplate",
+					"deps": ["webappinfo"],
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
+							"excluded": [	
+								".git",
+								".gitignore",
+								".gitmodules",
+								"enyo/.git",
+								"enyo/.gitignore",
+								"lib/enyo-cordova/.git",
+								"lib/enyo-ilib/.git",
+								"lib/enyo-webos/.git",
+								"lib/layout/.git",
+								"lib/moonstone/.git",
+								"lib/moonstone/.gitignore",
+								"lib/spotlight/.git"
+							]
+						}
+					]
+				},
+				{
+					"id": "bootplate-moonstone-ActivityPanels",
+					"type": "template",
+					"isDefault": false,
+					"description": "Enyo moonstone bootplate",
+					"deps": ["webappinfo"],
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
+							"excluded": [	
+								".git",
+								".gitignore",
+								".gitmodules",
+								"enyo/.git",
+								"enyo/.gitignore",
+								"lib/enyo-cordova/.git",
+								"lib/enyo-ilib/.git",
+								"lib/enyo-webos/.git",
+								"lib/layout/.git",
+								"lib/moonstone/.git",
+								"lib/moonstone/.gitignore",
+								"lib/spotlight/.git"
+							]
+						},
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/moonstone/project-templates/ActivityPanels/source",
+							"prefixToAdd": "source"
+						}
+					]
+				},
+				{
+					"id": "bootplate-moonstone-AlwaysViewingPanels",
+					"type": "template",
+					"isDefault": false,
+					"description": "Enyo moonstone bootplate",
+					"deps": ["webappinfo"],
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
+							"excluded": [	
+								".git",
+								".gitignore",
+								".gitmodules",
+								"enyo/.git",
+								"enyo/.gitignore",
+								"lib/enyo-cordova/.git",
+								"lib/enyo-ilib/.git",
+								"lib/enyo-webos/.git",
+								"lib/layout/.git",
+								"lib/moonstone/.git",
+								"lib/moonstone/.gitignore",
+								"lib/spotlight/.git"
+							]
+						},
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/moonstone/project-templates/AlwaysViewingPanels/source",
+							"prefixToAdd": "source"
+						}
+					]
+				},
+				{
+					"id": "bootplate-2.3.0-pre.9",
+					"type": "template",
+					"isDefault": false,
 					"description": "Enyo bootplate 2.3.0-pre.9",
 					"deps": ["webos-app-config"],
 					"files": [
@@ -97,6 +187,16 @@
 					"files": [
 						{
 							"url": "http://enyojs.com/webos/webos-app-config.zip"
+						}
+					]
+				},
+				{
+					"id": "webappinfo",
+					"type": "appinfo",
+					"description": "webOS Applicatin appinfo.json",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/webappinfo"
 						}
 					]
 				}

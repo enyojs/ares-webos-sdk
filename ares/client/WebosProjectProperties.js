@@ -65,6 +65,17 @@ enyo.kind({
 						], onSetupItem: "webosSvcSetupItem", onSelect: "webosSvcSelected"}
 					]},
 					{name: "add", kind: "onyx.Button", content: "Add", style: "margin-left:5px", ontap: "addService"}
+				]},
+				{classes:"ares-row ares-align-left", components :[
+					{kind:"onyx.Groupbox", components:[
+						{kind: "onyx.GroupboxHeader", fit:true, content: "Install Mode"},
+						{kind:"Group",  onActivate:"checkMode", components:[
+							{name:"InstalledCheckBox", kind:"onyx.Checkbox", value:"Installed"},
+							{tag:"label", classes:"webos-label", content:"Installed"},
+							{name:"HostedCheckBox", kind:"onyx.Checkbox", value:"Hosted"},
+							{tag:"label", classes:"webos-label", content:"Hosted"}
+						]}
+					]}
 				]}
 			]}
 		]},
@@ -144,12 +155,15 @@ enyo.kind({
 		if(!config.enabled){
 			this.doInitSource();
 		}
+		this.setInstallMode();
 		if (this.debug) this.log("config:", this.config);
 	},
 	/** public */
-	getProjectConfig: function() {
+	getProjectConfig: function(config) {
 		if (this.debug) this.log("config:", this.config);
-		return this.config;
+		for(index in this.config){
+			config[index] = this.config[index];
+		}
 	},
     /** public */
     saveProjectConfig: function(project) {
@@ -157,6 +171,15 @@ enyo.kind({
             this.updateAppInfo(project);
         }
         return true;
+    },
+    checkMode:function(inSender, inEvent){
+    	this.config.installMode = inEvent.originator.value;
+    },
+    setInstallMode:function(){
+    	if(!this.config.installMode){
+    		this.config.installMode = "Installed";
+    	}
+    	this.$[this.config.installMode+"CheckBox"].setActive(true);
     },
     updateAppInfo: function(project) {
         var self = this;

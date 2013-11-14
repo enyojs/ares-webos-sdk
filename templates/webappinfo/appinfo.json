@@ -1,0 +1,10 @@
+{
+	"id": "com.yourdomain.enyo-app",
+	"version": "0.0.1",
+	"vendor": "My Company",
+	"type": "web",
+	"main": "index.html",
+	"title": "singlepane",
+	"icon": "icon.png",
+	"uiRevision":2
+}
