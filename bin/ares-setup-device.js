@@ -62,6 +62,7 @@ var knownOpts = {
 	"version":	Boolean,
 	// command-specific options
 	"list":		Boolean,
+	"listfull":		Boolean,
 	"add":		Boolean,
 	"remove":	[String, null],
 	"modify":	Boolean,
@@ -82,6 +83,7 @@ var shortHands = {
 	"V": ["--version"],
 	// command-specific aliases
 	"l": ["--list"],
+	"F": ["--listfull"],
 	"a": ["--add"],
 	"r": ["--remove"],
 	"m": ["--modify"],
@@ -102,6 +104,7 @@ var helpString = [
 	"",
 	"SYNOPSIS",
 	help.format(processName + " --list, -l"),
+	help.format(processName + " --listfull, -F"),
 	help.format(processName + " [OPTION...] -a, --add <DEVICE_INFO>"),
 	help.format(processName + " [OPTION...] -r, --remove <DEVICE_INFO>"),
 	help.format(processName + " [OPTION...] -m, --modify <DEVICE_INFO>"),
@@ -165,6 +168,8 @@ log.verbose("argv", argv);
 var op;
 if (argv.list) {
 	op = list;
+} else if (argv.listfull) {
+	op = listFull;
 } else if (argv.add) {
 	op = add;
 } else if (argv.remove) {
@@ -208,6 +213,21 @@ function list(next) {
 				});
 			}
 			log.info("list()", "Success");
+			next();
+		}
+	], next);
+}
+
+
+function listFull(next) {
+	var resolver = new novacom.Resolver();
+	async.waterfall([
+		resolver.load.bind(resolver),
+		resolver.listFull.bind(resolver),
+		function(deviceContentsString, next) {
+			log.info("listFull()");
+			console.log(deviceContentsString);
+			log.info("listFull()", "Success");
 			next();
 		}
 	], next);

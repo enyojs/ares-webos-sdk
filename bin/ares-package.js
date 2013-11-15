@@ -92,14 +92,12 @@ function PalmPackage() {
 		"DESCRIPTION",
 		help.format("Make .ipk package. APP_DIR means a directory path having app source."),
 		"",
-		help.format("SERVICE_DIR means a directory path having service source"),
-		help.format("if service source path is locating under APP_DIR, don't have to"),
-		help.format("specify SERVICE_DIR PKG_DIR means a directory path having"),
-		help.format("packageinfo.json file if no specified PKG_DIR, " + processName),
-		help.format("makes packageinfo.json from appinfo.json"),
+		help.format("SERVICE_DIR means a directory path having service source."),
+		help.format("If service source path is located under APP_DIR, don't specify SERVICE_DIR."),
+		help.format("PKG_DIR means a directory path having packageinfo.json file,"),
+		help.format("and if no specified PKG_DIR, " + processName + " makes packageinfo.json from appinfo.json."),
 		"",
 		help.format("APP_DIR or OUTPUT_DIR can be a relative path or an absolute path."),
-		help.format("OPTIONS can be used overlapped, but COMMAND is used isolated."),
 		""
 	];
 

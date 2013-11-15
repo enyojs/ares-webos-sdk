@@ -112,7 +112,7 @@ function showUsage() {
 		help.format("Launch native app with gdbserver"),
 		help.format("(Notice) A native app should have been installed first."),
 		"",
-		help.format("APP_ID is an application id decribed in appinfo.json"),
+		help.format("APP_ID is an application id described in appinfo.json"),
 		""
 	];
 
