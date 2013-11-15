@@ -73,7 +73,10 @@ var knownOpts = {
 	"host":		[String, null],
 	"port":		[String, null],
 	"username":		[String, null],
-	"files":		[String, null]
+	"files":		[String, null],
+	"privatekey": [String, null],
+	"passphrase": [String, null],
+	"password": [String, null]
 };
 
 var shortHands = {
@@ -94,7 +97,10 @@ var shortHands = {
 	"H": ["--host"],
 	"p": ["--port"],
 	"u": ["--username"],
-	"f": ["--files"]
+	"f": ["--files"],
+	"K": ["--privatekey"],
+	"P": ["--passphrase"],
+	"W": ["--password"]
 };
 
 var helpString = [
@@ -103,14 +109,13 @@ var helpString = [
 	help.format(processName + " - Manages target device, such as emulator and webOS Device."),
 	"",
 	"SYNOPSIS",
-	help.format(processName + " --list, -l"),
-	help.format(processName + " --listfull, -F"),
 	help.format(processName + " [OPTION...] -a, --add <DEVICE_INFO>"),
 	help.format(processName + " [OPTION...] -r, --remove <DEVICE_INFO>"),
 	help.format(processName + " [OPTION...] -m, --modify <DEVICE_INFO>"),
 	"",
 	"OPTION",
 	help.format("-l, --list", "List the available DEVICEs"),
+	help.format("-F, --listfull", "List the available DEVICEs in detail"),
 	help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 	help.format("-h, --help", "Display this help"),
 	help.format("-V, --version", "Display version info"),
@@ -129,6 +134,12 @@ var helpString = [
 	help.format("  --files, -f [string]   file stream type can be 'stream' or 'sftp'"),
 	help.format("                         if target device support sft-server,"),
 	help.format("                         sftp is more stable than general stream"),
+	help.format("  --privatekey, -K [string]   ssh private key file name."),
+	help.format("                         	   ssh private key should exist under $HOME/.ssh/"),
+	help.format("  --passphrase, -P [string]   passphrase used for generating ssh keys"),
+	help.format("  --password,   -W [string]   password for ssh connection"),
+	help.format("                              '--password' option is available,"),
+	help.format("                              only when device allows password authentication via ssh."),
 	help.format(" (e.g.) --add --name \"tv2\" --type \"starfish\" "),
 	"",
 	help.format("To remove DEVICE, use '--remove'"),
@@ -150,6 +161,11 @@ var helpString = [
 	help.format("  --files, -f [string]   file stream type can be 'stream' or 'sftp'"),
 	help.format("                         if target device support sft-server,"),
 	help.format("                         sftp is more stable than general stream"),
+	help.format("  --privatekey, -K [string]   ssh private key file name."),
+	help.format("                         	   ssh private key should exist under $HOME/.ssh/"),
+	help.format("  --passphrase, -P [string]   passphrase used for generating ssh keys"),
+	help.format("  --password,   -W [string]   password for ssh connection"),
+	help.format("                              '--password' option is available,"),
 	help.format(" (e.g.) --modify --name \"tv2\" --host \"192.168.0.123\" "),
 	""
 ];
@@ -287,6 +303,12 @@ function add(next) {
 					"description": argv.description || defaultDeviceInfo.description,
 					"files": argv.files || defaultDeviceInfo.files
 				};
+				if (argv.passphrase) {
+					target.passphrase = argv.passphrase;
+				}
+				if (argv.password) {
+					target.password = argv.password;
+				}
 				target = JSON.stringify(target);
 			}
 		} else {
@@ -294,6 +316,15 @@ function add(next) {
 		}
 		var deviceInfoContent = convertJsonForm(target);
 		var inDevice = JSON.parse(deviceInfoContent);
+		if (inDevice.privatekey) {
+			inDevice.privateKey = inDevice.privatekey;
+			delete inDevice.privatekey;
+		}
+		if (inDevice.privateKey && typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
+			inDevice.privateKey = { "openSsh": inDevice.privateKey };
+		} else if (argv.privatekey) {
+			inDevice.privateKey = { "openSsh": argv.privatekey };
+		}
 		var keys = Object.keys(defaultDeviceInfo);
 		keys.forEach(function(key) {
 			if (!inDevice[key]) {
@@ -341,7 +372,7 @@ function modify(next) {
 				next(new Error("Need a target device name to add."));
 				return;
 			} else {
-				var keys = ["name", "type", "host", "port", "username", "description", "files"];
+				var keys = ["name", "type", "host", "port", "username", "description", "files", "passphrase", "password"];
 				keys.forEach( function(key) {
 					if (argv[key]) {
 						target[key] = argv[key];
@@ -354,6 +385,15 @@ function modify(next) {
 		}
 		var deviceInfoContent = convertJsonForm(target);
 		var inDevice = JSON.parse(deviceInfoContent);
+		if (inDevice.privatekey) {
+			inDevice.privateKey = inDevice.privatekey;
+			delete inDevice.privatekey;
+		}
+		if (inDevice.privateKey && typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
+			inDevice.privateKey = { "openSsh": inDevice.privateKey };
+		} else if (argv.privatekey) {
+			inDevice.privateKey = { "openSsh": argv.privatekey };
+		}
 		replaceDefaultDeviceInfo(inDevice);
 		var resolver = new novacom.Resolver();
 		async.series([
