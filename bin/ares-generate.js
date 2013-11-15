@@ -6,6 +6,7 @@ var fs 		= require("fs"),
     async 	= require('async'),
     path 	= require('path'),
     log 	= require('npmlog'),
+    sprintf 	= require('sprintf').sprintf,
     prjgen 		= require('ares-generator'),
     versionTool = require('./../lib/version-tools'),
     console 	= require('./../lib/consoleSync'),
@@ -258,7 +259,7 @@ PalmGenerate.prototype = {
 				sourceIds.forEach(function(sourceId){
 					var source = sources[sourceId];
 					log.info("displayTemplateList()", "source:", source);
-					console.log(util.format("%s\t%s %s", source.id, source.description, source.isDefault ? "(default)" : ""));
+					console.log(sprintf("%-40s\t%s %s", source.id, source.description, source.isDefault ? "(default)" : ""));
 				});
 				next();
 			}
