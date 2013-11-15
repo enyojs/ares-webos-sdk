@@ -322,7 +322,9 @@ function add(next) {
 		}
 		if (inDevice.privateKey && typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
 			inDevice.privateKey = { "openSsh": inDevice.privateKey };
-		} 
+		} else if (argv.privatekey) {
+			inDevice.privateKey = { "openSsh": argv.privatekey };
+		}
 		var keys = Object.keys(defaultDeviceInfo);
 		keys.forEach(function(key) {
 			if (!inDevice[key]) {
@@ -389,7 +391,9 @@ function modify(next) {
 		}
 		if (inDevice.privateKey && typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
 			inDevice.privateKey = { "openSsh": inDevice.privateKey };
-		} 
+		} else if (argv.privatekey) {
+			inDevice.privateKey = { "openSsh": argv.privatekey };
+		}
 		replaceDefaultDeviceInfo(inDevice);
 		var resolver = new novacom.Resolver();
 		async.series([
