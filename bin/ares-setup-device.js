@@ -374,7 +374,7 @@ function modify(next) {
 			} else {
 				var keys = ["name", "type", "host", "port", "username", "description", "files", "passphrase", "password"];
 				keys.forEach( function(key) {
-					if (argv[key]) {
+					if (argv[key] || argv[key] === "") {
 						target[key] = argv[key];
 					}
 				});
