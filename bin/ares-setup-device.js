@@ -303,10 +303,10 @@ function add(next) {
 					"description": argv.description || defaultDeviceInfo.description,
 					"files": argv.files || defaultDeviceInfo.files
 				};
-				if (argv.passphrase) {
+				if (argv.passphrase || argv.passphrase === "") {
 					target.passphrase = argv.passphrase;
 				}
-				if (argv.password) {
+				if (argv.password || argv.password === "") {
 					target.password = argv.password;
 				}
 				target = JSON.stringify(target);
@@ -316,13 +316,14 @@ function add(next) {
 		}
 		var deviceInfoContent = convertJsonForm(target);
 		var inDevice = JSON.parse(deviceInfoContent);
-		if (inDevice.privatekey) {
+		if (inDevice.privatekey || inDevice.privatekey == "") {
 			inDevice.privateKey = inDevice.privatekey;
 			delete inDevice.privatekey;
 		}
-		if (inDevice.privateKey && typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
+		if ( (inDevice.privateKey || inDevice.privateKey === "") && 
+				typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
 			inDevice.privateKey = { "openSsh": inDevice.privateKey };
-		} else if (argv.privatekey) {
+		} else if (argv.privatekey || argv.privatekey === "") {
 			inDevice.privateKey = { "openSsh": argv.privatekey };
 		}
 		var keys = Object.keys(defaultDeviceInfo);
@@ -385,13 +386,14 @@ function modify(next) {
 		}
 		var deviceInfoContent = convertJsonForm(target);
 		var inDevice = JSON.parse(deviceInfoContent);
-		if (inDevice.privatekey) {
+		if (inDevice.privatekey || inDevice.privatekey === "") {
 			inDevice.privateKey = inDevice.privatekey;
 			delete inDevice.privatekey;
 		}
-		if (inDevice.privateKey && typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
+		if ( (inDevice.privateKey || inDevice.privateKey === "") &&
+				typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
 			inDevice.privateKey = { "openSsh": inDevice.privateKey };
-		} else if (argv.privatekey) {
+		} else if (argv.privatekey || argv.privatekey === "") {
 			inDevice.privateKey = { "openSsh": argv.privatekey };
 		}
 		replaceDefaultDeviceInfo(inDevice);
