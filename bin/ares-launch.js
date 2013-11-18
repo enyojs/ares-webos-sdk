@@ -134,7 +134,7 @@ function showUsage() {
 		help.format("to run APP as a hosted app without packaging, installing."),
 		help.format("If user wants to close Hosted app, please use com.sdk.ares.hostedapp as a <APP_ID>."),
 		"",
-		help.format("APP_ID is an application id decribed in appinfo.json"),
+		help.format("APP_ID is an application id described in appinfo.json"),
 		""
 	];
 
