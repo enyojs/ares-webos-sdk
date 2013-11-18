@@ -316,11 +316,12 @@ function add(next) {
 		}
 		var deviceInfoContent = convertJsonForm(target);
 		var inDevice = JSON.parse(deviceInfoContent);
-		if (inDevice.privatekey) {
+		if (inDevice.privatekey || inDevice.privatekey == "") {
 			inDevice.privateKey = inDevice.privatekey;
 			delete inDevice.privatekey;
 		}
-		if (inDevice.privateKey && typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
+		if ( (inDevice.privateKey || inDevice.privateKey === "") && 
+				typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
 			inDevice.privateKey = { "openSsh": inDevice.privateKey };
 		} else if (argv.privatekey || argv.privatekey === "") {
 			inDevice.privateKey = { "openSsh": argv.privatekey };
@@ -385,11 +386,12 @@ function modify(next) {
 		}
 		var deviceInfoContent = convertJsonForm(target);
 		var inDevice = JSON.parse(deviceInfoContent);
-		if (inDevice.privatekey) {
+		if (inDevice.privatekey || inDevice.privatekey === "") {
 			inDevice.privateKey = inDevice.privatekey;
 			delete inDevice.privatekey;
 		}
-		if (inDevice.privateKey && typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
+		if ( (inDevice.privateKey || inDevice.privateKey === "") &&
+				typeof inDevice.privateKey !== 'object' && typeof inDevice.privateKey === 'string') {
 			inDevice.privateKey = { "openSsh": inDevice.privateKey };
 		} else if (argv.privatekey || argv.privatekey === "") {
 			inDevice.privateKey = { "openSsh": argv.privatekey };
