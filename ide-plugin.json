@@ -124,14 +124,14 @@
 					]
 				},
 				{
-					"id": "bootplate-2.3.0-pre.9",
+					"id": "bootplate-2.3.0-pre.12",
 					"type": "template",
 					"isDefault": false,
-					"description": "Enyo bootplate 2.3.0-pre.9",
+					"description": "Enyo bootplate 2.3.0-pre.12",
 					"deps": ["webos-app-config"],
 					"files": [
 						{
-							"url": "http://enyojs.com/archive/bootplate-2.3.0-pre.9.zip",
+							"url": "http://enyojs.com/archive/bootplate-2.3.0-pre.12.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
 								"bootplate/api/"
