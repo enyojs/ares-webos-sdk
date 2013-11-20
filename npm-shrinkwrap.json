@@ -332,10 +332,6 @@
         }
       }
     },
-    "inherits": {
-      "version": "1.0.0",
-      "from": "inherits@1.x"
-    },
     "rimraf": {
       "version": "2.1.2",
       "from": "rimraf@2.1.2",
@@ -717,6 +713,11 @@
           }
         }
       }
+    },
+    "inherits": {
+      "version": "1.0.0",
+      "from": "inherits@1.0.0",
+      "resolved": "https://registry.npmjs.org/inherits/-/inherits-1.0.0.tgz"
     }
   }
 }
