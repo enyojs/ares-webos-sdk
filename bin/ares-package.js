@@ -1,20 +1,28 @@
 #!/usr/bin/env node
 
-var fs = require("fs"),
-    util = require('util'),
-    path = require('path'),
-    async = require('async'),
+var f 		= require("fs"),
+    util 	= require('util'),
+    path 	= require('path'),
+    async 	= require('async'),
+    log 	= require('npmlog'),
     versionTool = require('./../lib/version-tools'),
-    tools = require('./../lib/ipkg-tools');
+    console 	= require('./../lib/consoleSync'),
+    tools 		= require('./../lib/ipkg-tools'),
+    help 		= require('./../lib/helpFormat');
 
 /**********************************************************************/
 
 var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
-	console.error("*** " + processName + ": "+ err.toString());
+	log.error("*** " + processName + ": "+ err.toString());
+	log.info('uncaughtException', err.stack);
 	process.exit(1);
 });
+
+if (process.argv.length === 2) {
+	process.argv.splice(2, 0, '--help');
+}
 
 /**********************************************************************/
 
@@ -26,7 +34,7 @@ function PalmPackage() {
 	var knownOpts = {
 		"help":		Boolean,
 		"version":	Boolean,
-		"debug":	Boolean,
+		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 		"outdir":	path,
 		"check":	Boolean,
 		"no-minify":	Boolean,
@@ -37,30 +45,64 @@ function PalmPackage() {
 	var shortHands = {
 		"h":		"--help",
 		"V":		"--version",
-		"d":		"--debug",
 		"o":		"--outdir",
 		"c":		"--check",
-		"":"",	//no-minify
+		"n":		"--no-minify",
 		"e":		"--app-exclude",
 		"r":		"--rom",
-		"d":		"--deployscript"
+		"d":		"--deployscript",
+		"v":		["--level", "verbose"]
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.helpString = [
-		"Usage: ares-package [OPTIONS] ...",
 		"",
-		"Options:",
-		"--help, -h          Display this help and exit",
-		"--version           Display version info and exit",
-		"--debug, -d         Enable debug mode                           [boolean]",
-		"--outdir, -o        Use OUTPUT_DIR as the output directory      [path]",
-		"--check, -c         Check the application but don't package it  [boolean]",
-		"--no-minify         Skip the minification phase                 [boolean]",
-		"--app-exclude, -e   Use EXCLUDE_DIR to exclude dir in package	[path]",
-		"                    To exclude multi sub-dirs, it can be used as '-e subdir1 -e subdir2'",
-		"--rom, -r           Do not create ipk; instead output a folder structure to OUTPUT_DIR suitable for inclusion in webOS ROM image [boolean]",
-		"--deployscript, -d  Path to enyo deploy script [path]"
+		"NAME",
+		help.format(processName + " - Creates webOS application package file"),
+		"",
+		"SYNOPSIS",
+		help.format(processName + " [OPTION...] APP_DIR [SERVICE_DIR] [PKG_DIR]"),
+		"",
+		"OPTION",
+		help.format("-c, --check", "Check the application but don't package it"),
+		help.format("-o, --outdir <OUTPUT_DIR>", "Use OUTPUT_DIR as the output directory"),
+		help.format("-n, --no-minify", "Skip the minification phase"),
+		"",
+		help.format("-e, --app-exclude [RELATIVE_PATH]"),
+		help.format("\t Specify RELATIVE_PATH to exclude dir or files from package"),
+		help.format("\t To exclude multi sub-dirs or files, use '-e' options like '-e subdir1 -e subdir2'"),
+		help.format("\t (e.g.) app_dir/"),
+		help.format("\t          +--- subdir1/file1-A.txt"),
+		help.format("\t          +--- subdir1/file1-B.txt"),
+		help.format("\t          +--- subdir2/file2-C.txt"),
+		help.format("\t          +--- subdir2/file2-D.txt"),
+		help.format("\t       To exclude 'subdir1' and 'subdir2/file2-D.txt' from .ipk pakcage,"),
+		help.format("\t       user can use '" + processName + " app_dir -e subdir1 -e subdir2/file2-D.txt'"),
+		"",
+		help.format("-r, --rom"),
+		help.format("\t Do not create ipk, instead output a folder structure"),
+		help.format("\t to OUTPUT_DIR suitable for inclusion in webOS ROM image"),
+		"",
+		help.format("-d, --deployscript <deploy.js Path>"),
+		help.format("\t Set path to enyo deploy script"),
+		"",
+		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+		help.format("-h, --help", "Display this help"),
+		help.format("-V, --version", "Display version info"),
+		"",
+		"DESCRIPTION",
+		help.format("Make .ipk package. APP_DIR means a directory path having app source."),
+		"",
+		help.format("SERVICE_DIR means a directory path having service source."),
+		help.format("If service source path is located under APP_DIR, don't specify SERVICE_DIR."),
+		help.format("PKG_DIR means a directory path having packageinfo.json file,"),
+		help.format("and if no specified PKG_DIR, " + processName + " makes packageinfo.json from appinfo.json."),
+		"",
+		help.format("APP_DIR or OUTPUT_DIR can be a relative path or an absolute path."),
+		""
 	];
+
+	log.heading = processName;
+	log.level = this.argv.level || 'warn';
 }
 
 PalmPackage.prototype = {
@@ -86,9 +128,8 @@ PalmPackage.prototype = {
 	},
 
 	handleOptions: function() {
-		if (this.argv.debug) {
-			this.options.verbose = true;
-		}
+		this.options.level = log.level;
+
 		// Pass unsupported options verbatim thru the options Object -- TODO: TBR
 		for(var key in this.argv) {
 			if (this.unsupportedOptions[key]) {
@@ -118,23 +159,13 @@ PalmPackage.prototype = {
 
 	},
 
-	debug: function(msg) {
-		if (this.argv.debug) {
-			console.log(msg);
-		}
-	},
-
-	log: function(msg) {
-		console.log(msg);
-	},
-
 	exitOnError: function(msg) {
 		console.error("*** " + processName + ": "+ msg);
 		process.exit(1);
 	},
 
 	packageReady: function(err, results) {
-		this.debug("projectReady");
+		log.info("projectReady");
 		if (err) {
 			console.error("*** " + processName + ": "+ err.toString());
 			this.showUsage(1);
@@ -143,17 +174,17 @@ PalmPackage.prototype = {
 	},
 
 	appOk: function(err, results) {
-		this.debug("appOk");
+		log.info("appOk");
 		if (err) {
 			console.error("*** " + processName + ": "+ err.toString());
 			this.showUsage(1);
 		}
-		this.log("no problems detected");
+		console.log("no problems detected");
 		process.exit(0);
 	},
 
 	setOutputDir: function(next) {
-		this.debug("setOutputDir");
+		log.info("setOutputDir");
 
 		if (this.argv.outdir) {
 			this.destination = this.argv.outdir;
@@ -177,14 +208,14 @@ PalmPackage.prototype = {
 	},
 
 	checkInputDir: function(next) {
-		this.debug("checkInputDir");
+		log.info("checkInputDir");
 
 		// Check the directories, ...
 		tools.checkApp(this.argv.argv.remain, this.options, next);
 	},
 
 	packageApp: function(next) {
-		this.debug("packageApp");
+		log.info("packageApp");
 
 		tools.packageApp(this.argv.argv.remain, this.destination, this.options, next);
 	},

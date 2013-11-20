@@ -1,5 +1,7 @@
 /node_modules/.bin
 /node_modules/async
+/node_modules/base64-stream/
+/node_modules/busboy/
 /node_modules/fstream
 /node_modules/graceful-fs
 /node_modules/mkdirp
@@ -17,7 +19,9 @@
 /node_modules/temp
 /node_modules/combined-stream
 /node_modules/express
+/node_modules/readline
+/node_modules/rsync
+/node_modules/semver
 /node
 *~
-
 .DS_Store

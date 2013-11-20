@@ -6,7 +6,7 @@
 			"name":"webOS",
 			"type": ["build", "test"],
 			"command":"@NODE@", "params":[
-				"@PLUGINDIR@/ares/server/main.js", "-P", "/webos", "-p", "0"
+				"@PLUGINDIR@/ares/server/bdWebos.js", "-l", "http", "-I", "@INSTALLDIR@", "-P", "/webos", "-p", "0", "-t", "240000"
 			],
 			"pluginClient": "@PLUGINURL@/ares/client/package.js",
 			"useJsonp":false,
@@ -17,59 +17,155 @@
 			"id": "genZip",
 			"sources": [
 				{
-					"id": "bootplate-webos-2.1.1",
-					"type": "template",
-					"description": "Enyo bootplate 2.1.1",
+				"id": "WebOS-Ports",
+				"type": null
+				}, 
+				{
+					"id": "bootplate-sample-local",
+					"Xtype": "template",
+					"type": null,
+					"description": "Local Bootplate Sample(Local)",
+					"deps": ["webos-app-config"],
 					"files": [
 						{
-							"url": "bootplate-2.1.1.zip",
-							"alternateUrl": "http://enyojs.com/archive/bootplate-2.1.1.zip",
-							"prefixToRemove": "bootplate",
-							"excluded": [
-								"bootplate/api"
+							"url": "@PLUGINDIR@/../bootplate-folder-name",
+							"excluded": [	
+								".git/",
+								"enyo/.git/",
+								"lib/enyo-sample/.git/"
 							]
-						},
-						{
-							"url": "webos-app-config.zip",
-							"alternateUrl": "http://enyojs.com/webos/webos-app-config.zip"
 						}
 					]
 				},
 				{
-					"id": "bootplate-webos-2.2.0",
+					"id": "bootplate-moonstone",
+					"type": "template",
+					"isDefault": true,
+					"description": "Enyo moonstone bootplate",
+					"deps": ["webappinfo"],
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
+							"excluded": [	
+								".git",
+								".gitignore",
+								".gitmodules",
+								"enyo/.git",
+								"enyo/.gitignore",
+								"lib/enyo-cordova/.git",
+								"lib/enyo-ilib/.git",
+								"lib/enyo-webos/.git",
+								"lib/layout/.git",
+								"lib/moonstone/.git",
+								"lib/moonstone/.gitignore",
+								"lib/spotlight/.git"
+							]
+						}
+					]
+				},
+				{
+					"id": "bootplate-moonstone-ActivityPanels",
+					"type": "template",
+					"isDefault": false,
+					"description": "Enyo moonstone bootplate",
+					"deps": ["webappinfo"],
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
+							"excluded": [	
+								".git",
+								".gitignore",
+								".gitmodules",
+								"enyo/.git",
+								"enyo/.gitignore",
+								"lib/enyo-cordova/.git",
+								"lib/enyo-ilib/.git",
+								"lib/enyo-webos/.git",
+								"lib/layout/.git",
+								"lib/moonstone/.git",
+								"lib/moonstone/.gitignore",
+								"lib/spotlight/.git"
+							]
+						},
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/moonstone/project-templates/ActivityPanels/source",
+							"prefixToAdd": "source"
+						}
+					]
+				},
+				{
+					"id": "bootplate-moonstone-AlwaysViewingPanels",
+					"type": "template",
+					"isDefault": false,
+					"description": "Enyo moonstone bootplate",
+					"deps": ["webappinfo"],
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
+							"excluded": [	
+								".git",
+								".gitignore",
+								".gitmodules",
+								"enyo/.git",
+								"enyo/.gitignore",
+								"lib/enyo-cordova/.git",
+								"lib/enyo-ilib/.git",
+								"lib/enyo-webos/.git",
+								"lib/layout/.git",
+								"lib/moonstone/.git",
+								"lib/moonstone/.gitignore",
+								"lib/spotlight/.git"
+							]
+						},
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/moonstone/project-templates/AlwaysViewingPanels/source",
+							"prefixToAdd": "source"
+						}
+					]
+				},
+				{
+					"id": "bootplate-2.3.0-pre.12",
+					"type": "template",
+					"isDefault": false,
+					"description": "Enyo bootplate 2.3.0-pre.12",
+					"deps": ["webos-app-config"],
+					"files": [
+						{
+							"url": "http://enyojs.com/archive/bootplate-2.3.0-pre.12.zip",
+							"prefixToRemove": "bootplate",
+							"excluded": [
+								"bootplate/api/"
+							]
+						}
+					]
+				},
+				{
+					"id": "bootplate-2.2.0",
 					"type": "template",
 					"description": "Enyo bootplate 2.2.0",
+					"deps": ["webos-app-config"],
 					"files": [
 						{
-							"url": "bootplate-2.2.0.zip",
-							"alternateUrl": "http://enyojs.com/archive/bootplate-2.2.0.zip",
+							"url": "http://enyojs.com/archive/bootplate-2.2.0.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
-								"bootplate/api"
+								"bootplate/api/"
 							]
-						},
-						{
-							"url": "webos-app-config.zip",
-							"alternateUrl": "http://enyojs.com/webos/webos-app-config.zip"
 						}
 					]
 				},
 				{
-					"id": "bootplate-webos-nightly",
+					"id": "bootplate-2.1.1",
 					"type": "template",
-					"description": "Enyo bootplate for webOS - Nightly",
+					"description": "Enyo bootplate 2.1.1",
+					"deps": ["webos-app-config"],
 					"files": [
 						{
-							"url": "bootplate-latest.zip",
-							"alternateUrl": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
+							"url": "http://enyojs.com/archive/bootplate-2.1.1.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
-								"bootplate/api"
+								"bootplate/api/"
 							]
-						},
-						{
-							"url": "webos-app-config.zip",
-							"alternateUrl": "http://enyojs.com/webos/webos-app-config.zip"
 						}
 					]
 				},
@@ -79,9 +175,28 @@
 					"description": "Hello World webOS Service 1.0.0",
 					"files": [
 						{
-							"url": "webos-service-config.zip",
-							"alternateUrl": "http://enyojs.com/webos/webos-service-config.zip",
+							"url": "http://enyojs.com/webos/webos-service-config.zip",
 							"prefixToAdd": "services/com.yourdomain.hello.service"
+						}
+					]
+				},
+				{
+					"id": "webos-app-config",
+					"type": "webosConfig",
+					"description": "webOS Applicatin Config data",
+					"files": [
+						{
+							"url": "http://enyojs.com/webos/webos-app-config.zip"
+						}
+					]
+				},
+				{
+					"id": "webappinfo",
+					"type": "appinfo",
+					"description": "webOS Applicatin appinfo.json",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/webappinfo"
 						}
 					]
 				}

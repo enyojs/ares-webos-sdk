@@ -4,11 +4,11 @@
 BIN_DIR=$(cd `dirname $0` && pwd)
 
 # node script we are going to run
-SCRIPT=${BIN_DIR}/../lib/node_modules/ares-webos-sdk/bin/ares-package.js
+SCRIPT=${BIN_DIR}/../lib/node_modules/ares-webos-sdk/bin/ares-gdbserver.js
 
 # check file path
 if [ ! -e $SCRIPT ]; then
-    SCRIPT=${BIN_DIR}/ares-package.js
+    SCRIPT=${BIN_DIR}/ares-gdbserver.js
 fi
 
 # path to node modules

@@ -1,12 +1,30 @@
 #!/usr/bin/env node
 
-var fs = require('fs'),
-    path = require("path"),
-    ipkg = require('./../lib/ipkg-tools'),
-    npmlog = require('npmlog'),
+var fs 		= require('fs'),
+    path 	= require("path"),
+    async 	= require('async'),
+    npmlog 	= require('npmlog'),
+    sprintf = require('sprintf').sprintf,
+    nopt 	= require('nopt'),
+    ipkg 		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
-    nopt = require('nopt');
+    console 	= require('./../lib/consoleSync'),
+    help 		= require('./../lib/helpFormat'),
+	novacom 	= require('./../lib/novacom');
 
+/**********************************************************************/
+
+var processName = path.basename(process.argv[1]).replace(/.js/, '');
+
+process.on('uncaughtException', function (err) {
+	log.error('uncaughtException', err.toString());
+	log.info('uncaughtException', err.stack);
+	process.exit(1);
+});
+
+if (process.argv.length === 2) {
+	process.argv.splice(2, 0, '--help');
+}
 /**********************************************************************/
 
 var knownOpts = {
@@ -40,18 +58,8 @@ ipkg.installer.log.level = log.level;
 
 /**********************************************************************/
 
-var processName = path.basename(process.argv[1]).replace(/.js/, '');
-
-process.on('uncaughtException', function (err) {
-	log.error('uncaughtException', err.toString());
-	log.info('uncaughtException', err.stack);
-	process.exit(1);
-});
-
-/**********************************************************************/
-
 if (argv.help) {
-	help();
+	showUsage();
 	process.exit(0);
 }
 
@@ -60,14 +68,12 @@ log.verbose("argv", argv);
 var op;
 if (argv.list) {
 	op = list;
-} else if (argv.list) {
-	op = list;
 } else if (argv.install) {
 	op = install;
 } else if (argv.remove) {
 	op = remove;
 } else if (argv['device-list']) {
-	throw new Error('Not implemented');
+	op = deviceList;
 } else if (argv['version']) {
 	versionTool.showVersionAndExit();
 } else {
@@ -75,7 +81,7 @@ if (argv.list) {
 }
 
 var options = {
-	appId: 'com.lge.ares.defaultName',
+	appId: 'com.ares.defaultName',
 	device: argv.device
 };
 
@@ -87,19 +93,44 @@ if (op) {
 	});
 }
 
-function help() {
-	console.log("\n" +
-			"USAGE:\n" +
-			"\t" + processName + " [OPTIONS] <PACKAGE_FILE>\n" +
-			"\t" + processName + " [OPTIONS] --remove <PACKAGE_ID>\n" +
-			"\t" + processName + " [OPTIONS] --list|-l\n" +
-			"\t" + processName + " [OPTIONS] --device-list|-D\n" +
-			"\t" + processName + " [OPTIONS] --version|-V\n" +
-			"\t" + processName + " [OPTIONS] --help|-h\n" +
-			"\n" +
-			"OPTIONS:\n" +
-			"\t--device|-d: device name to connect to default]\n" +
-			"\t--level: tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]\n");
+function showUsage() {
+	var helpString = [
+		"",
+		"NAME",
+		help.format(processName + " - Install/Remove applications"),
+		"",
+		"SYNOPSIS",
+		help.format(processName + " [OPTION...] <PACKAGE_FILE>"),
+		"",
+		help.format(processName + " [OPTION...] -r, --remove <APP_ID>"),
+		"",
+		"OPTION",
+		help.format("-d, --device <DEVICE>", "Specify DEVICE to use"),
+		help.format("-D, --device-list", "List the available DEVICEs"),
+		help.format("-l, --list", "List the installed applications"),
+		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+		help.format("-h, --help", "Display this help"),
+		help.format("-V, --version", "Display version info"),
+		"",
+		"DESCRIPTION",
+		help.format("To install .ipk package into TARGET DEVICE,"),
+		help.format("user have to specify the TARGET DEVICE using '--device, -d' option"),
+		"",
+		help.format("APP_ID is an application id described in appinfo.json"),
+		"", 
+		"Examples:",
+		"",
+		"# Install package into emulator",
+		processName + " ~/projects/packages/com.examples.app_1.0_all.ipk -d emulator",
+		"",
+		"# Remove an application on emulator",
+		processName + " -r com.examples.app -d emulator",
+		"",
+	];
+
+	helpString.forEach(function(line) {
+		console.log(line);
+	});
 }
 
 function install() {
@@ -115,7 +146,7 @@ function install() {
 function list() {
 	ipkg.installer.list(options, function(err, pkgs) {
 		var strPkgs = "";
-		if (pkgs) pkgs.forEach(function (pkg) {
+		if (pkgs instanceof Array) pkgs.forEach(function (pkg) {
 			strPkgs = strPkgs.concat(pkg.id).concat('\n');
 		});
 		process.stdout.write(strPkgs);
@@ -124,13 +155,32 @@ function list() {
 }
 
 function remove() {
-	var pkgId = argv.remove;
+	var pkgId = (argv.remove === 'true')? argv.argv.remain[0] : argv.remove;
 	log.info("remove():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
 		process.exit(1);
 	}
 	ipkg.installer.remove(options, pkgId, finish);
+}
+
+function deviceList() {
+	var resolver = new novacom.Resolver();
+	async.waterfall([
+		resolver.load.bind(resolver),
+		resolver.list.bind(resolver),
+		function(devices, next) {
+			log.info("list()", "devices:", devices);
+			if (Array.isArray(devices)) {
+				console.log(sprintf("%-16s %-16s %-24s %s", "<DEVICE NAME>", "<PLATFORM>", "<DESCRIPTION>", "<SSH ADDRESS>"));
+				devices.forEach(function(device) {
+					console.log(sprintf("%-16s %-16s %-24s (%s)", device.name, device.type, device.description, device.addr));
+				});
+			}
+			log.info("list()", "Success");
+			next();
+		}
+	], finish);
 }
 
 /**********************************************************************/

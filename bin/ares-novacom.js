@@ -1,13 +1,29 @@
 #!/usr/bin/env node
 
-var fs = require('fs'),
-    path = require("path"),
-    npmlog = require('npmlog'),
-    nopt = require('nopt'),
-    async = require('async'),
+var fs  	= require('fs'),
+    path 	= require("path"),
+    npmlog 	= require('npmlog'),
+    nopt 	= require('nopt'),
+    async 	= require('async'),
     sprintf = require('sprintf').sprintf,
     versionTool = require('./../lib/version-tools'),
-    novacom = require('./../lib/novacom');
+    console 	= require('./../lib/consoleSync'),
+    novacom 	= require('./../lib/novacom'),
+    help 		= require('./../lib/helpFormat');
+    
+/**********************************************************************/
+
+var processName = path.basename(process.argv[1]).replace(/.js/, '');
+
+process.on('uncaughtException', function (err) {
+	log.info('exit', err);
+	log.error('exit', err.toString());
+	process.exit(1);
+});
+
+if (process.argv.length === 2) {
+	process.argv.splice(2, 0, '--help');
+}
 
 /**********************************************************************/
 
@@ -45,8 +61,18 @@ var knownOpts = {
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 	"version":	Boolean,
 	// command-specific options
+	"list":		Boolean,
+	"forward":  Boolean, 
+	"port":		[String, Array],
+	"privatekey": [String, null],
+	"passphrase": [String, null],
+	"password": [String, null],
+	"getkey":   Boolean, 
 	"device":	[String, null],
-	"port":		[String, Array]
+	// no shortHands
+	"run":		[String, null],
+	"put":	[String, null],
+	"get":	[String, null]
 };
 
 var shortHands = {
@@ -55,27 +81,72 @@ var shortHands = {
 	"v": ["--level", "verbose"],
 	"V": ["--version"],
 	// command-specific aliases
-	"l": ["list"],
-	"f": ["forward"],
-	"d": ["--device"],
-	"p": ["--port"]
+	"l": ["--list"],
+	"f": ["--forward"],
+	"p": ["--port"],
+	"K": ["--privatekey"],
+	"P": ["--passphrase"],
+	"W": ["--password"],
+	"k": ["--getkey"],
+	"d": ["--device"]
 };
 
 var helpString = [
 	"",
-	"USAGE:",
-	"\t" + processName + " [OPTIONS] list",
-	"\t" + processName + " [OPTIONS] put file://DEVICE_PATH < HOST_FILE",
-	"\t" + processName + " [OPTIONS] get file://DEVICE_PATH > HOST_FILE",
-	"\t" + processName + " [OPTIONS] run DEVICE_COMMAND",
-	"\t" + processName + " [OPTIONS] [--port DEVICE_PORT1[:HOST_PORT1]][--port DEVICE_PORT2[:HOST_PORT2]][...] forward",
-	"\t" + processName + " [OPTIONS] --version|-V",
-	"\t" + processName + " [OPTIONS] --help|-h",
+	"NAME",
+	help.format(processName + " - Command Line Tool to control target device"),
 	"",
-	"OPTIONS:",
-	"\t--device|-d: device name to connect to default]",
-	"\t--level: tracing level is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]",
-	""
+	"SYNOPSIS",
+	help.format(processName + " [OPTION...] -r, --run <DEVICE_COMMAND>"),
+	help.format(processName + " [OPTION...] -f, --forward [--port, -p DEVICE_PORT1[:HOST_PORT1]][--port, -p DEVICE_PORT2[:HOST_PORT2]][...]"),
+	help.format(processName + " [OPTION...] -k, --getkey"),
+	help.format(processName + " [OPTION...] -K, --privatekey <PRIVATE_KEY_NAME> -P, --passphrase <PASSPHASE>"),
+//  Hidden option '--password'
+//	help.format(processName + " [OPTIONS] --password, -W <PASSWORD> --device, -d <DEVICE_NAME>"),
+//	"Options (Not implmeneted) :",
+//	help.format(processName + " [OPTIONS] --put file://DEVICE_PATH < HOST_FILE"),
+//	help.format(processName + " [OPTIONS] --get file://DEVICE_PATH > HOST_FILE"),
+//	"",
+	"",
+	"OPTION",
+	help.format("-d, --device <DEVICE>", "Specify DEVICE to use"),
+	help.format("-l, --list", "List the available DEVICEs"),
+	help.format("--level <LEVEL>", "Tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+	help.format("-h, --help", "Display this help"),
+	help.format("-V, --version", "Display version info"),
+	"",
+	"DESCRIPTION",
+	help.format("'--getkey' initiates ssh key configuration to communicate with device"),
+	help.format("This option is available only when device is running 'Developer Mode' application (with appid: 'com.palmdts.devmode')."),
+	help.format("Emulator does not need ssh key configuration, it is already configurated."),
+	"",
+	help.format("(Note) If user configure a ssh registration manually without 'Developer Mode' application,"),
+	help.format("User need to update target information regarding ssh key"),
+	help.format("(e.g.) " + processName + " --privatekey id_rsa --passphrase webos --device tv"),
+	"",
+	help.format("To run a command on target device, use '--run'"),
+	"",
+	help.format("To run a port forwarding between a Host PC and the target,"),
+	help.format("'--forward' is available."),
+//  "",
+//  Hidden option '--password'
+//	help.format("To Set password for a target device named <DEVICE_NAME>,"),
+//	help.format("'--password' is available"),
+	"", 
+	"Examples:",
+	"",
+	"# Initiate ssh key configuration for tv by running 'Developer Mode' application",
+	"  then use the following command.",
+	processName + " --getkey -d tv",
+	"",
+	"# Run 'ls -al' command on emulator",
+	processName + " --run \"ls -al\" -d emulator",
+	"",
+	"# Port forwarding between TARGET_DEVICE(22) and HOST_PC(3030)",
+	processName + " --forward --port 6622:3030 -d emulator",
+	"User can connect to emulator via 3030 port",
+	"(Linux/Mac) $ ssh -p 3030 root@127.0.0.1",
+	"",
 ];
 
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-*.js'*/);
@@ -87,28 +158,23 @@ log.heading = processName;
 log.level = argv.level || 'warn';
 
 /**********************************************************************/
-
-process.on('uncaughtException', function (err) {
-	log.info('exit', err);
-	log.error('exit', err.toString());
-	process.exit(1);
-});
-
-/**********************************************************************/
-
 log.verbose("argv", argv);
 
-var op, command = argv.argv.remain.shift();
-if (command === 'list') {
+var op;
+if (argv.list) {
 	op = list;
-} else if (command === 'put') {
+} else if (argv.getkey) {
+	op = getkey;
+} else if (argv.put) {
 	op = put;
-} else if (command === 'get') {
+} else if (argv.get) {
 	op = get;
-} else if (command === 'run') {
+} else if (argv.run) {
 	op = run;
-} else if (command === 'forward') {
+} else if (argv.forward) {
 	op = forward;
+} else if (argv.privatekey || argv.passphrase || argv.password) {
+	op = setSshAuthInfo;
 } else if (argv.version) {
 	versionTool.showVersionAndExit();
 } else if (argv.help) {
@@ -140,13 +206,48 @@ function list(next) {
 		function(devices, next) {
 			log.info("list()", "devices:", devices);
 			if (Array.isArray(devices)) {
+				console.log(sprintf("%-16s %-16s %-16s %-16s %s", 
+						"<DEVICE NAME>", "<PLATFORM>", "<PRIVATE KEY>", "<PASSPHRASE>", "<SSH ADDRESS>"));
 				devices.forEach(function(device) {
-					console.log(sprintf("%-16s %-16s %-24s (%s)", device.name, device.type, device.description, device.addr));
+					var sshPrvKeyName = device.privateKeyName || "'No Ssh Key'";
+					var sshPassphrase = device.passphrase || "'No passphrase'"
+					console.log(sprintf("%-16s %-16s %-16s %-16s (%s)", 
+						device.name, device.type, sshPrvKeyName, sshPassphrase, device.addr));
 				});
 			}
 			log.info("list()", "Success");
 			next();
 		}
+	], next);
+}
+
+function getkey(next) {
+	var resolver = new novacom.Resolver();
+	async.waterfall([
+		resolver.load.bind(resolver),
+		resolver.getSshPrvKey.bind(resolver, options),
+		function(keyFileName, next) {
+			if (keyFileName) {
+				var target = {};
+				target.name = options.name;
+				target.privateKey = { "openSsh": keyFileName };
+				process.stdin.resume();
+				process.stdin.setEncoding('utf8');
+				process.stdout.write('input passphrase [default: webos]:');
+				process.stdin.on('data', function (text) {
+					var passphrase = text.toString().trim();
+					if (passphrase === '') {
+						passphrase = 'webos';
+					}
+					log.info('registed passphrase is ', passphrase);
+					target.passphrase = passphrase;
+					next(null, target);
+				});
+			} else {
+				next(null, null);
+			}
+		},
+		resolver.modifyDeviceFile.bind(resolver, 'modify')
 	], next);
 }
 
@@ -160,18 +261,23 @@ function get(next) {
 
 function run(next) {
 	var session = new novacom.Session(options, function(err, result) {
-		log.verbose("run()", "argv:", argv.argv.remain);
+		log.verbose("run()", "argv:", argv.run);
 		log.verbose("run()", "options:", options);
 		if (err) {
 			next(err);
 			return;
 		}
-		session.run(argv.argv.remain.join(" "), process.stdin, process.stdout, process.stderr, next);
+		session.run(argv.run, process.stdin, process.stdout, process.stderr, next);
 	});
 }
 
 function forward(next) {
 	log.info('forward', "ports:", argv.port);
+	if (!argv.port || argv.port.toString() === 'true') {
+		next(new Error("forward option needs port value to forward via '--port, -p DEVICE_PORT:HOST_PORT'"));
+		return;
+	}
+
 	var tasks = [
 		function(next) {
 			options.session = new novacom.Session(options, next);
@@ -195,6 +301,31 @@ function forward(next) {
 		return;
 	}
 	async.series(tasks, next);
+}
+
+function setSshAuthInfo(next) {
+	console.log('setSshAuthInfo', "privateKey:", argv.privatekey, ", passphrase:", argv.passphrase, ", password:", argv.password);
+	try {
+		var target = {
+			"name": argv.device
+		};
+		if (argv.privatekey) {
+			target.privateKey = { "openSsh": argv.privatekey };
+		}
+		if (argv.passphrase || argv.passphrase == "") {
+			target.passphrase = argv.passphrase;
+		}
+		if (argv.password || argv.password == "") {
+			target.password = argv.password;
+		}
+		var resolver = new novacom.Resolver();
+		async.series([
+			resolver.load.bind(resolver),
+			resolver.modifyDeviceFile.bind(resolver, 'modify', target)
+		], next);
+	} catch (err) {
+		next(err);
+	}
 }
 
 /**********************************************************************/
