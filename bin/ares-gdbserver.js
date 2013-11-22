@@ -30,6 +30,7 @@ if (process.argv.length === 2) {
 var knownOpts = {
 	"device":	[String, null],
 	"port":	[String, null],
+	"host-port":	[String, null],
 	"close":	Boolean,
 	"device-list":	Boolean,
 	"version":	Boolean,
@@ -39,6 +40,7 @@ var knownOpts = {
 var shortHands = {
 	"d": ["--device"],
 	"p": ["--port"],
+	"H": ["--host-port"],
 	"c": ["--close"],
 	"D": ["--device-list"],
 	"V": ["--version"],
@@ -79,6 +81,7 @@ if (argv['version']) {
 var options = {
 	device: argv.device,
 	appId: argv.argv.remain[0],
+	hostPort: argv['host-port'],
 	port: argv.port
 };
 
@@ -103,7 +106,8 @@ function showUsage() {
 		help.format("-d, --device <DEVICE>", "Specify DEVICE to use"),
 		help.format("-D, --device-list", "List the available DEVICEs"),
 		help.format("-c, --close", "close running gdbserver"),
-		help.format("-p, --port", "gdbserver port to use [default:9930]"),
+		help.format("-p, --port", "gdbserver port to be used on device [default:9930]"),
+		help.format("-H, --host-port", "Host PC's port to connect gdbserver's port  [default:9930]"),
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
 		help.format("-V, --version", "Display version info"),
