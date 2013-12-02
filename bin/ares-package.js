@@ -144,7 +144,7 @@ PalmPackage.prototype = {
 		}
 
 		if (this.argv.hasOwnProperty('app-exclude')) {
-			this.options.excludedir = this.argv['app-exclude'];
+			this.options.excludefiles = this.argv['app-exclude'];
 		}
 
 		if (this.argv.hasOwnProperty('rom')) {
