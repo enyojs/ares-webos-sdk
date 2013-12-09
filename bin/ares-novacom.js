@@ -241,6 +241,7 @@ function getkey(next) {
 					}
 					log.info('registed passphrase is ', passphrase);
 					target.passphrase = passphrase;
+					target.files = 'sftp';
 					next(null, target);
 				});
 			} else {
