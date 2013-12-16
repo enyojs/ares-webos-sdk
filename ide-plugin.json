@@ -67,7 +67,7 @@
 					"id": "bootplate-moonstone-ActivityPanels",
 					"type": "template",
 					"isDefault": false,
-					"description": "Enyo moonstone bootplate",
+					"description": "Enyo moonstone bootplate ActivityPanels",
 					"deps": ["webappinfo"],
 					"files": [
 						{
@@ -97,7 +97,7 @@
 					"id": "bootplate-moonstone-AlwaysViewingPanels",
 					"type": "template",
 					"isDefault": false,
-					"description": "Enyo moonstone bootplate",
+					"description": "Enyo moonstone bootplate AlwaysViewingPanels",
 					"deps": ["webappinfo"],
 					"files": [
 						{
