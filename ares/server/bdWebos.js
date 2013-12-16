@@ -105,12 +105,13 @@ BdWebOS.prototype.prepare = function(req, res, next) {
 };
 
 BdWebOS.prototype.load = function(req, res, next) {
+	var self = this;
 	async.series([
 		_loadDevices.bind(this, req, res),
 		_returnDevicesData.bind(this, req, res)
 	], function (err, results) {
 		if (err) {
-			this.cleanSession.bind(this)(req, res, function() {
+			self.cleanSession(req, res, function() {
 				log.error('/devices/load', err.stack);
 				err.stack = null;
 				next(err);
@@ -147,12 +148,13 @@ BdWebOS.prototype.load = function(req, res, next) {
 };
 
 BdWebOS.prototype.save = function(req, res, next) {
+	var self = this;
 	async.series([
 		_saveDevices.bind(this, req, res),
 		this.answerOk.bind(this, req, res)
 	], function (err, results) {
 		if (err) {
-			this.cleanSession.bind(this)(req, res, function() {
+			self.cleanSession(req, res, function() {
 				log.error('/devices/save', err.stack);
 				err.stack = null;
 				next(err);
@@ -173,12 +175,13 @@ BdWebOS.prototype.save = function(req, res, next) {
 };
 
 BdWebOS.prototype.requestKey = function(req, res, next) {
+	var self = this;
 	async.series([
 		_getSshPrvKey.bind(this, req, res),
 		this.answerOk.bind(this, req, res)
 	], function (err, results) {
 		if (err) {
-			this.cleanSession.bind(this)(req, res, function() {
+			self.cleanSession(req, res, function() {
 				log.error('/devices/requestKey', err.stack);
 				err.stack = null;
 				next(err);
@@ -196,6 +199,7 @@ BdWebOS.prototype.requestKey = function(req, res, next) {
 };
 
 BdWebOS.prototype.build = function(req, res, next) {
+	var self = this;
 	async.series([
 		this.prepare.bind(this, req, res),
 		this.store.bind(this, req, res),
@@ -205,7 +209,7 @@ BdWebOS.prototype.build = function(req, res, next) {
 	], function (err, results) {
 		if (err) {
 			// cleanup & run express's next() : the errorHandler
-			this.cleanSession.bind(this)(req, res, function() {
+			self.cleanSession(req, res, function() {
 				log.error('/op/build', err.stack);
 				err.stack = null;
 				next(err);
@@ -319,6 +323,7 @@ BdWebOS.prototype.build = function(req, res, next) {
 };
 
 BdWebOS.prototype.install = function(req, res, next) {
+	var self = this;
 	async.series([
 		this.close.bind(this, req, res),
 		this.prepare.bind(this, req, res),
@@ -329,7 +334,7 @@ BdWebOS.prototype.install = function(req, res, next) {
 	], function (err, results) {
 		if (err) {
 			// cleanup & run express's next() : the errorHandler
-			this.cleanSession.bind(this)(req, res, function() {
+			self.cleanSession(req, res, function() {
 				log.error('/op/install', err.stack);
 				err.stack = null;
 				next(err);
@@ -352,13 +357,14 @@ BdWebOS.prototype.install = function(req, res, next) {
 };
 
 BdWebOS.prototype.launch = function(req, res, next) {
+	var self = this;
 	async.series([
 		_launch.bind(this, req, res),
 		this.answerOk.bind(this, req, res)
 	], function (err, results) {
 		if (err) {
 			// cleanup & run express's next() : the errorHandler
-			this.cleanSession.bind(this)(req, res, function() {
+			self.cleanSession(req, res, function() {
 				log.error('/op/launch', err.stack);
 				err.stack = null;
 				next(err);
@@ -383,12 +389,13 @@ BdWebOS.prototype.launch = function(req, res, next) {
 };
 
 BdWebOS.prototype.debug = function(req, res, next) {
+	var self = this;
 	async.series([
 		_debug.bind(this, req, res)
 	], function (err, results) {
 		if (err) {
 			// cleanup & run express's next() : the errorHandler
-			this.cleanSession.bind(this)(req, res, function() {
+			self.cleanSession(req, res, function() {
 				log.error('/op/debug', err.stack);
 				err.stack = null;
 				next(err);
