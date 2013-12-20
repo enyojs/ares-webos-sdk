@@ -77,7 +77,7 @@ function PalmGenerate() {
 		"",
 		help.format("-l, --list <TYPE>"),
 		help.format("\t List the available templates corresponeded with TYPE [default: " + this.defaultSourceType + "]"),
-		help.format("\t Available TYPE is 'template', 'webosService', 'library', 'appinfo'"),
+		help.format("\t Available TYPE is 'template', 'webosService', 'appinfo'"),
 		"",
 		help.format("-p, --property <PROPERTY>", "Set the properties of appinfo.json"),
 		help.format("\t PROPERTY (e.g.) '{\"id\": \"com.examples.helloworld\", \"version\":\"1.0.0\", \"type\":\"web\"}'"),
