@@ -230,7 +230,7 @@
 					"type": "template",
 					"version": "2.3.0-rc3",
 					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
-					"deps": ["webappinfo"],
+					"deps": ["webappinfo", "enyo-onyx"],
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
@@ -242,7 +242,11 @@
 								"enyo/.gitignore",
 								"lib/enyo-cordova",
 								"lib/enyo-ilib",
-								"lib/enyo-webos"
+								"lib/enyo-webos",
+								"lib/layout/.git",
+								"lib/moonstone/.git",
+								"lib/moonstone/.gitignore",
+								"lib/spotlight/.git"
 							]
 						}
 					]
@@ -370,6 +374,24 @@
 								".gitignore",
 								".gitmodules",
 								"lib/spotlight/.git"
+							]
+						}
+					]
+				},
+				{
+					"id": "enyo-onyx",
+					"type": "library",
+					"version": "2.3.0-rc3",
+					"description": "Enyo onyx library",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/onyx",
+							"prefixToAdd": "lib/onyx",
+							"excluded": [	
+								".git",
+								".gitignore",
+								".gitmodules",
+								"lib/onyx/.git"
 							]
 						}
 					]
