@@ -218,7 +218,7 @@
 					"id": "webappinfo",
 					"type": "appinfo",
 					"version": "0.0.1",
-					"description": "webOS Applicatin appinfo.json",
+					"description": "appinfo.json for webOS Applicatin",
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/webappinfo"
@@ -230,6 +230,7 @@
 					"type": "template",
 					"version": "2.3.0-rc3",
 					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
+					"deps": ["webappinfo"],
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
@@ -241,9 +242,7 @@
 								"enyo/.gitignore",
 								"lib/enyo-cordova",
 								"lib/enyo-ilib",
-								"lib/enyo-webos",
-								"lib/moonstone",
-								"lib/spotlight"
+								"lib/enyo-webos"
 							]
 						}
 					]
