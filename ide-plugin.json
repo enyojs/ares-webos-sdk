@@ -38,9 +38,24 @@
 					]
 				},
 				{
+					"id": "bootplate-web",
+					"type": "template",
+					"version": "0.0.1",
+					"isDefault": true,
+					"description": "Basic web template for webOS - none enyo library.",
+					"deps": ["webappinfo"],
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-web.zip",
+							"prefixToRemove": "bootplate"
+						}
+					]
+				},
+				{
 					"id": "bootplate-moonstone",
 					"type": "template",
-					"isDefault": true,
+					"version": "2.3.0-rc3",
+					"isDefault": false,
 					"description": "Enyo moonstone bootplate",
 					"deps": ["webappinfo"],
 					"files": [
@@ -66,6 +81,7 @@
 				{
 					"id": "bootplate-moonstone-ActivityPanels",
 					"type": "template",
+					"version": "2.3.0-rc3",
 					"isDefault": false,
 					"description": "Enyo moonstone bootplate ActivityPanels",
 					"deps": ["webappinfo"],
@@ -96,6 +112,7 @@
 				{
 					"id": "bootplate-moonstone-AlwaysViewingPanels",
 					"type": "template",
+					"version": "2.3.0-rc3",
 					"isDefault": false,
 					"description": "Enyo moonstone bootplate AlwaysViewingPanels",
 					"deps": ["webappinfo"],
@@ -126,8 +143,9 @@
 				{
 					"id": "bootplate-2.3.0-pre.12",
 					"type": "template",
+					"version": "2.3.0-pre.12",
 					"isDefault": false,
-					"description": "Enyo bootplate 2.3.0-pre.12",
+					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
 					"deps": ["webos-app-config"],
 					"files": [
 						{
@@ -141,7 +159,8 @@
 				},
 				{
 					"id": "bootplate-2.2.0",
-					"type": "template",
+					"type": "null",
+					"version": "2.2.0",
 					"description": "Enyo bootplate 2.2.0",
 					"deps": ["webos-app-config"],
 					"files": [
@@ -156,7 +175,8 @@
 				},
 				{
 					"id": "bootplate-2.1.1",
-					"type": "template",
+					"type": "null",
+					"version": "2.1.1",
 					"description": "Enyo bootplate 2.1.1",
 					"deps": ["webos-app-config"],
 					"files": [
@@ -172,6 +192,7 @@
 				{
 					"id": "webos-service",
 					"type": "webosService",
+					"version": "0.0.1",
 					"description": "Hello World webOS Service 1.0.0",
 					"files": [
 						{
@@ -183,6 +204,7 @@
 				{
 					"id": "webos-app-config",
 					"type": "webosConfig",
+					"version": "0.0.1",
 					"description": "webOS Applicatin Config data",
 					"files": [
 						{
@@ -193,10 +215,83 @@
 				{
 					"id": "webappinfo",
 					"type": "appinfo",
+					"version": "0.0.1",
 					"description": "webOS Applicatin appinfo.json",
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/webappinfo"
+						}
+					]
+				},
+				{
+					"id": "enyo-cordova",
+					"type": "library",
+					"version": "2.3.0-rc3",
+					"description": "enyo cordova library",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/enyo-cordova",
+							"prefixToAdd": "lib/enyo-cordova"
+						}
+					]
+				},
+				{
+					"id": "enyo-ilib",
+					"type": "library",
+					"version": "2.3.0-rc3",
+					"description": "enyo ilib",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/enyo-ilib",
+							"prefixToAdd": "lib/enyo-ilib"
+						}
+					]
+				},
+				{
+					"id": "enyo-webos",
+					"type": "library",
+					"version": "2.3.0-rc3",
+					"description": "enyo library for webOS",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/enyo-webos",
+							"prefixToAdd": "lib/enyo-webos"
+						}
+					]
+				},
+				{
+					"id": "enyo-layout",
+					"type": "library",
+					"version": "2.3.0-rc3",
+					"description": "enyo layout library",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/layout",
+							"prefixToAdd": "lib/layout"
+						}
+					]
+				},
+				{
+					"id": "enyo-moonstone",
+					"type": "library",
+					"version": "2.3.0-rc3",
+					"description": "enyo moonstone library",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/moonstone",
+							"prefixToAdd": "lib/moonstone"
+						}
+					]
+				},
+				{
+					"id": "enyo-spotlight",
+					"type": "library",
+					"version": "2.3.0-rc3",
+					"description": "enyo spotlight library",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/spotlight",
+							"prefixToAdd": "lib/moonstone"
 						}
 					]
 				}
