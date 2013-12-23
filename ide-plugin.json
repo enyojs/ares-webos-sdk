@@ -218,7 +218,7 @@
 					"id": "webappinfo",
 					"type": "appinfo",
 					"version": "0.0.1",
-					"description": "appinfo.json for webOS Applicatin",
+					"description": "appinfo.json for webOS Application",
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/webappinfo"
