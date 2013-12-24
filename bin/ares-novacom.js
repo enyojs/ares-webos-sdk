@@ -64,9 +64,6 @@ var knownOpts = {
 	"list":		Boolean,
 	"forward":  Boolean, 
 	"port":		[String, Array],
-	"privatekey": [String, null],
-	"passphrase": [String, null],
-	"password": [String, null],
 	"getkey":   Boolean, 
 	"device":	[String, null],
 	// no shortHands
@@ -84,9 +81,6 @@ var shortHands = {
 	"l": ["--list"],
 	"f": ["--forward"],
 	"p": ["--port"],
-	"K": ["--privatekey"],
-	"P": ["--passphrase"],
-	"W": ["--password"],
 	"k": ["--getkey"],
 	"d": ["--device"]
 };
@@ -100,9 +94,6 @@ var helpString = [
 	help.format(processName + " [OPTION...] -r, --run <DEVICE_COMMAND>"),
 	help.format(processName + " [OPTION...] -f, --forward [--port, -p DEVICE_PORT1[:HOST_PORT1]][--port, -p DEVICE_PORT2[:HOST_PORT2]][...]"),
 	help.format(processName + " [OPTION...] -k, --getkey"),
-	help.format(processName + " [OPTION...] -K, --privatekey <PRIVATE_KEY_NAME> -P, --passphrase <PASSPHASE>"),
-//  Hidden option '--password'
-//	help.format(processName + " [OPTIONS] --password, -W <PASSWORD> --device, -d <DEVICE_NAME>"),
 //	"Options (Not implmeneted) :",
 //	help.format(processName + " [OPTIONS] --put file://DEVICE_PATH < HOST_FILE"),
 //	help.format(processName + " [OPTIONS] --get file://DEVICE_PATH > HOST_FILE"),
@@ -120,10 +111,6 @@ var helpString = [
 	help.format("This option is available only when device is running 'Developer Mode' application (with appid: 'com.palmdts.devmode')."),
 	help.format("Emulator does not need ssh key configuration, it is already configurated."),
 	"",
-	help.format("(Note) If user configure a ssh registration manually without 'Developer Mode' application,"),
-	help.format("User need to update target information regarding ssh key"),
-	help.format("(e.g.) " + processName + " --privatekey id_rsa --passphrase webos --device tv"),
-	"",
 	help.format("To run a command on target device, use '--run'"),
 	"",
 	help.format("To run a port forwarding between a Host PC and the target,"),
@@ -139,8 +126,8 @@ var helpString = [
 	"  then use the following command.",
 	processName + " --getkey -d tv",
 	"",
-	"# Run 'ls -al' command on emulator",
-	processName + " --run \"ls -al\" -d emulator",
+	"# Run 'ps -aux' command on emulator",
+	processName + " --run \"ps -aux\" -d emulator",
 	"",
 	"# Port forwarding between TARGET_DEVICE(22) and HOST_PC(3030)",
 	processName + " --forward --port 6622:3030 -d emulator",
@@ -173,8 +160,6 @@ if (argv.list) {
 	op = run;
 } else if (argv.forward) {
 	op = forward;
-} else if (argv.privatekey || argv.passphrase || argv.password) {
-	op = setSshAuthInfo;
 } else if (argv.version) {
 	versionTool.showVersionAndExit();
 } else if (argv.help) {
@@ -303,32 +288,6 @@ function forward(next) {
 	}
 	async.series(tasks, next);
 }
-
-function setSshAuthInfo(next) {
-	console.log('setSshAuthInfo', "privateKey:", argv.privatekey, ", passphrase:", argv.passphrase, ", password:", argv.password);
-	try {
-		var target = {
-			"name": argv.device
-		};
-		if (argv.privatekey) {
-			target.privateKey = { "openSsh": argv.privatekey };
-		}
-		if (argv.passphrase || argv.passphrase == "") {
-			target.passphrase = argv.passphrase;
-		}
-		if (argv.password || argv.password == "") {
-			target.password = argv.password;
-		}
-		var resolver = new novacom.Resolver();
-		async.series([
-			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, 'modify', target)
-		], next);
-	} catch (err) {
-		next(err);
-	}
-}
-
 /**********************************************************************/
 
 function finish(err, value) {
