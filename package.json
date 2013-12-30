@@ -35,7 +35,8 @@
 		"stream-buffers": "0.2.x",
 		"express": "~3.3.4",
 		"base64-stream": "~0.1.2",
-		"busboy": "~0.0.5"
+		"busboy": "~0.0.5",
+		"inherits": "~1.x"
 	},
 	"engines": {
 		"node": "~0.10.0",
@@ -73,7 +74,10 @@
 		"semver",
 		"sprintf",
 		"stream-buffers",
-		"express"
+		"express",
+		"base64-stream",
+		"busboy",
+		"inherits"
 	],
 	"files": [
 		"DEMO.md",
