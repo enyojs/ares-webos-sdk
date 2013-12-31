@@ -39,6 +39,7 @@ function PalmGenerate() {
 	this.genConfigSourceIds = [];
 
 	this.defaultSourceType = 'template';
+	this.defaultEnyoVersion = '2.3.0';
 
 	var knownOpts = {
 		"help":		Boolean,
@@ -48,6 +49,7 @@ function PalmGenerate() {
 		"template":	[String, Array],
 		"property":	[String, Array],
 		"proxy-url":	url,
+		"onDevice": String,
 		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
 	};
 	var shortHands = {
@@ -58,10 +60,12 @@ function PalmGenerate() {
 		"t":		"--template",
 		"p":		"--property",
 		"P":		"--proxy-url",
+		"D":		"--onDevice",
 		"v":		["--level", "verbose"]
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
+	this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice)? this.defaultEnyoVersion:this.argv.onDevice;
 	this.helpString = [
 		"",
 		"NAME",
@@ -81,6 +85,10 @@ function PalmGenerate() {
 		"",
 		help.format("-p, --property <PROPERTY>", "Set the properties of appinfo.json"),
 		help.format("\t PROPERTY (e.g.) '{\"id\": \"com.examples.helloworld\", \"version\":\"1.0.0\", \"type\":\"web\"}'"),
+		"",
+		help.format("-D, --onDevice <ENYO-VERSION>"),
+		help.format("\t ENYO-VERSION is enyo framework version to use [default: " + this.defaultEnyoVersion + "]"),
+		help.format("\t This option is applied to 'enyoVersion', 'onDeviceSource' field in appinfo.json"),
 		"",
 		help.format("-f, --overwrite", "Overwrite existing files [boolean]"),
 		help.format("--level <LEVEL>", "Tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
@@ -214,6 +222,7 @@ PalmGenerate.prototype = {
 	manageProperties: function(next) {
 		log.info("manageProperties");
 		var properties = {};
+		var substitution = { fileRegexp: "appinfo.json" };
 		if (this.argv.property) {
 			if (typeof this.argv.property === 'string') {
 				this.argv.property = this.convertToJsonFormat(this.argv.property);
@@ -233,8 +242,12 @@ PalmGenerate.prototype = {
 					}
 				}, this);
 			}
-			this.substitutions.push({ fileRegexp: "appinfo.json", json: properties});
+			substitution.json = properties;
 		}
+		//Default substitution
+		var appName = path.basename(this.destination);
+		substitution.vars = {"@DIR@":appName, "@ENYO-VERSION@":this.argv.onDevice};
+		this.substitutions.push(substitution);
 		next();
 	},
 
