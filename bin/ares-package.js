@@ -90,7 +90,7 @@ function PalmPackage() {
 		"",
 		"EXAMPLES",
 		"",
-		"# Create a package for the webOS application excluded all text files and the tests directory.",
+		"# Create a package for the webOS application excluding all text files and the tests directory.",
 		processName+" --exclude *.txt --exclude tests",
 		""
 	];

@@ -65,7 +65,7 @@ function PalmGenerate() {
 	this.helpString = [
 		"",
 		"NAME",
-		help.format(processName + " - Creates the project and displays the template list"),
+		help.format(processName + " - Creates webOS app projects from templates"),
 		"",
 		"SYNOPSIS",
 		help.format(processName + " [OPTION...] <APP_DIR>"),
@@ -76,7 +76,7 @@ function PalmGenerate() {
 		help.format("", "TEMPLATE can be listed via " + processName + " --list, -l"),
 		"",
 		help.format("-l, --list <TYPE>"),
-		help.format("\t List the available templates corresponeded with TYPE [default: " + this.defaultSourceType + "]"),
+		help.format("\t List the available templates corresponding with TYPE [default: " + this.defaultSourceType + "]"),
 		help.format("\t Available TYPE is 'template', 'webosService', 'appinfo'"),
 		"",
 		help.format("-p, --property <PROPERTY>", "Set the properties of appinfo.json"),
