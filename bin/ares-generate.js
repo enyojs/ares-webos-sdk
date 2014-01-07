@@ -36,7 +36,7 @@ function PalmGenerate() {
 	this.destination = undefined;
 	this.options = {};
 	this.substitutions = [];
-	this.genConfigSourceIds = [];
+	this.genConfigSources = {};
 
 	this.defaultSourceType = 'template';
 	this.defaultEnyoVersion = '2.3.0';
@@ -48,6 +48,7 @@ function PalmGenerate() {
 		"overwrite":	Boolean,
 		"template":	[String, Array],
 		"property":	[String, Array],
+		"file":	[String, Array],
 		"proxy-url":	url,
 		"onDevice": String,
 		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
@@ -59,6 +60,7 @@ function PalmGenerate() {
 		"f":		"--overwrite",
 		"t":		"--template",
 		"p":		"--property",
+		"F":		"--file",
 		"P":		"--proxy-url",
 		"D":		"--onDevice",
 		"v":		["--level", "verbose"]
@@ -66,6 +68,32 @@ function PalmGenerate() {
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice)? this.defaultEnyoVersion:this.argv.onDevice;
+	this.argv.file = (this.argv.file == 'true' || !this.argv.file)? []:this.argv.file;
+	var pluginDir = path.dirname(this.configFile);
+	var dirName = this.argv.argv.remain[0];
+	if (dirName) {
+		var dirNameArry = dirName.split('.');
+		switch (dirNameArry.length) {
+			case 2:
+				if (dirNameArry[0] == "com") {
+					dirNameArry.splice(1, 0, "yourdomain");
+				} else {
+					dirNameArry.splice(0, 0, "com");
+				}
+				break;
+			case 1:
+				dirNameArry.splice(0, 0, "com.yourdomain");
+				break;
+			default:
+				break;
+		}
+		dirName = dirNameArry.join(".");
+	}
+	this.substituteWords = {
+		"@PLUGINDIR@": pluginDir,
+		"@ID@": dirName,
+		"@ENYO-VERSION@":this.argv.onDevice
+	};
 	this.helpString = [
 		"",
 		"NAME",
@@ -123,7 +151,7 @@ PalmGenerate.prototype = {
 					return source.isDefault;
 				});
 				var defaultTemplate = matchedSources[0] || sources[0];
-				this.argv.template = defaultTemplate.id;
+				this.argv.template = [defaultTemplate.id];
 				log.info("applyDefaultTemplate#defaultTemplate:", this.argv.template);
 				next();
 			}
@@ -141,12 +169,12 @@ PalmGenerate.prototype = {
 			this.showUsage();
 		}
 		// TODO: Verify the template exist
-		if (this.genConfigSourceIds.length === 0) {
+		if (Object.keys(this.genConfigSources).length === 0) {
 			return next(new Error("Not available templates..."));
 		} else {
 			var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
 			sources.forEach(function(source) {
-				if (this.genConfigSourceIds.indexOf(source) === -1) {
+				if (!this.genConfigSources[source]) {
 					return next(new Error("Not available template named " + source));
 				}
 			}.bind(this));
@@ -185,6 +213,45 @@ PalmGenerate.prototype = {
 		next();
 	},
 
+	getSubstFileListFromConfig: function(next) {
+		var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
+		sources.forEach(function(source) {
+			configSource = this.genConfigSources[source];
+			if (configSource.deps) {
+				configSource.deps.forEach(function(subSource) {
+					_addSubstFile(this.argv.file, this.genConfigSources[subSource]);
+				}.bind(this));
+			}
+			_addSubstFile(this.argv.file, configSource);
+
+			function _addSubstFile(substFiles, configSourceItem) {
+				var files = configSourceItem.filesubstitution;
+				if (files) {
+					files.forEach(function(file) {
+						substFiles.push(file);
+					});
+				}
+			}
+		}.bind(this));
+		next();
+	},
+
+	setSubstitutions: function(next) {
+		var self = this;
+		var propertyFiles;
+		if (this.argv.file instanceof Array) {
+			propertyFiles = this.argv.file;
+		} else {
+			propertyFiles = [this.argv.file];
+		}
+
+		async.forEachSeries(propertyFiles, function(file, next) {
+			self.manageProperties(file, next);
+		}, function(err) {
+			next(err);
+		});
+	},
+
 	instantiateProject: function(next) {
 		log.info("instantiateProject");
 		if (this.argv.overwrite || !this.existed) {
@@ -219,10 +286,11 @@ PalmGenerate.prototype = {
 		log.info("Inserting property " + values[0] + " = " + values[1]);
 	},
 
-	manageProperties: function(next) {
+	manageProperties: function(file, next) {
 		log.info("manageProperties");
 		var properties = {};
-		var substitution = { fileRegexp: "appinfo.json" };
+		file = file.replace(/\*/g, "").replace(/$/g,"$");
+		var substitution = { fileRegexp: file };
 		if (this.argv.property) {
 			if (typeof this.argv.property === 'string') {
 				this.argv.property = this.convertToJsonFormat(this.argv.property);
@@ -242,11 +310,22 @@ PalmGenerate.prototype = {
 					}
 				}, this);
 			}
-			substitution.json = properties;
+			
+			//Currently property options is proper for substitution of appinfo.json
+			if (file.match(/appinfo.json/gi)) {
+				//substitution for json
+				substitution.json = properties;
+			}
+
+			//property option can be used for substitution of string
+			for (propKey in properties) {
+				var word = "@"+propKey.toUpperCase()+"@";
+				var value = properties[propKey];
+				this.substituteWords[word] = properties[propKey];
+			}
 		}
-		//Default substitution
-		var appName = path.basename(this.destination);
-		substitution.regexp = {"@DIR@":appName, "@ENYO-VERSION@":this.argv.onDevice};
+		//substitution for string
+		substitution.regexp = this.substituteWords;
 		this.substitutions.push(substitution);
 		next();
 	},
@@ -315,7 +394,9 @@ PalmGenerate.prototype = {
 				versionTool.checkNodeVersion,
 				this.checkTemplateValid.bind(this),
 				this.checkCreateAppDir.bind(this),
-				this.manageProperties.bind(this),
+				this.getSubstFileListFromConfig.bind(this),
+				this.setSubstitutions.bind(this),
+				this.loadPluginConfig.bind(this, this.configFile),
 				this.instantiateProject.bind(this)
 			],
 			this.projectReady.bind(this));
@@ -353,6 +434,11 @@ PalmGenerate.prototype = {
 			throw "Not a file: '"+configFile+"': ";
 		}
 		var configContent = fs.readFileSync(configFile, 'utf8');
+		for (key in this.substituteWords) {
+			var word = new RegExp(key, "g");
+			configContent = configContent.replace(word, this.substituteWords[key]);
+		}
+
 		try {
 			this.plugin = JSON.parse(configContent);
 		} catch(e) {
@@ -370,15 +456,12 @@ PalmGenerate.prototype = {
 		};
 		genConfig = util._extend(genConfig, this.plugin.services[0]);
 
-		//Change @PLUGINDIR@ to real path
-		var pluginDir = path.dirname(configFile);
 		genConfig.sources.forEach(function(source) {
 			if (source.id) {
-				this.genConfigSourceIds.push(source.id);
+				this.genConfigSources[source.id] = source;
 			}
 			if (source.files) {
 				source.files.forEach(function(file) {
-					file.url = file.url.replace(/@PLUGINDIR@/g, pluginDir);
 					if (process.platform === 'win32') {
 						file.url = file.url.replace(/\\/g,'/');
 					}
