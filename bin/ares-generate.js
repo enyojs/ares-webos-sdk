@@ -246,7 +246,7 @@ PalmGenerate.prototype = {
 		}
 		//Default substitution
 		var appName = path.basename(this.destination);
-		substitution.vars = {"@DIR@":appName, "@ENYO-VERSION@":this.argv.onDevice};
+		substitution.regexp = {"@DIR@":appName, "@ENYO-VERSION@":this.argv.onDevice};
 		this.substitutions.push(substitution);
 		next();
 	},
