@@ -41,7 +41,7 @@
 					"id": "bootplate-web",
 					"type": "template",
 					"version": "0.0.1",
-					"isDefault": true,
+					"isDefault": false,
 					"description": "Basic web template for webOS - none enyo library.",
 					"deps": ["webappinfo"],
 					"files": [
@@ -55,7 +55,7 @@
 					"id": "bootplate-moonstone",
 					"type": "template",
 					"version": "2.3.0-rc3",
-					"isDefault": false,
+					"isDefault": true,
 					"description": "Enyo moonstone bootplate",
 					"deps": ["webappinfo"],
 					"files": [
