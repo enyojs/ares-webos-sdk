@@ -1,15 +1,15 @@
 [submodule "node_modules/tar"]
 	path = node_modules/tar
-	url = ../../enyojs/node-tar.git
+	url = ../node-tar.git
 [submodule "enyo"]
 	path = enyo
-	url = git@github.com:enyojs/enyo.git
+	url = ../enyo.git
 [submodule "node_modules/ares-generator"]
 	path = node_modules/ares-generator
-	url = git@github.com:enyojs/ares-generator.git
+	url = ../ares-generator.git
 [submodule "templates/bootplate-moonstone"]
 	path = templates/bootplate-moonstone
-	url = git@github.com:enyojs/bootplate-moonstone.git
+	url = ../bootplate-moonstone.git
 [submodule "templates/onyx"]
 	path = templates/onyx
-	url = git@github.com:enyojs/onyx.git
+	url = ../onyx.git
