@@ -65,7 +65,7 @@ function PalmGenerate() {
 	this.helpString = [
 		"",
 		"NAME",
-		help.format(processName + " - Creates webOS app projects from templates"),
+		help.format(processName + " - Create webOS app projects from templates"),
 		"",
 		"SYNOPSIS",
 		help.format(processName + " [OPTION...] <APP_DIR>"),

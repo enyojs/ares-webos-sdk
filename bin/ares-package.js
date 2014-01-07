@@ -57,7 +57,7 @@ function PalmPackage() {
 	this.helpString = [
 		"",
 		"NAME",
-		help.format(processName + " - Creates webOS application package file"),
+		help.format(processName + " - Create a webOS application package file"),
 		"",
 		"SYNOPSIS",
 		help.format(processName + " [OPTION...] APP_DIR [SERVICE_DIR] [PKG_DIR]"),
