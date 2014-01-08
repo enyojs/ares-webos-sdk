@@ -115,7 +115,7 @@ function showUsage() {
 		help.format("-D, --device-list", "List the available DEVICEs"),
 		help.format("-l, --list", "List the installed app IDs"),
 		help.format("-F, --listfull", "List the installed applications' infomations"),
-		help.format("-t, --type <TYPE>", "specify app TYPE (web, native, ...)"),
+		help.format("-t, --type <TYPE>", "Specify app TYPE (web, native, ...)"),
 		help.format("", 					"this option can be used with '--list' or '--listfull'"),
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
