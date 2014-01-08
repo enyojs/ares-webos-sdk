@@ -177,6 +177,7 @@ function listFull() {
 					return;
 				}
 			}
+			strPkgs = strPkgs.concat('----------------\n');
 			strPkgs = strPkgs.concat("id:"+ pkg.id+", ");
 			for (key in pkg) {
 				if (key == "id") continue;
