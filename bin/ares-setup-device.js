@@ -268,10 +268,12 @@ function replaceDefaultDeviceInfo(inDevice) {
 			inDevice.privateKey = { "openSsh": "webos_emul" };
 			inDevice.files = "sftp";
 		} else if (inDevice.type && inDevice.type == "starfish") {
-			if (inDevice.port == 22) {
+			if (inDevice.port == 22 || inDevice.username == "root") {
 				inDevice.username = "root";
-			} else if(inDevice.port == 9922) {
+				inDevice.port = 22;
+			} else if(inDevice.port == 9922 || inDevice.username == "prisoner") {
 				inDevice.username = "prisoner";
+				inDevice.port = 9922;
 			}
 		}
 	}
