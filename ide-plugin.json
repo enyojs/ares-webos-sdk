@@ -57,7 +57,7 @@
 					"version": "2.3.0-rc3",
 					"isDefault": true,
 					"description": "Enyo moonstone bootplate",
-					"deps": ["webappinfo"],
+					"deps": ["enyoappinfo"],
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
@@ -84,7 +84,7 @@
 					"version": "2.3.0-rc3",
 					"isDefault": false,
 					"description": "Enyo moonstone bootplate ActivityPanels",
-					"deps": ["webappinfo"],
+					"deps": ["enyoappinfo"],
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
@@ -115,7 +115,7 @@
 					"version": "2.3.0-rc3",
 					"isDefault": false,
 					"description": "Enyo moonstone bootplate AlwaysViewingPanels",
-					"deps": ["webappinfo"],
+					"deps": ["enyoappinfo"],
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
@@ -218,10 +218,21 @@
 					"id": "webappinfo",
 					"type": "appinfo",
 					"version": "0.0.1",
-					"description": "appinfo.json for webOS Applicatin",
+					"description": "minimal appinfo.json for webOS Applicatin",
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/webappinfo"
+						}
+					]
+				},
+				{
+					"id": "enyoappinfo",
+					"type": "appinfo",
+					"version": "0.0.1",
+					"description": "appinfo.json to use built-in enyo framework on WebOS Device",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/enyoappinfo"
 						}
 					]
 				},
@@ -230,7 +241,7 @@
 					"type": "template",
 					"version": "2.3.0-rc3",
 					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
-					"deps": ["webappinfo", "enyo-onyx"],
+					"deps": ["enyoappinfo", "enyo-onyx"],
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/bootplate-moonstone",

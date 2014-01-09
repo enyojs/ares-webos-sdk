@@ -14,7 +14,7 @@
 		"ares-setup-device": "./bin/ares-setup-device.js"
 	},
 	"dependencies": {
-		"ares-generator": "0.2.4",
+		"ares-generator": "0.3.4",
 		"shelljs": "~0.1.4",
 		"request": "2.12.x",
 		"async": "~0.2.9",
