@@ -71,11 +71,6 @@ log.verbose("argv", argv);
 var installMode = "Installed";
 var hostedurl = "";
 var params = {};
-if (argv.params) {
-	argv.params.forEach(function(keyPair) {
-		insertParams(params, keyPair);
-	});
-}
 
 if(argv.hosted){
 	installMode = "Hosted";
@@ -130,7 +125,8 @@ function showUsage() {
 		help.format("-r, --running", "List the running applications on device"),
 		help.format("-i, --inspect", "launch application with a web inspector"),
 		help.format("-p, --params <PARAMS>", "PARAMS is used on boot application-launching"),
-		help.format("		 PARAMS (e.g.) -p key1=value2 -p key2=\"value2 containing space\""),
+		help.format("		 PARAMS (e.g.) -p '{\"key1\":\"value2\", \"key2\":\"value2 containing space\"}'"),
+		help.format("		        (e.g.) -p key1=value2 -p key2=\"value2 containing space\""),
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
 		help.format("-V, --version", "Display version info"),
@@ -155,7 +151,8 @@ function showUsage() {
 }
 
 function launch() {
-	var pkgId = argv.argv.remain[0];
+	var pkgId = argv.argv.remain.splice(0,1).join("");
+	params = getParams();
 	log.info("launch():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
@@ -165,15 +162,50 @@ function launch() {
 }
 
 function launchHostedApp() {
-	var hostedurl = fs.realpathSync(argv.argv.remain[0]);
+	var hostedurl = fs.realpathSync(argv.argv.remain.splice(0,1).join(""));
 	var pkgId = "com.sdk.ares.hostedapp";
 	options.hostedurl = hostedurl;
+	params = getParams();
 	log.info("launch():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
 		process.exit(1);
 	}
 	ipkg.launcher.launch(options, pkgId, params, finish);
+}
+
+function getParams() {
+	var params = {};
+	if (argv.params) {
+		argv.params.forEach(function(strParam) {
+			var jsonFromArgv = strParam + argv.argv.remain.join("");
+			jsonFromArgv = convertToJsonFormat(jsonFromArgv);
+			if (isJson(jsonFromArgv)) {
+				params = JSON.parse(jsonFromArgv);
+			} else {
+				insertParams(params, strParam);
+			}
+		});
+	}
+	return params;
+}
+
+function convertToJsonFormat(str) {
+	return str.replace(/\s*"/g, "")
+			.replace(/\s*'/g, "")
+			.replace("{", "{\"")
+			.replace("}","\"}")
+			.replace(/\s*,\s*/g, "\",\"")
+			.replace(/\s*:\s*/g, "\":\"");
+}
+
+function isJson(str) {
+	try {
+		JSON.parse(str);
+	} catch(err) {
+		return false;
+	}
+	return true;
 }
 
 function close() {
