@@ -33,6 +33,7 @@ var knownOpts = {
 	"device-list":	Boolean,
 	"close":	String,
 	"running":	Boolean,
+	"params":   [String, Array],
 	"version":	Boolean,
 	"help":		Boolean,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
@@ -43,6 +44,7 @@ var shortHands = {
 	"D": ["--device-list"],
 	"c": ["--close"],
 	"r": ["--running"],
+	"p": ["--params"],
 	"V": ["--version"],
 	"h": ["--help"],
 	"H": ["--hosted"],
@@ -68,6 +70,13 @@ log.verbose("argv", argv);
 
 var installMode = "Installed";
 var hostedurl = "";
+var params = {};
+if (argv.params) {
+	argv.params.forEach(function(keyPair) {
+		insertParams(params, keyPair);
+	});
+}
+
 if(argv.hosted){
 	installMode = "Hosted";
 }
@@ -120,6 +129,8 @@ function showUsage() {
 		help.format("-c, --close", "Terminate appication on device"),
 		help.format("-r, --running", "List the running applications on device"),
 		help.format("-i, --inspect", "launch application with a web inspector"),
+		help.format("-p, --params <PARAMS>", "PARAMS is used on boot application-launching"),
+		help.format("		 PARAMS (e.g.) -p key1=value2 -p key2=\"value2 containing space\""),
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
 		help.format("-V, --version", "Display version info"),
@@ -150,7 +161,7 @@ function launch() {
 		help();
 		process.exit(1);
 	}
-	ipkg.launcher.launch(options, pkgId, null, finish);
+	ipkg.launcher.launch(options, pkgId, params, finish);
 }
 
 function launchHostedApp() {
@@ -162,7 +173,7 @@ function launchHostedApp() {
 		help();
 		process.exit(1);
 	}
-	ipkg.launcher.launch(options, pkgId, null, finish);
+	ipkg.launcher.launch(options, pkgId, params, finish);
 }
 
 function close() {
@@ -172,7 +183,7 @@ function close() {
 		help();
 		process.exit(1);
 	}
-	ipkg.launcher.close(options, pkgId, null, finish);
+	ipkg.launcher.close(options, pkgId, params, finish);
 }
 
 function running() {
@@ -216,6 +227,12 @@ function finish(err, value) {
 		}
 		process.exit(0);
 	}
+}
+
+function insertParams(params, keyPair) {
+	var values = keyPair.split('=');
+	params[values[0]] = values[1];
+	log.info("Inserting params " + values[0] + " = " + values[1]);
 }
 
 process.on('uncaughtException', function (err) {
