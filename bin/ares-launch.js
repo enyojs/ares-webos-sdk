@@ -125,7 +125,7 @@ function showUsage() {
 		help.format("-r, --running", "List the running applications on device"),
 		help.format("-i, --inspect", "launch application with a web inspector"),
 		help.format("-p, --params <PARAMS>", "PARAMS is used on boot application-launching"),
-		help.format("		 PARAMS (e.g.) -p '{\"key1\":\"value2\", \"key2\":\"value2 containing space\"}'"),
+		help.format("\t PARAMS (e.g.) -p '{\"key1\":\"value2\", \"key2\":\"value2 containing space\"}'"),
 		help.format("		        (e.g.) -p key1=value2 -p key2=\"value2 containing space\""),
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
