@@ -126,7 +126,7 @@ function showUsage() {
 		help.format("-i, --inspect", "launch application with a web inspector"),
 		help.format("-p, --params <PARAMS>", "PARAMS is used on boot application-launching"),
 		help.format("\t PARAMS (e.g.) -p '{\"key1\":\"value2\", \"key2\":\"value2 containing space\"}'"),
-		help.format("		        (e.g.) -p key1=value2 -p key2=\"value2 containing space\""),
+		"",
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
 		help.format("-V, --version", "Display version info"),
@@ -134,6 +134,11 @@ function showUsage() {
 		"DESCRIPTION",
 		help.format("To launch an app on the TARGET DEVICE, user have to specify"),
 		help.format("the TARGET DEVICE using '--device, -d' option"),
+		"",
+		help.format("PARAMS defines parameters to be used when app lauching."),
+		help.format("PARAMS can be specified as key-value pairs of the form \"key=value\""),
+		help.format("or as JSON objects of the form '{\"key1\":\"value1\", \"key2\":\"value2\", ...}'."),
+		help.format("Surrounding quotes are required in both cases."),
 		"",
 		help.format("Hosted app does not need packaging/installing."),
 		help.format("Hosted app means providing app via a local server based on <APP_DIR>,"),
@@ -179,7 +184,7 @@ function getParams() {
 	if (argv.params) {
 		argv.params.forEach(function(strParam) {
 			var jsonFromArgv = strParam + argv.argv.remain.join("");
-			jsonFromArgv = convertToJsonFormat(jsonFromArgv);
+			jsonFromArgv = refineJsonString(jsonFromArgv);
 			if (isJson(jsonFromArgv)) {
 				params = JSON.parse(jsonFromArgv);
 			} else {
@@ -190,13 +195,18 @@ function getParams() {
 	return params;
 }
 
-function convertToJsonFormat(str) {
-	return str.replace(/\s*"/g, "")
-			.replace(/\s*'/g, "")
-			.replace("{", "{\"")
-			.replace("}","\"}")
-			.replace(/\s*,\s*/g, "\",\"")
-			.replace(/\s*:\s*/g, "\":\"");
+function refineJsonString(str) {
+		var refnStr = str;
+		var reg = /^['|"](.)*['|"]$/;
+		if (reg.test(refnStr)) {
+			refnStr = refnStr.substring(1, str.length);
+		}
+		reg = /^{(.)*}$/;
+		if (!reg.test(refnStr)) {
+			//is not JSON string
+			return str;
+		}
+		return refnStr.replace(/\s*'/g, "\"");
 }
 
 function isJson(str) {

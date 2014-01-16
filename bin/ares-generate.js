@@ -157,7 +157,7 @@ PalmGenerate.prototype = {
 	checkCreateAppDir: function(next) {
 		log.info("checkCreateAppDir");
 		// Verify we have an APP_DIR parameter
-		if (this.argv.argv.remain.length != 1) {
+		if (this.argv.argv.remain.length < 1) {
 			this.showUsage();
 		}
 		this.destination = this.argv.argv.remain.splice(0,1).join("");
@@ -195,13 +195,18 @@ PalmGenerate.prototype = {
 		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
 	},
 
-	convertToJsonFormat: function(str) {
-		return str.replace(/\s*"/g, "")
-				.replace(/\s*'/g, "")
-				.replace("{", "{\"")
-				.replace("}","\"}")
-				.replace(/\s*,\s*/g, "\",\"")
-				.replace(/\s*:\s*/g, "\":\"");
+	refineJsonString: function(str) {
+		var refnStr = str;
+		var reg = /^['|"](.)*['|"]$/;
+		if (reg.test(refnStr)) {
+			refnStr = refnStr.substring(1, str.length);
+		}
+		reg = /^{(.)*}$/;
+		if (!reg.test(refnStr)) {
+			//is not JSON string
+			return str;
+		}
+		return refnStr.replace(/\s*'/g, "\"");
 	},
 
 	isJson: function(str) {
@@ -225,7 +230,7 @@ PalmGenerate.prototype = {
 		var substitution = { fileRegexp: "appinfo.json" };
 		if (this.argv.property) {
 			if (typeof this.argv.property === 'string') {
-				this.argv.property = this.convertToJsonFormat(this.argv.property);
+				this.argv.property = this.refineJsonString(this.argv.property);
 				if (isJson(this.argv.property)) {
 					properties = JSON.parse(this.argv.property);
 				} else {
@@ -234,7 +239,7 @@ PalmGenerate.prototype = {
 			} else {
 				this.argv.property.forEach(function(prop) {
 					var jsonFromArgv = prop + this.argv.argv.remain.join("");
-					jsonFromArgv = this.convertToJsonFormat(jsonFromArgv);
+					jsonFromArgv = this.refineJsonString(jsonFromArgv);
 					if (this.isJson(jsonFromArgv)) {
 						properties = JSON.parse(jsonFromArgv);
 					} else {
