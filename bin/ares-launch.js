@@ -135,7 +135,7 @@ function showUsage() {
 		help.format("To launch an app on the TARGET DEVICE, user have to specify"),
 		help.format("the TARGET DEVICE using '--device, -d' option"),
 		"",
-		help.format("PARAMS defines parameters to be used when app lauching."),
+		help.format("PARAMS defines parameters to be used on boot app lauching."),
 		help.format("PARAMS can be specified as key-value pairs of the form \"key=value\""),
 		help.format("or as JSON objects of the form '{\"key1\":\"value1\", \"key2\":\"value2\", ...}'."),
 		help.format("Surrounding quotes are required in both cases."),
