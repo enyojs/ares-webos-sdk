@@ -162,7 +162,6 @@ PalmPackage.prototype = {
 		log.info("projectReady");
 		if (err) {
 			console.error("*** " + processName + ": "+ err.toString());
-			this.showUsage(1);
 		}
 		process.exit(0);
 	},
@@ -171,7 +170,6 @@ PalmPackage.prototype = {
 		log.info("appOk");
 		if (err) {
 			console.error("*** " + processName + ": "+ err.toString());
-			this.showUsage(1);
 		}
 		console.log("no problems detected");
 		process.exit(0);
