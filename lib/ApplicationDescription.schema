@@ -22,7 +22,7 @@
             "description": "Keyword meta-data. Just Type list apps that contain the user-entered text in their keywords values."
         },
         "mimeTypes": {
-			"id": "MimeTypes",
+            "id": "MimeTypes",
             "type": "array",
             "items": {
                 "$ref": "MimeTypes"
@@ -140,7 +140,7 @@
             "description": "indicates that app needs hardwwarefeatures, e,g., Wifi,Bluetooth"
         },
         "universalSearch": {
-			"id": "UniversalSearch",
+            "id": "UniversalSearch",
             "extends": {
                 "$ref": "UniversalSearch"
             },
