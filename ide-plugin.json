@@ -54,7 +54,7 @@
 				{
 					"id": "bootplate-moonstone",
 					"type": "template",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"isDefault": true,
 					"description": "Enyo moonstone bootplate",
 					"deps": ["enyoappinfo"],
@@ -81,7 +81,7 @@
 				{
 					"id": "bootplate-moonstone-ActivityPanels",
 					"type": "template",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"isDefault": false,
 					"description": "Enyo moonstone bootplate ActivityPanels",
 					"deps": ["enyoappinfo"],
@@ -112,7 +112,7 @@
 				{
 					"id": "bootplate-moonstone-AlwaysViewingPanels",
 					"type": "template",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"isDefault": false,
 					"description": "Enyo moonstone bootplate AlwaysViewingPanels",
 					"deps": ["enyoappinfo"],
@@ -239,7 +239,7 @@
 				{
 					"id": "bootplate-2.3.0",
 					"type": "template",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
 					"deps": ["enyoappinfo", "enyo-onyx"],
 					"files": [
@@ -265,7 +265,7 @@
 				{
 					"id": "enyo",
 					"type": "library",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"description": "Enyo library",
 					"files": [
 						{
@@ -284,7 +284,7 @@
 				{
 					"id": "enyo-cordova",
 					"type": "library",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"description": "Enyo cordova library",
 					"files": [
 						{
@@ -302,7 +302,7 @@
 				{
 					"id": "enyo-ilib",
 					"type": "library",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"description": "Enyo ilib globalization/internationalization library",
 					"files": [
 						{
@@ -320,7 +320,7 @@
 				{
 					"id": "enyo-webos",
 					"type": "library",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"description": "Enyo library for webOS",
 					"files": [
 						{
@@ -338,7 +338,7 @@
 				{
 					"id": "enyo-layout",
 					"type": "library",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"description": "Enyo layout library",
 					"files": [
 						{
@@ -356,7 +356,7 @@
 				{
 					"id": "enyo-moonstone",
 					"type": "library",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"description": "Enyo moonstone library",
 					"files": [
 						{
@@ -374,7 +374,7 @@
 				{
 					"id": "enyo-spotlight",
 					"type": "library",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"description": "Enyo spotlight library",
 					"files": [
 						{
@@ -392,7 +392,7 @@
 				{
 					"id": "enyo-onyx",
 					"type": "library",
-					"version": "2.3.0-rc4",
+					"version": "2.3.0-rc5",
 					"description": "Enyo onyx library",
 					"files": [
 						{
