@@ -1,5 +1,5 @@
 {
-	"id": "com.yourdomain.enyo-app",
+	"id": "com.yourdomain.@DIR@",
 	"version": "0.0.1",
 	"vendor": "My Company",
 	"type": "web",

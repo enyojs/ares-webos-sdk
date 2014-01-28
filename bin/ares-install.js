@@ -31,6 +31,8 @@ var knownOpts = {
 	"device":	[String, null],
 	"device-list":	Boolean,
 	"list":		Boolean,
+	"listfull":	Boolean,
+	"type":		[String, null],
 	"install":	path,
 	"remove":	String,
 	"version":	Boolean,
@@ -42,6 +44,8 @@ var shortHands = {
 	"i": ["--install"],
 	"r": ["--remove"],
 	"l": ["--list"],
+	"F": ["--listfull"],
+	"t": ["--type"],
 	"D": ["--device-list"],
 	"V": ["--version"],
 	"h": ["--help"],
@@ -68,6 +72,8 @@ log.verbose("argv", argv);
 var op;
 if (argv.list) {
 	op = list;
+} else if (argv.listfull) {
+	op = listFull;
 } else if (argv.install) {
 	op = install;
 } else if (argv.remove) {
@@ -107,7 +113,10 @@ function showUsage() {
 		"OPTION",
 		help.format("-d, --device <DEVICE>", "Specify DEVICE to use"),
 		help.format("-D, --device-list", "List the available DEVICEs"),
-		help.format("-l, --list", "List the installed applications"),
+		help.format("-l, --list", "List the installed app IDs"),
+		help.format("-F, --listfull", "List the installed app detailed infomatins"),
+		help.format("-t, --type <TYPE>", "Specify app TYPE (web, native, ...)"),
+		help.format("", 					"followed by '--list' or '--listfull'"),
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
 		help.format("-V, --version", "Display version info"),
@@ -125,6 +134,12 @@ function showUsage() {
 		"",
 		"# Remove an application on emulator",
 		processName + " -r com.examples.app -d emulator",
+		"",
+		"# List the applications installed in emulator",
+		processName + " -l -d emulator",
+		"",
+		"# List web type apps among the applications installed in emulator",
+		processName + " -l -t web -d emulator",
 		"",
 	];
 
@@ -147,7 +162,34 @@ function list() {
 	ipkg.installer.list(options, function(err, pkgs) {
 		var strPkgs = "";
 		if (pkgs instanceof Array) pkgs.forEach(function (pkg) {
-			strPkgs = strPkgs.concat(pkg.id).concat('\n');
+			if (argv.type) {
+				if (argv.type !== pkg.type) {
+					return;
+				}
+			}
+				strPkgs = strPkgs.concat(pkg.id).concat('\n');
+		});
+		process.stdout.write(strPkgs);
+		finish(err);
+	});
+}
+
+function listFull() {
+	ipkg.installer.list(options, function(err, pkgs) {
+		var strPkgs = "";
+		if (pkgs instanceof Array) pkgs.forEach(function (pkg) {
+			if (argv.type) {
+				if (argv.type !== pkg.type) {
+					return;
+				}
+			}
+			strPkgs = strPkgs.concat('----------------\n');
+			strPkgs = strPkgs.concat("id:"+ pkg.id+", ");
+			for (key in pkg) {
+				if (key == "id") continue;
+				strPkgs = strPkgs.concat(key+":").concat(pkg[key]).concat(", ");
+			}
+			strPkgs = strPkgs.concat('\n');
 		});
 		process.stdout.write(strPkgs);
 		finish(err);
