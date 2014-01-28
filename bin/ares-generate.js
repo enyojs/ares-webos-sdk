@@ -248,6 +248,10 @@ PalmGenerate.prototype = {
 				}, this);
 			}
 			substitution.json = properties;
+			substitution.add = {};
+			if (key in properties) {
+				substitution.add[key] = true;
+			}
 		}
 		//Default substitution
 		var appName = path.basename(this.destination);
