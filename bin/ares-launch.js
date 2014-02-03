@@ -196,17 +196,27 @@ function getParams() {
 }
 
 function refineJsonString(str) {
+		//FIXME: this is temporary implementation. need to verify more.
 		var refnStr = str;
 		var reg = /^['|"](.)*['|"]$/;
 		if (reg.test(refnStr)) {
-			refnStr = refnStr.substring(1, str.length);
+			refnStr = refnStr.substring(1, str.length-1);
 		}
 		reg = /^{(.)*}$/;
 		if (!reg.test(refnStr)) {
 			//is not JSON string
 			return str;
 		}
-		return refnStr.replace(/\s*'/g, "\"");
+		if (refnStr.indexOf("\"") === -1) {
+			return refnStr.replace(/\s*"/g, "")
+	 				.replace(/\s*'/g, "")
+	 				.replace("{", "{\"")
+	 				.replace("}","\"}")
+	 				.replace(/\s*,\s*/g, "\",\"")
+	 				.replace(/\s*:\s*/g, "\":\"");
+		} else {
+			return refnStr.replace(/\s*'/g, "\"");
+		}
 }
 
 function isJson(str) {
