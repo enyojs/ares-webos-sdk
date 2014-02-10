@@ -57,7 +57,7 @@ function PalmPackage() {
 	this.helpString = [
 		"",
 		"NAME",
-		help.format(processName + " - Creates webOS application package file"),
+		help.format(processName + " - Create a webOS application package file"),
 		"",
 		"SYNOPSIS",
 		help.format(processName + " [OPTION...] APP_DIR [SERVICE_DIR] [PKG_DIR]"),
@@ -90,7 +90,7 @@ function PalmPackage() {
 		"",
 		"EXAMPLES",
 		"",
-		"# Create a package for the webOS application excluded all text files and the tests directory.",
+		"# Create a package for the webOS application excluding all text files and the tests directory.",
 		processName+" --exclude *.txt --exclude tests",
 		""
 	];
@@ -162,7 +162,6 @@ PalmPackage.prototype = {
 		log.info("projectReady");
 		if (err) {
 			console.error("*** " + processName + ": "+ err.toString());
-			this.showUsage(1);
 		}
 		process.exit(0);
 	},
@@ -171,7 +170,6 @@ PalmPackage.prototype = {
 		log.info("appOk");
 		if (err) {
 			console.error("*** " + processName + ": "+ err.toString());
-			this.showUsage(1);
 		}
 		console.log("no problems detected");
 		process.exit(0);

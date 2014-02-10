@@ -97,7 +97,7 @@ function PalmGenerate() {
 	this.helpString = [
 		"",
 		"NAME",
-		help.format(processName + " - Creates the project and displays the template list"),
+		help.format(processName + " - Create webOS app projects from templates"),
 		"",
 		"SYNOPSIS",
 		help.format(processName + " [OPTION...] <APP_DIR>"),
@@ -108,7 +108,7 @@ function PalmGenerate() {
 		help.format("", "TEMPLATE can be listed via " + processName + " --list, -l"),
 		"",
 		help.format("-l, --list <TYPE>"),
-		help.format("\t List the available templates corresponeded with TYPE [default: " + this.defaultSourceType + "]"),
+		help.format("\t List the available templates corresponding with TYPE [default: " + this.defaultSourceType + "]"),
 		help.format("\t Available TYPE is 'template', 'webosService', 'appinfo'"),
 		"",
 		help.format("-p, --property <PROPERTY>", "Set the properties of appinfo.json"),
@@ -262,13 +262,28 @@ PalmGenerate.prototype = {
 		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
 	},
 
-	convertToJsonFormat: function(str) {
-		return str.replace(/\s*"/g, "")
-				.replace(/\s*'/g, "")
-				.replace("{", "{\"")
-				.replace("}","\"}")
-				.replace(/\s*,\s*/g, "\",\"")
-				.replace(/\s*:\s*/g, "\":\"");
+	refineJsonString: function(str) {
+		//FIXME: this is temporary implementation. need to verify more.
+		var refnStr = str;
+		var reg = /^['|"](.)*['|"]$/;
+		if (reg.test(refnStr)) {
+			refnStr = refnStr.substring(1, str.length-1);
+		}
+		reg = /^{(.)*}$/;
+		if (!reg.test(refnStr)) {
+			//is not JSON string
+			return str;
+		}
+		if (refnStr.indexOf("\"") === -1) {
+			return refnStr.replace(/\s*"/g, "")
+	 				.replace(/\s*'/g, "")
+	 				.replace("{", "{\"")
+	 				.replace("}","\"}")
+	 				.replace(/\s*,\s*/g, "\",\"")
+	 				.replace(/\s*:\s*/g, "\":\"");
+		} else {
+			return refnStr.replace(/\s*'/g, "\"");
+		}
 	},
 
 	isJson: function(str) {
@@ -293,7 +308,7 @@ PalmGenerate.prototype = {
 		var substitution = { fileRegexp: file };
 		if (this.argv.property) {
 			if (typeof this.argv.property === 'string') {
-				this.argv.property = this.convertToJsonFormat(this.argv.property);
+				this.argv.property = this.refineJsonString(this.argv.property);
 				if (isJson(this.argv.property)) {
 					properties = JSON.parse(this.argv.property);
 				} else {
@@ -302,7 +317,7 @@ PalmGenerate.prototype = {
 			} else {
 				this.argv.property.forEach(function(prop) {
 					var jsonFromArgv = prop + this.argv.argv.remain.join("");
-					jsonFromArgv = this.convertToJsonFormat(jsonFromArgv);
+					jsonFromArgv = this.refineJsonString(jsonFromArgv);
 					if (this.isJson(jsonFromArgv)) {
 						properties = JSON.parse(jsonFromArgv);
 					} else {
@@ -315,6 +330,10 @@ PalmGenerate.prototype = {
 			if (file.match(/appinfo.json/gi)) {
 				//substitution for json
 				substitution.json = properties;
+				substitution.add = {};
+				if (key in properties) {
+					substitution.add[key] = true;
+				}
 			}
 
 			//property option can be used for substitution of string

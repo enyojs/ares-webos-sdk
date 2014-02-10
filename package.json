@@ -14,7 +14,7 @@
 		"ares-setup-device": "./bin/ares-setup-device.js"
 	},
 	"dependencies": {
-		"ares-generator": "0.2.4",
+		"ares-generator": "0.3.4",
 		"shelljs": "~0.1.4",
 		"request": "2.12.x",
 		"async": "~0.2.9",
@@ -36,7 +36,8 @@
 		"express": "~3.3.4",
 		"base64-stream": "~0.1.2",
 		"busboy": "~0.0.5",
-		"inherits": "~1.x"
+		"inherits": "~1.x",
+		"jsonschema": "~0.4.x"
 	},
 	"engines": {
 		"node": "~0.10.0",
@@ -77,7 +78,8 @@
 		"express",
 		"base64-stream",
 		"busboy",
-		"inherits"
+		"inherits",
+		"jsonschema"
 	],
 	"files": [
 		"DEMO.md",

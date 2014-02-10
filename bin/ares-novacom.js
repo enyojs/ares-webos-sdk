@@ -227,6 +227,9 @@ function getkey(next) {
 					log.info('registed passphrase is ', passphrase);
 					target.passphrase = passphrase;
 					target.files = 'sftp';
+					target.port = '9922';
+					target.username = 'prisoner';
+					target.password = '';
 					next(null, target);
 				});
 			} else {

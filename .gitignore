@@ -2,6 +2,7 @@
 /node_modules/async
 /node_modules/base64-stream/
 /node_modules/busboy/
+/node_modules/jsonschema
 /node_modules/fstream
 /node_modules/graceful-fs
 /node_modules/mkdirp

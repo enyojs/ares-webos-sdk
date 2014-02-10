@@ -268,22 +268,39 @@ function replaceDefaultDeviceInfo(inDevice) {
 			inDevice.privateKey = { "openSsh": "webos_emul" };
 			inDevice.files = "sftp";
 		} else if (inDevice.type && inDevice.type == "starfish") {
-			if (inDevice.port == 22) {
+			if (inDevice.port == 22 || inDevice.username == "root") {
 				inDevice.username = "root";
-			} else if(inDevice.port == 9922) {
+				inDevice.port = 22;
+			} else if(inDevice.port == 9922 || inDevice.username == "prisoner") {
 				inDevice.username = "prisoner";
+				inDevice.port = 9922;
 			}
 		}
 	}
 }
 
-function convertJsonForm(str) {
-	return str.replace(/\s*"/g, "")
-			.replace(/\s*'/g, "")
-			.replace("{", "{\"")
-			.replace("}","\"}")
-			.replace(/\s*,\s*/g, "\",\"")
-			.replace(/\s*:\s*/g, "\":\"");
+function refineJsonString(str) {
+	//FIXME: this is temporary implementation. need to verify more.
+	var refnStr = str;
+	var reg = /^['|"](.)*['|"]$/;
+	if (reg.test(refnStr)) {
+		refnStr = refnStr.substring(1, str.length-1);
+	}
+	reg = /^{(.)*}$/;
+	if (!reg.test(refnStr)) {
+		//is not JSON string
+		return str;
+	}
+	if (refnStr.indexOf("\"") === -1) {
+		return refnStr.replace(/\s*"/g, "")
+ 				.replace(/\s*'/g, "")
+ 				.replace("{", "{\"")
+ 				.replace("}","\"}")
+ 				.replace(/\s*,\s*/g, "\",\"")
+ 				.replace(/\s*:\s*/g, "\":\"");
+	} else {
+		return refnStr.replace(/\s*'/g, "\"");
+	}
 }
 
 function add(next) {
@@ -314,7 +331,7 @@ function add(next) {
 		} else {
 			target = argv.argv.remain.join("");
 		}
-		var deviceInfoContent = convertJsonForm(target);
+		var deviceInfoContent = refineJsonString(target);
 		var inDevice = JSON.parse(deviceInfoContent);
 		if (inDevice.privatekey || inDevice.privatekey == "") {
 			inDevice.privateKey = inDevice.privatekey;
@@ -345,7 +362,7 @@ function add(next) {
 
 function remove(next) {
 	try {
-		var deviceInfoContent = convertJsonForm(argv.remove);
+		var deviceInfoContent = refineJsonString(argv.remove);
 		var resolver = new novacom.Resolver();
 		var argvCheck = deviceInfoContent.indexOf("{");	
 		var inDevice;	
@@ -384,7 +401,7 @@ function modify(next) {
 		} else {
 			target = argv.argv.remain.join("");
 		}
-		var deviceInfoContent = convertJsonForm(target);
+		var deviceInfoContent = refineJsonString(target);
 		var inDevice = JSON.parse(deviceInfoContent);
 		if (inDevice.privatekey || inDevice.privatekey === "") {
 			inDevice.privateKey = inDevice.privatekey;
