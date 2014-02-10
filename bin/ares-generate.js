@@ -259,7 +259,7 @@ PalmGenerate.prototype = {
 			}
 			substitution.json = properties;
 			substitution.add = {};
-			if (key in properties) {
+			for (key in properties) {
 				substitution.add[key] = true;
 			}
 		}
