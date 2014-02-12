@@ -325,13 +325,12 @@ PalmGenerate.prototype = {
 					}
 				}, this);
 			}
-			
 			//Currently property options is proper for substitution of appinfo.json
 			if (file.match(/appinfo.json/gi)) {
 				//substitution for json
 				substitution.json = properties;
 				substitution.add = {};
-				if (key in properties) {
+				for (key in properties) {
 					substitution.add[key] = true;
 				}
 			}
