@@ -1,5 +1,5 @@
 {
-  "name": "@ID@.service",
+  "name": "@SERVICE-NAME@",
   "version": "1.0.0",
   "description": "Helloworld service",
   "main": "helloworld_webos_service.js",

@@ -1,8 +1,8 @@
 {
-	"id": "@ID@.service",
+	"id": "@SERVICE-NAME@",
 	"description": "HelloWorld Service",
 	"services": [ {
-		"name": "@ID@.service",
+		"name": "@SERVICE-NAME@",
 		"description": "HelloWorld Service",
 		"commands": [ { 
 			"name": "hello", 
@@ -38,7 +38,7 @@
 		}] 
 	},
 	{
-		"name": "@ID@2.service",
+		"name": "@SERVICE-NAME@2",
 		"description": "Second service in the same program",
 		"commands": [ { 
 			"name": "hello", 

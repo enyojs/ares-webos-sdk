@@ -211,7 +211,7 @@
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/webos-service",
-							"prefixToAdd": "services/@ID@.service"
+							"prefixToAdd": "services/@SERVICE-NAME@"
 						}
 					],
 					"filesubstitution": [

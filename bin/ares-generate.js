@@ -91,10 +91,12 @@ function PalmGenerate() {
 	}
 	this.configFileSubstitutions = {
 		"@PLUGINDIR@": path.dirname(this.configFile).replace(/\\/g,'/'),
-		"@ID@": dirName
+		"@ID@": dirName,
+		"@SERVICE-NAME@": dirName + ".service"
 	};
 	this.substituteWords = {
 		"@ID@": dirName,
+		"@SERVICE-NAME@": dirName + ".service",
 		"@ENYO-VERSION@":this.argv.onDevice
 	};
 	this.helpString = [
@@ -337,6 +339,16 @@ PalmGenerate.prototype = {
 				var value = properties[propKey];
 				this.substituteWords[word] = properties[propKey];
 				this.configFileSubstitutions[word] = properties[propKey];
+
+				//FIXME: hard coded for webos-service tempalte source substitutions
+				if (word === "@ID@") {
+					var serviceName = properties[propKey];
+					if (!properties[propKey].match(/.service$/g)) {
+						serviceName = serviceName.concat(".service");
+					} 
+					this.substituteWords["@SERVICE-NAME@"] = serviceName;
+					this.configFileSubstitutions["@SERVICE-NAME@"] = serviceName;					
+				}
 			}
 		}
 		//substitution for string

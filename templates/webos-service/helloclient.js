@@ -5,9 +5,9 @@ var Service = require('webos-service');
 // Register com.example.helloworld, on both buses
 var service = new Service("com.example.helloclient");
 console.log("simple call");
-	service.call("luna://@ID@.service/hello", {}, function(message) {
+	service.call("luna://@SERVICE-NAME@/hello", {}, function(message) {
 	console.log("message payload: " + JSON.stringify(message.payload));
-	var sub = service.subscribe("luna://@ID@.service/heartbeat", {subscribe: true});
+	var sub = service.subscribe("luna://@SERVICE-NAME@/heartbeat", {subscribe: true});
 	var count = 0;
 	var max = 10;
 	sub.addListener("response", function(msg) {

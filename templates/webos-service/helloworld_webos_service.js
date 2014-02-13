@@ -4,7 +4,7 @@
 var Service = require('webos-service');
 
 // Register com.yourdomain.@DIR@.service, on both buses
-var service = new Service("@ID@.service");
+var service = new Service("@SERVICE-NAME@");
 var greeting = "Hello, World!";
 
 // a method that always returns the same value
@@ -133,7 +133,7 @@ service.register("ping", function(message) {
 	        "persist": true,       // this activity will be persistent across reboots
 	        "explicit": true,      // this activity *must* be completed or cancelled explicitly, or it will be re-launched until it does
 	        "callback": {          // what service to call when this activity starts
-	            "method": "luna://@ID@.service/pong", // URI to service
+	            "method": "luna://@SERVICE-NAME@/pong", // URI to service
 	            "params": {        // parameters/arguments to pass to service
 	            }
 	        }
@@ -163,7 +163,7 @@ service.register("/do/re/me", function(message) {
 	]});
 });
 
-var service2 = new Service("@ID@2.service");
+var service2 = new Service("@SERVICE-NAME@2");
 service2.registerPrivate("hello", function(message) {
 	message.respond({msg: "hello"});
 });
