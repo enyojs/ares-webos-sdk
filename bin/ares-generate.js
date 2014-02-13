@@ -36,7 +36,8 @@ function PalmGenerate() {
 	this.destination = undefined;
 	this.options = {};
 	this.substitutions = [];
-	this.genConfigSources = {};
+	this.configGenZip = {};
+	this.templatesWithID = {};
 
 	this.defaultSourceType = 'template';
 	this.defaultEnyoVersion = '2.3.0';
@@ -69,7 +70,6 @@ function PalmGenerate() {
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice)? this.defaultEnyoVersion:this.argv.onDevice;
 	this.argv.file = (this.argv.file == 'true' || !this.argv.file)? []:this.argv.file;
-	var pluginDir = path.dirname(this.configFile);
 	var dirName = this.argv.argv.remain[0];
 	if (dirName) {
 		var dirNameArry = dirName.split('.');
@@ -89,8 +89,11 @@ function PalmGenerate() {
 		}
 		dirName = dirNameArry.join(".");
 	}
+	this.configFileSubstitutions = {
+		"@PLUGINDIR@": path.dirname(this.configFile).replace(/\\/g,'/'),
+		"@ID@": dirName
+	};
 	this.substituteWords = {
-		"@PLUGINDIR@": pluginDir,
 		"@ID@": dirName,
 		"@ENYO-VERSION@":this.argv.onDevice
 	};
@@ -143,19 +146,14 @@ PalmGenerate.prototype = {
 
 	applyDefaultTemplate: function(next) {
 		log.info("applyDefaultTemplate");
-		this.generator.getSources(this.defaultSourceType, function(err, sources) {
-			if(err) {
-				next(err);
-			} else {
-				var matchedSources = sources.filter(function(source){
-					return source.isDefault;
-				});
-				var defaultTemplate = matchedSources[0] || sources[0];
-				this.argv.template = [defaultTemplate.id];
-				log.info("applyDefaultTemplate#defaultTemplate:", this.argv.template);
-				next();
-			}
+		var defaultTemplates = this.configGenZip.sources.filter(function(template){
+			return (this.defaultSourceType === template.type && template.isDefault == true);
 		}.bind(this));
+		if (defaultTemplates.length < 1) {
+			return next(new Error("failed to get a default template name, please specify the template name"));
+		}
+		this.argv.template = [defaultTemplates[0].id];
+		next();
 	},
 
 	checkTemplateValid: function(next) {
@@ -169,13 +167,12 @@ PalmGenerate.prototype = {
 			this.showUsage();
 		}
 		// TODO: Verify the template exist
-		if (Object.keys(this.genConfigSources).length === 0) {
+		if (this.configGenZip.sources.length === 0) {
 			return next(new Error("Not available templates..."));
 		} else {
-			var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
-			sources.forEach(function(source) {
-				if (!this.genConfigSources[source]) {
-					return next(new Error("Not available template named " + source));
+			this.argv.template.forEach(function(name) {
+				if (!this.templatesWithID[name]) {
+					return next(new Error("Not available template named " + name));
 				}
 			}.bind(this));
 		}
@@ -214,12 +211,12 @@ PalmGenerate.prototype = {
 	},
 
 	getSubstFileListFromConfig: function(next) {
-		var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
-		sources.forEach(function(source) {
-			configSource = this.genConfigSources[source];
+		var reqTemplates = this.argv.template;
+		reqTemplates.forEach(function(name) {
+			configSource = this.templatesWithID[name];
 			if (configSource.deps) {
 				configSource.deps.forEach(function(subSource) {
-					_addSubstFile(this.argv.file, this.genConfigSources[subSource]);
+					_addSubstFile(this.argv.file, this.templatesWithID[subSource]);
 				}.bind(this));
 			}
 			_addSubstFile(this.argv.file, configSource);
@@ -334,12 +331,12 @@ PalmGenerate.prototype = {
 					substitution.add[key] = true;
 				}
 			}
-
 			//property option can be used for substitution of string
 			for (propKey in properties) {
 				var word = "@"+propKey.toUpperCase()+"@";
 				var value = properties[propKey];
 				this.substituteWords[word] = properties[propKey];
+				this.configFileSubstitutions[word] = properties[propKey];
 			}
 		}
 		//substitution for string
@@ -361,19 +358,16 @@ PalmGenerate.prototype = {
 
 	displayTemplateList: function(type, next) {
 		log.info("displayTemplateList");
-		this.generator.getSources(type, function(err, sources) {
-			if(err) {
-				next(err);
-			} else {
-				var sourceIds = Object.keys(sources);
-				sourceIds.forEach(function(sourceId){
-					var source = sources[sourceId];
-					log.info("displayTemplateList()", "source:", source);
-					console.log(sprintf("%-40s\t%s %s", source.id, source.description, source.isDefault ? "(default)" : ""));
-				});
-				next();
-			}
+		var templates = this.configGenZip.sources.filter(function(template){
+			return (type === template.type);
 		});
+		var sourceIds = Object.keys(templates);
+		sourceIds.forEach(function(sourceId){
+			var source = templates[sourceId];
+			log.info("displayTemplateList()", "source:", source);
+			console.log(sprintf("%-40s\t%-10s\t%s %s", source.id, source.version, source.description, source.isDefault ? "(default)" : ""));
+		});
+		next();
 	},
 
 	listSources: function(type) {
@@ -414,7 +408,8 @@ PalmGenerate.prototype = {
 				this.checkCreateAppDir.bind(this),
 				this.getSubstFileListFromConfig.bind(this),
 				this.setSubstitutions.bind(this),
-				this.loadPluginConfig.bind(this, this.configFile),
+				this.substituteConfigGenZip.bind(this),
+				this.loadGenerator.bind(this),
 				this.instantiateProject.bind(this)
 			],
 			this.projectReady.bind(this));
@@ -452,41 +447,47 @@ PalmGenerate.prototype = {
 			throw "Not a file: '"+configFile+"': ";
 		}
 		var configContent = fs.readFileSync(configFile, 'utf8');
-		for (key in this.substituteWords) {
-			var word = new RegExp(key, "g");
-			configContent = configContent.replace(word, this.substituteWords[key]);
-		}
-
 		try {
-			this.plugin = JSON.parse(configContent);
+			var plugin = JSON.parse(configContent);
 		} catch(e) {
 			throw "Improper JSON: "+configContent;
 		}
-		if (!this.plugin.services || !this.plugin.services[0]) {
+		if (!plugin.services || !plugin.services[0]) {
 			throw "Corrupted '"+configFile+"': no services defined";
 		}
-		this.plugin.services = this.plugin.services.filter(function(service){
+		plugin.services = plugin.services.filter(function(service){
 			return service.hasOwnProperty('sources');
 		});
+		this.configGenZip = plugin.services[0];
+		plugin.services[0].sources.forEach(function(source){
+			if (source.id && source.type != null) {
+				this.templatesWithID[source.id] = source;
+			}
+		}.bind(this));
+		next();
+	},
+
+	substituteConfigGenZip: function(next) {
+		log.info("displayTemplateList");
+		try {
+			configGenZipString = JSON.stringify(this.configGenZip);
+			for(key in this.configFileSubstitutions) {
+				var regexp = new RegExp(key, "g");
+				configGenZipString = configGenZipString.replace(regexp, this.configFileSubstitutions[key]);
+			}
+			this.configGenZip = JSON.parse(configGenZipString);
+			next();
+		} catch(e) {
+			throw "Failed during substitutions about sources";
+		}
+	},
+
+	loadGenerator: function(next) {
 		var genConfig = {
 			level: log.level,
 			proxyUrl: this.argv["proxy-url"]
 		};
-		genConfig = util._extend(genConfig, this.plugin.services[0]);
-
-		genConfig.sources.forEach(function(source) {
-			if (source.id) {
-				this.genConfigSources[source.id] = source;
-			}
-			if (source.files) {
-				source.files.forEach(function(file) {
-					if (process.platform === 'win32') {
-						file.url = file.url.replace(/\\/g,'/');
-					}
-				});
-			}
-		}.bind(this));
-
+		genConfig = util._extend(genConfig, this.configGenZip);
 		this.generator = new prjgen.Generator(genConfig, next);
 	}
 };
