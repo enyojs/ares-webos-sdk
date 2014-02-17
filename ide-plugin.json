@@ -191,8 +191,9 @@
 					]
 				},
 				{
-					"id": "webos-service",
-					"type": "webosService",
+					"id": "webos-service-helloworld",
+					"xtype": "webosService",
+					"type" : null,
 					"version": "0.0.1",
 					"description": "webOS Service Template",
 					"files": [
@@ -200,6 +201,24 @@
 							"url": "http://enyojs.com/webos/webos-service-config.zip",
 							"prefixToAdd": "services/com.example.helloworld"
 						}
+					]
+				},
+				{
+					"id": "webos-service",
+					"type": "webosService",
+					"version": "0.0.1",
+					"description": "webOS Service Template",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/webos-service",
+							"prefixToAdd": "services/@SERVICE-NAME@"
+						}
+					],
+					"filesubstitution": [
+						"package.json",
+						"services.json",
+						"helloworld_webos_service.js",
+						"helloclient.js"
 					]
 				},
 				{
@@ -223,6 +242,9 @@
 						{
 							"url": "@PLUGINDIR@/templates/webappinfo"
 						}
+					],
+					"filesubstitution": [
+						"appinfo.json"
 					]
 				},
 				{
@@ -234,6 +256,9 @@
 						{
 							"url": "@PLUGINDIR@/templates/enyoappinfo"
 						}
+					],
+					"filesubstitution": [
+						"appinfo.json"
 					]
 				},
 				{

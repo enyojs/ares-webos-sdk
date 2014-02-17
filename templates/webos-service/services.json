@@ -1,0 +1,48 @@
+{
+	"id": "@SERVICE-NAME@",
+	"description": "HelloWorld Service",
+	"services": [ {
+		"name": "@SERVICE-NAME@",
+		"description": "HelloWorld Service",
+		"commands": [ { 
+			"name": "hello", 
+			"public": true
+		},
+		{ 
+			"name": "config/setGreeting", 
+			"public": true
+		},
+		{ 
+			"name": "locale", 
+			"public": true
+		},
+		{ 
+			"name": "heartbeat", 
+			"public": true
+		}, 
+		{ 
+			"name": "heartbeat2", 
+			"public": true
+		},
+		{ 
+			"name": "ping", 
+			"public": true
+		}, 
+		{ 
+			"name": "pong", 
+			"public": true
+		},
+		{ 
+			"name": "do/re/me", 
+			"public": true
+		}] 
+	},
+	{
+		"name": "@SERVICE-NAME@2",
+		"description": "Second service in the same program",
+		"commands": [ { 
+			"name": "hello", 
+			"public": true
+		}]
+	} ]
+}

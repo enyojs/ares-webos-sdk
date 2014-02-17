@@ -1,5 +1,5 @@
 {
-	"id": "com.yourdomain.@DIR@",
+	"id": "@ID@",
 	"version": "0.0.1",
 	"vendor": "My Company",
 	"type": "web",
