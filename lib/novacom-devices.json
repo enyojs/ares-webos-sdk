@@ -19,7 +19,7 @@
 		"description": "LG webOS TV Emulator",
 		"host": "127.0.0.1",
 		"port": 6622,
-		"username": "root",
+		"username": "developer",
 		"privateKey": {
 			"openSsh": "webos_emul"
 		},
