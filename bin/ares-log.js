@@ -76,7 +76,7 @@ var helpString = [
 	help.format("-D, --device-list", "List the available DEVICEs"),
 	help.format("-f, --follow", "Follow the log output (use Ctrl-C to terminate)"),
 	help.format("-l, --list", "List the installed app IDs"),
-	help.format("--level <LEVEL>", "Tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+	//help.format("--level <LEVEL>", "Tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 	help.format("-h, --help", "Display this help"),
 	help.format("-V, --version", "Display version info"),
 	"",
