@@ -85,7 +85,7 @@ var helpString = [
 	help.format("**Restriction**"),
 	help.format("this command can display only native application logs, not web application."),
 	"", 
-	help.format("APP_ID is sthe id of the application for which logs are shown."),
+	help.format("APP_ID is the id of the application for which logs are shown."),
 	"", 
 	"Examples:",
 	"",
