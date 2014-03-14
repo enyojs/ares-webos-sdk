@@ -214,7 +214,9 @@ function printLog(next) {
 	} else {
 		argv.follow = "";
 	}
-	var command = util.format("%s %s %s", "tail", argv.follow, "/media/developer/log/devlog");
+	var logFile = "/media/developer/log/devlog";
+	var msgNotFoundLog = "Log file does not exist.";
+	var command = "test -e " + logFile + " && tail " + argv.follow + " " + logFile + " || echo " + msgNotFoundLog;
 	var session;
 	async.series([
 		isInstalled.bind(null, argv.appId),
@@ -234,7 +236,7 @@ function printLog(next) {
 			}
 			function _onLine(line) {
 				var regExp = new RegExp(argv.appId, "gi");
-				if (line.match(regExp)) {
+				if (line.match(regExp) || line.match(msgNotFoundLog)) {
 					console.log(line);
 				} 
 			}
