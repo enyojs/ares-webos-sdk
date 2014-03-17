@@ -169,7 +169,7 @@ function list() {
 			}
 				strPkgs = strPkgs.concat(pkg.id).concat('\n');
 		});
-		process.stdout.write(strPkgs);
+		console.log(strPkgs);
 		finish(err);
 	});
 }
@@ -191,7 +191,7 @@ function listFull() {
 			}
 			strPkgs = strPkgs.concat('\n');
 		});
-		process.stdout.write(strPkgs);
+		console.log(strPkgs);
 		finish(err);
 	});
 }
