@@ -191,7 +191,7 @@ function listFull() {
 			}
 			strPkgs = strPkgs.concat('\n');
 		});
-		console.log(strPkgs);
+		process.stdout.write(strPkgs);
 		finish(err);
 	});
 }
