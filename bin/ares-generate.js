@@ -70,7 +70,7 @@ function PalmGenerate() {
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice)? this.defaultEnyoVersion:this.argv.onDevice;
 	this.argv.file = (this.argv.file == 'true' || !this.argv.file)? []:this.argv.file;
-	var dirName = this.argv.argv.remain[0];
+	var dirName = path.basename(this.argv.argv.remain[0]);
 	if (dirName) {
 		var dirNameArry = dirName.split('.');
 		switch (dirNameArry.length) {
@@ -256,7 +256,7 @@ PalmGenerate.prototype = {
 		if (this.argv.overwrite || !this.existed) {
 			this.options.overwrite = true;
 		}
-
+		console.log("Generating " + this.argv.template + " in " + this.destination);
 		var sources = (this.argv.template instanceof Array)? this.argv.template : [this.argv.template];
 		this.generator.generate(sources, this.substitutions, this.destination, this.options, next);
 	},
@@ -364,7 +364,7 @@ PalmGenerate.prototype = {
 			log.verbose(err.stack);
 			process.exit(1);
 		}
-		log.info("projectReady", "Generating " + this.argv.template + " in " + this.destination);
+		console.log("Success");
 		process.exit(0);
 	},
 
@@ -480,7 +480,7 @@ PalmGenerate.prototype = {
 	},
 
 	substituteConfigGenZip: function(next) {
-		log.info("displayTemplateList");
+		log.info("substituteConfigGenZip");
 		try {
 			configGenZipString = JSON.stringify(this.configGenZip);
 			for(key in this.configFileSubstitutions) {
@@ -489,12 +489,13 @@ PalmGenerate.prototype = {
 			}
 			this.configGenZip = JSON.parse(configGenZipString);
 			next();
-		} catch(e) {
-			throw "Failed during substitutions about sources";
+		} catch(err) {
+			next(err);
 		}
 	},
 
 	loadGenerator: function(next) {
+		log.info("loadGenerator");
 		var genConfig = {
 			level: log.level,
 			proxyUrl: this.argv["proxy-url"]

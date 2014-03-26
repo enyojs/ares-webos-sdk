@@ -163,6 +163,9 @@ PalmPackage.prototype = {
 		if (err) {
 			console.error("*** " + processName + ": "+ err.toString());
 		}
+		if (results && results[results.length-1].msg) {
+			console.log(results[results.length-1].msg);
+		}
 		process.exit(0);
 	},
 
