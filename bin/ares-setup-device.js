@@ -66,6 +66,7 @@ var knownOpts = {
 	"add":		Boolean,
 	"remove":	[String, null],
 	"modify":	Boolean,
+	"reset":	Boolean,
 	// params for device info
 	"name":		[String, null],
 	"type":		[String, null],
@@ -90,6 +91,7 @@ var shortHands = {
 	"a": ["--add"],
 	"r": ["--remove"],
 	"m": ["--modify"],
+	"R": ["--reset"],
 	// params for device info
 	"n": ["--name"],
 	"t": ["--type"],
@@ -114,6 +116,7 @@ var helpString = [
 	help.format(processName + " [OPTION...] -m, --modify <DEVICE_INFO>"),
 	"",
 	"OPTION",
+	help.format("-R, --reset", "initialize the DEVICE list"),
 	help.format("-l, --list", "List the available DEVICEs"),
 	help.format("-F, --listfull", "List the available DEVICEs in detail"),
 	help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
@@ -186,6 +189,8 @@ if (argv.list) {
 	op = list;
 } else if (argv.listfull) {
 	op = listFull;
+} else if (argv.reset) {
+	op = reset;
 } else if (argv.add) {
 	op = add;
 } else if (argv.remove) {
@@ -214,6 +219,22 @@ if (op) {
 }
 
 /**********************************************************************/
+function reset(next) {
+	var appdir = path.resolve(process.env.APPDATA || process.env.HOME || process.env.USERPROFILE, '.ares');
+	var deviceFilePath = path.join(appdir, 'novacom-devices.json');
+	async.series([
+		function(next) {
+			if (fs.existsSync(deviceFilePath)) {
+				fs.unlink(deviceFilePath, next);
+			} else {
+				next();
+			}
+		},
+		list()
+	], function(err) {
+		next(err);
+	});
+}
 
 function list(next) {
 	var resolver = new novacom.Resolver();
