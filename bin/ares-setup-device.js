@@ -66,7 +66,7 @@ var knownOpts = {
 	"add":		Boolean,
 	"remove":	[String, null],
 	"modify":	Boolean,
-	"reset":    Boolean,
+	"reset":	Boolean,
 	// params for device info
 	"name":		[String, null],
 	"type":		[String, null],
@@ -230,7 +230,7 @@ function reset(next) {
 				next();
 			}
 		},
-		list(next)
+		list()
 	], function(err) {
 		next(err);
 	});
