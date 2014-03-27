@@ -112,11 +112,11 @@ argv.appId = (argv.argv.remain.length > 0)? argv.argv.remain[0] : null;
 var op;
 if (argv.list) {
 	op = list;
-} else if (argv.device-list) {
+} else if (argv['device-list']) {
 	op = deviceList;
 } else if (argv.run) {
 	op = run;
-} else if (argv.appId) {
+} else if (argv.appId || (argv.appId === null && argv.device)) {
 	op = printLog;
 } else if (argv.version) {
 	versionTool.showVersionAndExit();
@@ -177,6 +177,9 @@ function list(next) {
 
 function isInstalled(appId, next) {
 	var installed = false;
+	if (appId === null) {
+		return next();
+	}
 	ipkg.installer.list(options, function(err, pkgs) {
 		if (pkgs instanceof Array) pkgs.forEach(function (pkg) {
 			if(pkg.id == appId) {
@@ -206,9 +209,6 @@ function run(next) {
 
 function printLog(next) {
 	log.verbose("printLog()", "options:", options);
-	if (!argv.appId) {
-		return next(new Error("app ID is required to print log"));
-	}
 	if (argv.follow) {
 		argv.follow = "-f";
 	} else {
@@ -235,10 +235,11 @@ function printLog(next) {
 				str.split(/\r?\n/).forEach(_onLine);
 			}
 			function _onLine(line) {
-				var regExp = new RegExp(argv.appId, "gi");
-				if (line.match(regExp) || line.match(msgNotFoundLog)) {
+				//FIXME: current native app does not print appID in log file.
+				//var regExp = new RegExp(argv.appId, "gi");
+				//if (line.match(regExp) || line.match(msgNotFoundLog)) {
 					console.log(line);
-				} 
+				//} 
 			}
 		}
 	], function(err, result) {
