@@ -21,38 +21,6 @@ process.on('uncaughtException', function (err) {
 	process.exit(1);
 });
 
-if (process.argv.length === 2) {
-	process.argv.splice(2, 0, '--help');
-}
-
-/**********************************************************************/
-
-/*
-$ novacom -h
-version: novacom-22
-usage: novacom [-a address] [-p port] [-t] [-l] [-d device] [-c cmd] [-r password] [-w] <command>
-novacom [-V]
-novacom [-a address] [-p port] -P[ [-f <localport:remoteport,...>] ]
-options:
-        -a address: ip address of the novacomd server, default is 'localhost'
-        -p port: port of the novacomd server's device list port, default is 6968
-        -t: go into terminal mode, for interactive use
-        -s: pass signals to remote process
-        -l: list devices and then exit
-        -r: device password (must use with -c option)
-        -c: service command [login, add, remove, logout]
-                  login:  opens new session
-                  add:    adds device token to host
-                  remove: remove device token from host
-                  logout: closes active session
-        -d device: connect to specific device instead of first.
-                 might be <nduid>, <connection type>, <device type>
-        -w: wait for device to show up before running command
-        -V: version information
-        -P: Port Forwarding Enabled
-        -f: ports to forward
-*/
-
 var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 var knownOpts = {
@@ -66,18 +34,7 @@ var knownOpts = {
 	"add":		Boolean,
 	"remove":	[String, null],
 	"modify":	Boolean,
-	"reset":	Boolean,
-	// params for device info
-	"name":		[String, null],
-	"type":		[String, null],
-	"description":		[String, null],
-	"host":		[String, null],
-	"port":		[String, null],
-	"username":		[String, null],
-	"files":		[String, null],
-	"privatekey": [String, null],
-	"passphrase": [String, null],
-	"password": [String, null]
+	"reset":	Boolean
 };
 
 var shortHands = {
@@ -91,18 +48,7 @@ var shortHands = {
 	"a": ["--add"],
 	"r": ["--remove"],
 	"m": ["--modify"],
-	"R": ["--reset"],
-	// params for device info
-	"n": ["--name"],
-	"t": ["--type"],
-	"D": ["--description"],
-	"H": ["--host"],
-	"p": ["--port"],
-	"u": ["--username"],
-	"f": ["--files"],
-	"K": ["--privatekey"],
-	"P": ["--passphrase"],
-	"W": ["--password"]
+	"R": ["--reset"]
 };
 
 var helpString = [
@@ -111,8 +57,9 @@ var helpString = [
 	help.format(processName + " - Manages target device, such as emulator and webOS Device."),
 	"",
 	"SYNOPSIS",
+	help.format(processName + " [OPTION...]"),
 	help.format(processName + " [OPTION...] -a, --add <DEVICE_INFO>"),
-	help.format(processName + " [OPTION...] -r, --remove <DEVICE_INFO>"),
+	help.format(processName + " [OPTION...] -r, --remove DEVICE_NAME"),
 	help.format(processName + " [OPTION...] -m, --modify <DEVICE_INFO>"),
 	"",
 	"OPTION",
@@ -124,52 +71,30 @@ var helpString = [
 	help.format("-V, --version", "Display version info"),
 	"",
 	"DESCRIPTION",
-	help.format("To add a new device info, use '--add'"),
-	help.format("<DEVICE_INFO> can be JSON Form."),
-	help.format("  (e.g.) --add '{\"name\": \"tv2\", \"type\":\"starfish\", \"host\":\"127.0.0.1\",\"port\":\"22\"}'"),
-	help.format("Or <DEVICE_INFO> can be specified by the following additional options."),
-	help.format("  --name, -n [string]   device name"),
-	help.format("  --type, -t [string]   platform type can be 'starfish' or 'emulator'"),
-	help.format("  --description, -D [string]   description of target device"),
-	help.format("  --host, -H [string]   ip address"),
-	help.format("  --port, -p [string]   port number"),
-	help.format("  --username, -u [string]   user name can be 'root' or 'prisoner'"),
-	help.format("  --files, -f [string]   file stream type can be 'stream' or 'sftp'"),
+	help.format("Basically, this command provide an interactive prompt to get a device information"),
+	help.format("To add a new device info, use '--add <DEVICE_INFO>'"),
+	help.format(" (e.g.) --add '{\"name\": \"tv2\", \"username\":\"root\", \"host\":\"127.0.0.1\",\"port\":\"22\"}'"),
+	help.format("  ** attributes of JSON form."),
+	help.format("   name [string]  device name"),
+	help.format("   type [\"starfish\" | \"emulator\"]  platform type"),
+	help.format("   description [string]   description of target device"),
+	help.format("   host [string]   ip address"),
+	help.format("   port [string]   port number"),
+	help.format("   username [string]   user name to connect ('developer' or 'prisoner')"),
+	help.format("   files ['stream' | 'sftp']   file stream type can be 'stream' or 'sftp'"),
 	help.format("                         if target device support sftp-server,"),
 	help.format("                         sftp is more stable than general stream"),
-	help.format("  --privatekey, -K [string]   ssh private key file name."),
-	help.format("                              ssh private key should exist under $HOME/.ssh/"),
-	help.format("  --passphrase, -P [string]   passphrase used for generating ssh keys"),
-	help.format("  --password,   -W [string]   password for ssh connection"),
-	help.format("                              '--password' option is available,"),
-	help.format("                              only when device allows password authentication via ssh."),
-	help.format(" (e.g.) --add --name \"tv2\" --type \"starfish\" "),
+	help.format("   privatekey  [string]   ssh private key file name."),
+	help.format("                         ssh private key should exist under $HOME/.ssh/"),
+	help.format("   passphrase  [string]   passphrase used for generating ssh keys"),
+	help.format("   password  [string]   password for ssh connection"),
 	"",
 	help.format("To remove DEVICE, use '--remove'"),
-	help.format("<DEVICE_INFO> can be JSON Form."),
-	help.format("  (e.g.) --remove '{\"name\": \"tv2\"'}"),
-	help.format("Or <DEVICE_INFO> can be only NAME of target device"),
-	help.format("  (e.g.) --remove tv2"),
+	help.format(" (e.g.) --remove tv2"),
 	"",
 	help.format("To modify DEVICE_INFO, use '--modify'"),
 	help.format("<DEVICE_INFO> can be JSON Form."),
-	help.format("  (e.g.) --modify '{\"name\":\"tv2\",\"type\":\"starfish\",\"host\":\"192.168.0.123\",\"port\":\"22\"}'"),
-	help.format("Or <DEVICE_INFO> can be specified by the additional options like '--add'."),
-	help.format("  --name, -n [string]   device name"),
-	help.format("  --type, -t [string]   platform type can be 'starfish' or 'emulator'"),
-	help.format("  --description, -D [string]   description of target device"),
-	help.format("  --host, -H [string]   ip address"),
-	help.format("  --port, -p [string]   port number"),
-	help.format("  --username, -u [string]   user name can be 'root' or 'prisoner'"),
-	help.format("  --files, -f [string]   file stream type can be 'stream' or 'sftp'"),
-	help.format("                         if target device support sftp-server,"),
-	help.format("                         sftp is more stable than general stream"),
-	help.format("  --privatekey, -K [string]   ssh private key file name."),
-	help.format("                              ssh private key should exist under $HOME/.ssh/"),
-	help.format("  --passphrase, -P [string]   passphrase used for generating ssh keys"),
-	help.format("  --password,   -W [string]   password for ssh connection"),
-	help.format("                              '--password' option is available,"),
-	help.format(" (e.g.) --modify --name \"tv2\" --host \"192.168.0.123\" "),
+	help.format("  (e.g.) --modify '{\"name\":\"tv2\",\"username\":\"root\",\"host\":\"192.168.0.123\",\"port\":\"22\"}'"),
 	""
 ];
 
@@ -205,7 +130,7 @@ if (argv.list) {
 	});
 	process.exit(0);
 } else {
-	process.exit(1);
+	op = interactiveInput;
 }
 
 var options = {
@@ -260,7 +185,7 @@ function listFull(next) {
 	var resolver = new novacom.Resolver();
 	async.waterfall([
 		resolver.load.bind(resolver),
-		resolver.listFull.bind(resolver),
+		resolver.getRawDeviceString.bind(resolver),
 		function(deviceContentsString, next) {
 			log.info("listFull()");
 			console.log(deviceContentsString);
@@ -273,29 +198,25 @@ function listFull(next) {
 var defaultDeviceInfo = {
 	type: "starfish",
 	host: "127.0.0.1",
-	port: 22,
+	port: "22",
 	username: "root",
 	description: "new device description",
-	files: "stream"
+	files: "stream",
+	indelible: false
 };
 
 function replaceDefaultDeviceInfo(inDevice) {
 	if (inDevice) {
+			inDevice.type = inDevice.type || defaultDeviceInfo.type;
+			inDevice.host = inDevice.host || defaultDeviceInfo.host;
+			inDevice.port = inDevice.port || defaultDeviceInfo.port;
+			inDevice.username = inDevice.username || defaultDeviceInfo.username;
+			inDevice.files = inDevice.files || defaultDeviceInfo.files;
+			inDevice.description = inDevice.description || defaultDeviceInfo.description;
+			inDevice.indelible = inDevice.indelible || defaultDeviceInfo.indelible;
 		if (inDevice.type && inDevice.type == "emulator") {
-			inDevice.type = defaultDeviceInfo.type;
-			inDevice.host = "127.0.0.1";
-			inDevice.port = 6622;
-			inDevice.username = "root";
 			inDevice.privateKey = { "openSsh": "webos_emul" };
 			inDevice.files = "sftp";
-		} else if (inDevice.type && inDevice.type == "starfish") {
-			if (inDevice.port == 22 || inDevice.username == "root") {
-				inDevice.username = "root";
-				inDevice.port = 22;
-			} else if(inDevice.port == 9922 || inDevice.username == "prisoner") {
-				inDevice.username = "prisoner";
-				inDevice.port = 9922;
-			}
 		}
 	}
 }
@@ -324,32 +245,105 @@ function refineJsonString(str) {
 	}
 }
 
+// ["name", "type", "description", "host", "port", "username", "files", "privateKeyName", "passphrase", "password"];
+var requiredKeys = ["name", "host", "port", "username", "description", "privateKeyName", "passphrase", "password"];
+
+function getInput(inputMsg, next) {
+	var keyInputString = "";
+	process.stdin.resume();
+	process.stdin.setEncoding('utf8');
+	process.stdout.write(inputMsg+': ');
+	process.stdin.once('data', function (text) {
+		var input;
+		if (text !== '\n') {
+			input = text.toString().trim();
+		}
+		next(null, input);
+	});
+}
+
+function getDevice(name, next) {
+	if (!name) {
+		return next(new Error("Need to input a device name"));
+	}
+	var resolver = new novacom.Resolver();
+	async.waterfall([
+		resolver.load.bind(resolver),
+		resolver.getDeviceBy.bind(resolver, 'name', name + '$')
+	], function(err, device){
+		if (err) {
+			console.log("Adding new device named ", name, "!!");
+			next(null, {"name" : name, "mode":"add"});
+		} else {
+			next(null, device);
+		}
+	});
+}
+
+function interactiveInput(next) {
+	var mode = 'modify';
+	async.waterfall([
+		list.bind(this),
+		function(next) {
+			console.log("** You can modify the device info in the above list, or add new device.");
+			next();
+		},
+		getInput.bind(this,"Enter Device Name"),
+		getDevice.bind(this),
+		function(device, next) {
+			var inDevice = {};
+			if (device.mode) {
+				mode = device.mode;
+			}
+			async.forEachSeries(requiredKeys, function(key, next){
+				if (key === "name") {
+					console.log("Device Name :", device[key]);
+					inDevice[key] = device[key];
+					return next();
+				}
+				var defaultValue = (typeof defaultDeviceInfo[key] === 'string')? "(default: " + defaultDeviceInfo[key] + ")" : "";
+				var currentValue = (device[key])? "(" + device[key] + ")" : defaultValue;
+				async.waterfall([
+					getInput.bind(this, key + " " + currentValue),
+					function(input, next) {
+						inDevice[key] = (typeof input === "string")? input : device[key];
+						next();
+					}
+				], function(err) {
+					next();
+				});
+			}, function(err) {
+				next(err, inDevice);
+			});
+		}
+	], function(err, inDevice){
+		if (err) {
+			return 	next(err);
+		} else {
+			if (inDevice["privateKeyName"]) {
+				inDevice["password"] = "@DELETE@";
+				inDevice["privateKey"] = { "openSsh": inDevice["privateKeyName"] };
+				delete inDevice["privateKeyName"];
+			} else if (!inDevice["password"]){
+				inDevice["password"] = "";
+			}
+			replaceDefaultDeviceInfo(inDevice);
+			var resolver = new novacom.Resolver();
+			async.series([
+				resolver.load.bind(resolver),
+				resolver.modifyDeviceFile.bind(resolver, mode, inDevice),
+				list.bind(this)
+			], function(err) {
+				next(null, {"msg": "Success to " + mode + " a device!!"});
+			});
+		}
+	})
+}
+
 function add(next) {
 	try {
 		var target = {};
-		if (!argv.argv.remain[0]) {
-			if (!argv.name) {
-				next(new Error("Need a target device name to add."));
-				return;
-			} else {
-				target = {
-					"name": argv.name || defaultDeviceInfo.name,
-					"type": argv.type || defaultDeviceInfo.type,
-					"host": argv.host || defaultDeviceInfo.host,
-					"port": argv.port || defaultDeviceInfo.port,
-					"username": argv.username || defaultDeviceInfo.username,
-					"description": argv.description || defaultDeviceInfo.description,
-					"files": argv.files || defaultDeviceInfo.files
-				};
-				if (argv.passphrase || argv.passphrase === "") {
-					target.passphrase = argv.passphrase;
-				}
-				if (argv.password || argv.password === "") {
-					target.password = argv.password;
-				}
-				target = JSON.stringify(target);
-			}
-		} else {
+		if (argv.argv.remain[0]) {
 			target = argv.argv.remain.join("");
 		}
 		var deviceInfoContent = refineJsonString(target);
@@ -374,8 +368,14 @@ function add(next) {
 		var resolver = new novacom.Resolver();
 		async.series([
 			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, 'add', inDevice)
-		], next);
+			resolver.modifyDeviceFile.bind(resolver, 'add', inDevice),
+			list.bind(this)
+		], function(err) {
+			if (err) {
+				return next(err);
+			} 
+			next(null, {"msg": "Success to add a device named " + inDevice.name + "!!"});
+		});
 	} catch (err) {
 		next(err);
 	}
@@ -385,19 +385,17 @@ function remove(next) {
 	try {
 		var deviceInfoContent = refineJsonString(argv.remove);
 		var resolver = new novacom.Resolver();
-		var argvCheck = deviceInfoContent.indexOf("{");	
-		var inDevice;	
-		
-		if (argvCheck === 0) {
-			 inDevice = JSON.parse(deviceInfoContent);
-		}else {
-			inDevice = {name: deviceInfoContent};
-		}
-		
+		var inDevice = {name: deviceInfoContent};
 		async.series([
 			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, 'remove', inDevice)
-		], next);
+			resolver.modifyDeviceFile.bind(resolver, 'remove', inDevice),
+			list.bind(this)
+		], function(err) {
+			if (err) {
+				return next(err);
+			} 
+			next(null, {"msg": "Success to remove a device named " + argv.remove + "!!"});
+		});
 	} catch (err) {
 		next(err);
 	}
@@ -406,20 +404,7 @@ function remove(next) {
 function modify(next) {
 	try {
 		var target = {};
-		if (!argv.argv.remain[0]) {
-			if (!argv.name) {
-				next(new Error("Need a target device name to add."));
-				return;
-			} else {
-				var keys = ["name", "type", "host", "port", "username", "description", "files", "passphrase", "password"];
-				keys.forEach( function(key) {
-					if (argv[key] || argv[key] === "") {
-						target[key] = argv[key];
-					}
-				});
-				target = JSON.stringify(target);
-			}
-		} else {
+		if (argv.argv.remain[0]) {
 			target = argv.argv.remain.join("");
 		}
 		var deviceInfoContent = refineJsonString(target);
@@ -435,11 +420,20 @@ function modify(next) {
 			inDevice.privateKey = { "openSsh": argv.privatekey };
 		}
 		replaceDefaultDeviceInfo(inDevice);
+		if (inDevice.privatekey) {
+			inDevice.password = "@DELETE@";
+		} 
 		var resolver = new novacom.Resolver();
 		async.series([
 			resolver.load.bind(resolver),
-			resolver.modifyDeviceFile.bind(resolver, 'modify', inDevice)
-		], next);
+			resolver.modifyDeviceFile.bind(resolver, 'modify', inDevice),
+			list.bind(this)
+		], function(err) {
+			if (err) {
+				return next(err);
+			} 
+			next(null, {"msg": "Success to modify a device named " + inDevice.name + "!!"});
+		});
 	} catch (err) {
 		next(err);
 	}
