@@ -6,7 +6,9 @@
 ) 
 
 @IF EXIST "%~dp0\x86\node.exe" (
-  "%~dp0\x86\node.exe"  %SCRIPT% %*
+    @SETLOCAL
+    @SET PATH=%PATH%;"%~dp0\x86"
+    node %SCRIPT% %*
 ) ELSE (
   node  %SCRIPT% %*
 )
