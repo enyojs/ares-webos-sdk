@@ -207,21 +207,22 @@ var defaultDeviceInfo = {
 
 function replaceDefaultDeviceInfo(inDevice) {
 	if (inDevice) {
-			inDevice.type = inDevice.type || defaultDeviceInfo.type;
-			inDevice.host = inDevice.host || defaultDeviceInfo.host;
-			inDevice.port = inDevice.port || defaultDeviceInfo.port;
-			inDevice.username = inDevice.username || defaultDeviceInfo.username;
-			inDevice.files = inDevice.files || defaultDeviceInfo.files;
-			inDevice.description = inDevice.description || defaultDeviceInfo.description;
-			inDevice.indelible = inDevice.indelible || defaultDeviceInfo.indelible;
 		if (inDevice.type && inDevice.type == "emulator") {
 			inDevice.privateKey = { "openSsh": "webos_emul" };
-			inDevice.username = "developer";
-			inDevice.port = "6622";
-			inDevice.files = "sftp";
+			inDevice.username = inDevice.username || "developer";
 			inDevice.type = defaultDeviceInfo.type;
-			inDevice.description = "LG webOS TV Emulator";
+			inDevice.port = inDevice.port || "6622";
+			inDevice.files = inDevice.files || "sftp";
+			inDevice.description = inDevice.description || "LG webOS TV Emulator";
 		}
+
+		inDevice.type = inDevice.type || defaultDeviceInfo.type;
+		inDevice.host = inDevice.host || defaultDeviceInfo.host;
+		inDevice.port = inDevice.port || defaultDeviceInfo.port;
+		inDevice.username = inDevice.username || defaultDeviceInfo.username;
+		inDevice.files = inDevice.files || defaultDeviceInfo.files;
+		inDevice.description = inDevice.description || defaultDeviceInfo.description;
+		inDevice.indelible = inDevice.indelible || defaultDeviceInfo.indelible;
 	}
 }
 
