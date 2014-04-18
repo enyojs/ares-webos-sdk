@@ -216,7 +216,11 @@ function replaceDefaultDeviceInfo(inDevice) {
 			inDevice.indelible = inDevice.indelible || defaultDeviceInfo.indelible;
 		if (inDevice.type && inDevice.type == "emulator") {
 			inDevice.privateKey = { "openSsh": "webos_emul" };
+			inDevice.username = "developer";
+			inDevice.port = "6622";
 			inDevice.files = "sftp";
+			inDevice.type = defaultDeviceInfo.type;
+			inDevice.description = "LG webOS TV Emulator";
 		}
 	}
 }
