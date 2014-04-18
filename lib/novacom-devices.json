@@ -7,9 +7,7 @@
 		"host": "127.0.0.1",
 		"port": 5522,
 		"username": "root",
-		"privateKey": {
-			"openSsh": "webos"
-		},
+		"password": "",
 		"files":"stream",
 		"indelible": true
 	},
@@ -36,7 +34,7 @@
 		"host": "127.0.0.1",
 		"port": 22,
 		"username": "root",
-		"password": "webos",
+		"password": "",
 		"files":"stream",
 		"noPortForwarding":false,
 		"indelible": false
