@@ -10,7 +10,8 @@
 		"privateKey": {
 			"openSsh": "webos"
 		},
-		"files":"stream"
+		"files":"stream",
+		"indelible": true
 	},
 	{
 		"order":"1",
@@ -24,7 +25,8 @@
 			"openSsh": "webos_emul"
 		},
 		"files":"sftp",
-		"noPortForwarding":true
+		"noPortForwarding":true,
+		"indelible": true
 	},
 	{
 		"order":"2",
@@ -36,6 +38,7 @@
 		"username": "root",
 		"password": "webos",
 		"files":"stream",
-		"noPortForwarding":false
+		"noPortForwarding":false,
+		"indelible": false
 	}
 ]

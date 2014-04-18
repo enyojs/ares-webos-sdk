@@ -229,7 +229,7 @@ function getkey(next) {
 					target.files = 'sftp';
 					target.port = '9922';
 					target.username = 'prisoner';
-					target.password = '';
+					target.password = '@DELETE@';
 					next(null, target);
 				});
 			} else {
