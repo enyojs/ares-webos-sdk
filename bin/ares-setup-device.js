@@ -363,12 +363,6 @@ function add(next) {
 		} else if (argv.privatekey || argv.privatekey === "") {
 			inDevice.privateKey = { "openSsh": argv.privatekey };
 		}
-		var keys = Object.keys(defaultDeviceInfo);
-		keys.forEach(function(key) {
-			if (!inDevice[key]) {
-				inDevice[key] = defaultDeviceInfo[key];
-			}
-		}.bind(this));
 		replaceDefaultDeviceInfo(inDevice);
 		var resolver = new novacom.Resolver();
 		async.series([
