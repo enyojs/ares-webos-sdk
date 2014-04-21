@@ -79,68 +79,6 @@
 					]
 				},
 				{
-					"id": "bootplate-moonstone-ActivityPanels",
-					"type": "template",
-					"version": "2.3.0-rc9",
-					"isDefault": false,
-					"description": "Enyo moonstone bootplate ActivityPanels",
-					"deps": ["enyoappinfo"],
-					"files": [
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
-							"excluded": [	
-								".git",
-								".gitignore",
-								".gitmodules",
-								"enyo/.git",
-								"enyo/.gitignore",
-								"lib/enyo-cordova/.git",
-								"lib/enyo-ilib/.git",
-								"lib/enyo-webos/.git",
-								"lib/layout/.git",
-								"lib/moonstone/.git",
-								"lib/moonstone/.gitignore",
-								"lib/spotlight/.git"
-							]
-						},
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/moonstone/project-templates/ActivityPanels/source",
-							"prefixToAdd": "source"
-						}
-					]
-				},
-				{
-					"id": "bootplate-moonstone-AlwaysViewingPanels",
-					"type": "template",
-					"version": "2.3.0-rc9",
-					"isDefault": false,
-					"description": "Enyo moonstone bootplate AlwaysViewingPanels",
-					"deps": ["enyoappinfo"],
-					"files": [
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
-							"excluded": [	
-								".git",
-								".gitignore",
-								".gitmodules",
-								"enyo/.git",
-								"enyo/.gitignore",
-								"lib/enyo-cordova/.git",
-								"lib/enyo-ilib/.git",
-								"lib/enyo-webos/.git",
-								"lib/layout/.git",
-								"lib/moonstone/.git",
-								"lib/moonstone/.gitignore",
-								"lib/spotlight/.git"
-							]
-						},
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/moonstone/project-templates/AlwaysViewingPanels/source",
-							"prefixToAdd": "source"
-						}
-					]
-				},
-				{
 					"id": "bootplate-2.3.0-pre.12",
 					"Xtype": "template",
 					"type": "null",
