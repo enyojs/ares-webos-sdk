@@ -43,6 +43,7 @@
 					"version": "0.0.1",
 					"isDefault": false,
 					"description": "Basic web template for webOS - none enyo library.",
+					"class":"basic",
 					"deps": ["webappinfo"],
 					"files": [
 						{
@@ -57,6 +58,7 @@
 					"version": "2.3.0-rc9",
 					"isDefault": true,
 					"description": "Enyo moonstone bootplate",
+					"class":"moonstone",
 					"deps": ["enyoappinfo"],
 					"files": [
 						{
@@ -85,6 +87,7 @@
 					"version": "2.3.0-pre.12",
 					"isDefault": false,
 					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
+					"class":"basic",
 					"deps": ["webappinfo"],
 					"files": [
 						{
@@ -102,6 +105,7 @@
 					"version": "2.2.0",
 					"description": "Enyo bootplate 2.2.0",
 					"deps": ["webos-app-config"],
+					"class":"basic",
 					"files": [
 						{
 							"url": "http://enyojs.com/archive/bootplate-2.2.0.zip",
@@ -118,6 +122,7 @@
 					"version": "2.1.1",
 					"description": "Enyo bootplate 2.1.1",
 					"deps": ["webos-app-config"],
+					"class":"basic",
 					"files": [
 						{
 							"url": "http://enyojs.com/archive/bootplate-2.1.1.zip",
@@ -204,6 +209,7 @@
 					"type": "template",
 					"version": "2.3.0-rc9",
 					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
+					"class":"basic",
 					"deps": ["enyoappinfo", "enyo-onyx"],
 					"files": [
 						{
