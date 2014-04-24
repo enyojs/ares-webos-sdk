@@ -250,8 +250,18 @@ function refineJsonString(str) {
 	}
 }
 
-// ["name", "type", "description", "host", "port", "username", "files", "privateKeyName", "passphrase", "password"];
-var requiredKeys = ["name", "host", "port", "username", "description", "files", "privateKeyName", "passphrase", "password"];
+var requiredKeys = {
+	"name" : false,
+	"type" : false,
+	"host" : true,
+	"port" : true,
+	"username": true,
+	"description": true,
+	"files" : false,
+	"privateKeyName" : true,
+	"passphrase": true,
+	"password": true
+};
 
 function getInput(inputMsg, next) {
 	var keyInputString = "";
@@ -299,13 +309,14 @@ function interactiveInput(next) {
 			var inDevice = {};
 			if (device.mode) {
 				mode = device.mode;
+				delete device.mode;
 			}
 			if (device.name) {
 				console.log("Device Name :", device.name);
 			}
-			var keys = Object.keys(device);
+			var keys = Object.keys(requiredKeys);
 			async.forEachSeries(keys, function(key, next){
-				if (requiredKeys.indexOf(key) === -1 || key === "name") {
+				if (requiredKeys[key] === false) {
 					inDevice[key] = device[key];
 					return next();
 				}
