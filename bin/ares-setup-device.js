@@ -251,7 +251,7 @@ function refineJsonString(str) {
 }
 
 // ["name", "type", "description", "host", "port", "username", "files", "privateKeyName", "passphrase", "password"];
-var requiredKeys = ["name", "host", "port", "username", "description", "privateKeyName", "passphrase", "password"];
+var requiredKeys = ["name", "host", "port", "username", "description", "files", "privateKeyName", "passphrase", "password"];
 
 function getInput(inputMsg, next) {
 	var keyInputString = "";
@@ -300,9 +300,12 @@ function interactiveInput(next) {
 			if (device.mode) {
 				mode = device.mode;
 			}
-			async.forEachSeries(requiredKeys, function(key, next){
-				if (key === "name") {
-					console.log("Device Name :", device[key]);
+			if (device.name) {
+				console.log("Device Name :", device.name);
+			}
+			var keys = Object.keys(device);
+			async.forEachSeries(keys, function(key, next){
+				if (requiredKeys.indexOf(key) === -1 || key === "name") {
 					inDevice[key] = device[key];
 					return next();
 				}
@@ -339,6 +342,9 @@ function interactiveInput(next) {
 				resolver.modifyDeviceFile.bind(resolver, mode, inDevice),
 				list.bind(this)
 			], function(err) {
+				if (err) {
+					return next(err);
+				}
 				next(null, {"msg": "Success to " + mode + " a device!!"});
 			});
 		}
