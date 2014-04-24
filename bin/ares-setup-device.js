@@ -250,8 +250,18 @@ function refineJsonString(str) {
 	}
 }
 
-// ["name", "type", "description", "host", "port", "username", "files", "privateKeyName", "passphrase", "password"];
-var requiredKeys = ["name", "host", "port", "username", "description", "files", "privateKeyName", "passphrase", "password"];
+var requiredKeys = {
+	"name" : false,
+	"type" : false,
+	"host" : true,
+	"port" : true,
+	"username": true,
+	"description": true,
+	"files" : false,
+	"privateKeyName" : true,
+	"passphrase": true,
+	"password": true
+};
 
 function getInput(inputMsg, next) {
 	var keyInputString = "";
@@ -274,7 +284,7 @@ function getDevice(name, next) {
 	var resolver = new novacom.Resolver();
 	async.waterfall([
 		resolver.load.bind(resolver),
-		resolver.getDeviceBy.bind(resolver, 'name', name + '$')
+		resolver.getDeviceBy.bind(resolver, 'name', '^'+name+'$')
 	], function(err, device){
 		if (err) {
 			console.log("Adding new device named ", name, "!!");
@@ -299,13 +309,14 @@ function interactiveInput(next) {
 			var inDevice = {};
 			if (device.mode) {
 				mode = device.mode;
+				delete device.mode;
 			}
 			if (device.name) {
 				console.log("Device Name :", device.name);
 			}
-			var keys = Object.keys(device);
+			var keys = Object.keys(requiredKeys);
 			async.forEachSeries(keys, function(key, next){
-				if (requiredKeys.indexOf(key) === -1 || key === "name") {
+				if (requiredKeys[key] === false) {
 					inDevice[key] = device[key];
 					return next();
 				}
@@ -328,24 +339,60 @@ function interactiveInput(next) {
 		if (err) {
 			return 	next(err);
 		} else {
-			if (inDevice["privateKeyName"]) {
-				inDevice["password"] = "@DELETE@";
-				inDevice["privateKey"] = { "openSsh": inDevice["privateKeyName"] };
-				delete inDevice["privateKeyName"];
-			} else if (!inDevice["password"]){
-				inDevice["password"] = "";
-			}
-			replaceDefaultDeviceInfo(inDevice);
-			var resolver = new novacom.Resolver();
+			var auth = 'pass'; //key or pass
 			async.series([
-				resolver.load.bind(resolver),
-				resolver.modifyDeviceFile.bind(resolver, mode, inDevice),
-				list.bind(this)
+				function(next) {
+					if (inDevice["privateKeyName"] && typeof inDevice["password"] === 'string') {
+						if (inDevice["password"].length === 0) {
+							auth = 'key';
+							return next();
+						}
+						async.waterfall([
+							getInput.bind(this, "Select SSH auth method [ssh Key(k) or password(p)]"),
+							function(input, next) {
+								if (input.match(/pass|P/gi)){
+									auth = 'pass';
+								} else {
+									auth = 'key';
+								}
+								next();
+							}
+						], function(err) {
+							next(err);
+						});
+					} else {
+						next();
+					}
+				},
+				function (next) {
+					if (auth === 'pass') {
+						inDevice["password"] = inDevice["password"] || "";
+						inDevice["privateKey"] = "@DELETE@";
+						inDevice["passphrase"] = "@DELETE@";
+						inDevice["privateKeyName"] = "@DELETE@";
+					} else if (auth === 'key') {
+						inDevice["password"] = "@DELETE@";
+						inDevice["privateKey"] = { "openSsh": inDevice["privateKeyName"] };
+						inDevice["privateKeyName"] = "@DELETE@";
+					}
+					next();
+				}
 			], function(err) {
 				if (err) {
 					return next(err);
 				}
-				next(null, {"msg": "Success to " + mode + " a device!!"});
+				replaceDefaultDeviceInfo(inDevice);
+				var resolver = new novacom.Resolver();
+				async.series([
+					resolver.load.bind(resolver),
+					resolver.modifyDeviceFile.bind(resolver, mode, inDevice),
+					list.bind(this)
+				], function(err) {
+					if (err) {
+						return next(err);
+					}
+					next(null, {"msg": "Success to " + mode + " a device!!"});
+				});
 			});
 		}
 	})

@@ -192,12 +192,13 @@ function list(next) {
 			log.info("list()", "devices:", devices);
 			if (Array.isArray(devices)) {
 				console.log(sprintf("%-16s %-16s %-16s %-16s %s", 
-						"<DEVICE NAME>", "<PLATFORM>", "<PRIVATE KEY>", "<PASSPHRASE>", "<SSH ADDRESS>"));
+						"<DEVICE NAME>", "<PASSWORD>", "<PRIVATE KEY>", "<PASSPHRASE>", "<SSH ADDRESS>"));
 				devices.forEach(function(device) {
+					var sshPassword = device.password || "'No Password'";
 					var sshPrvKeyName = device.privateKeyName || "'No Ssh Key'";
 					var sshPassphrase = device.passphrase || "'No passphrase'"
 					console.log(sprintf("%-16s %-16s %-16s %-16s (%s)", 
-						device.name, device.type, sshPrvKeyName, sshPassphrase, device.addr));
+						device.name, sshPassword, sshPrvKeyName, sshPassphrase, device.addr));
 				});
 			}
 			log.info("list()", "Success");
