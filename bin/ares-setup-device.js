@@ -317,7 +317,7 @@ function interactiveInput(next) {
 				async.waterfall([
 					getInput.bind(this, key + " " + currentValue),
 					function(input, next) {
-						inDevice[key] = (typeof input === "string")? input : device[key];
+						inDevice[key] = (typeof input === "string" && input.length>0)? input : device[key];
 						next();
 					}
 				], function(err) {
@@ -334,6 +334,14 @@ function interactiveInput(next) {
 			var auth = 'pass'; //key or pass
 			async.series([
 				function(next) {
+					var nullValue = ["\"\"", "''"];
+					["privateKeyName", "password", "passphrase"].forEach(function(sshType) {
+						if (value = inDevice[sshType]) {
+							if (nullValue.indexOf(value) !== -1) {
+								delete inDevice[sshType];
+							}
+						}
+					});
 					if (inDevice["privateKeyName"] && typeof inDevice["password"] === 'string') {
 						if (inDevice["password"].length === 0) {
 							auth = 'key';
@@ -370,6 +378,7 @@ function interactiveInput(next) {
 					} else if (auth === 'key') {
 						inDevice["password"] = "@DELETE@";
 						inDevice["privateKey"] = { "openSsh": inDevice["privateKeyName"] };
+						inDevice["passphrase"] = inDevice["passphrase"] || "@DELETE@";
 						inDevice["privateKeyName"] = "@DELETE@";
 					}
 					next();
