@@ -72,11 +72,12 @@ var helpString = [
 	"",
 	"DESCRIPTION",
 	help.format("Basically, this command provide an interactive prompt to get a device information"),
+	"",
 	help.format("To add a new device info, use '--add <DEVICE_INFO>'"),
 	help.format(" (e.g.) --add '{\"name\": \"tv2\", \"username\":\"root\", \"host\":\"127.0.0.1\",\"port\":\"22\"}'"),
 	help.format("  ** attributes of JSON form."),
 	help.format("   name [string]  device name"),
-	help.format("   type [\"starfish\" | \"emulator\"]  platform type"),
+	help.format("   type ['starfish']   platform type"),
 	help.format("   description [string]   description of target device"),
 	help.format("   host [string]   ip address"),
 	help.format("   port [string]   port number"),
@@ -207,15 +208,6 @@ var defaultDeviceInfo = {
 
 function replaceDefaultDeviceInfo(inDevice) {
 	if (inDevice) {
-		if (inDevice.type && inDevice.type == "emulator") {
-			inDevice.privateKey = { "openSsh": "webos_emul" };
-			inDevice.username = inDevice.username || "developer";
-			inDevice.type = defaultDeviceInfo.type;
-			inDevice.port = inDevice.port || "6622";
-			inDevice.files = inDevice.files || "sftp";
-			inDevice.description = inDevice.description || "LG webOS TV Emulator";
-		}
-
 		inDevice.type = inDevice.type || defaultDeviceInfo.type;
 		inDevice.host = inDevice.host || defaultDeviceInfo.host;
 		inDevice.port = inDevice.port || defaultDeviceInfo.port;
@@ -471,7 +463,6 @@ function modify(next) {
 		} else if (argv.privatekey || argv.privatekey === "") {
 			inDevice.privateKey = { "openSsh": argv.privatekey };
 		}
-		replaceDefaultDeviceInfo(inDevice);
 		if (inDevice.privatekey) {
 			inDevice.password = "@DELETE@";
 		} 
