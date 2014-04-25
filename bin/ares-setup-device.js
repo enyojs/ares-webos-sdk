@@ -144,6 +144,29 @@ if (op) {
 	});
 }
 
+var defaultDeviceInfo = {
+	type: "starfish",
+	host: "127.0.0.1",
+	port: "22",
+	username: "root",
+	description: "new device description",
+	files: "stream",
+	indelible: false
+};
+
+var requiredKeys = {
+	"name" : false,
+	"type" : false,
+	"host" : true,
+	"port" : true,
+	"username": true,
+	"description": true,
+	"files" : true,
+	"privateKeyName" : true,
+	"passphrase": true,
+	"password": true
+};
+
 /**********************************************************************/
 function reset(next) {
 	var appdir = path.resolve(process.env.APPDATA || process.env.HOME || process.env.USERPROFILE, '.ares');
@@ -196,16 +219,6 @@ function listFull(next) {
 	], next);
 }
 
-var defaultDeviceInfo = {
-	type: "starfish",
-	host: "127.0.0.1",
-	port: "22",
-	username: "root",
-	description: "new device description",
-	files: "stream",
-	indelible: false
-};
-
 function replaceDefaultDeviceInfo(inDevice) {
 	if (inDevice) {
 		inDevice.type = inDevice.type || defaultDeviceInfo.type;
@@ -241,19 +254,6 @@ function refineJsonString(str) {
 		return refnStr.replace(/\s*'/g, "\"");
 	}
 }
-
-var requiredKeys = {
-	"name" : false,
-	"type" : false,
-	"host" : true,
-	"port" : true,
-	"username": true,
-	"description": true,
-	"files" : false,
-	"privateKeyName" : true,
-	"passphrase": true,
-	"password": true
-};
 
 function getInput(inputMsg, next) {
 	var keyInputString = "";
@@ -353,6 +353,11 @@ function interactiveInput(next) {
 							next(err);
 						});
 					} else {
+						if (inDevice["privateKeyName"]) {
+							auth = 'key';
+						} else if ((inDevice["password"])) {
+							auth = 'pass';
+						}
 						next();
 					}
 				},
