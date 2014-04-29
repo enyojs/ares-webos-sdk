@@ -171,6 +171,7 @@ PalmPackage.prototype = {
 		log.info("appOk");
 		if (err) {
 			console.error("*** " + processName + ": "+ err.toString());
+			process.exit(-1);
 		}
 		console.log("no problems detected");
 		process.exit(0);
