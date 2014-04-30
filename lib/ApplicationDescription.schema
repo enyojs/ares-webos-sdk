@@ -23,7 +23,10 @@
         },
         "mimeTypes": {
             "id": "MimeTypes",
-            "type": "array",
+            "type": [
+                "object",
+                "array"
+            ],
             "items": {
                 "$ref": "MimeTypes"
             },
@@ -51,7 +54,8 @@
                 "native_game",
                 "game",
                 "pdk",
-                "qt"
+                "qt",
+                "qml"
             ],
             "description": "Identifies the application type: \"web\" if an SDK-based or hybrid app, \"pdk\" if a PDK-based app."
         },
@@ -129,6 +133,7 @@
         },
         "removable": {
             "type": "boolean",
+            "default": true,
             "description": "whether app is removale or not"
         },
         "hardwareFeaturesNeeded": {
@@ -138,17 +143,6 @@
             },
             "default" : 0,
             "description": "indicates that app needs hardwwarefeatures, e,g., Wifi,Bluetooth"
-        },
-        "universalSearch": {
-            "id": "UniversalSearch",
-            "extends": {
-                "$ref": "UniversalSearch"
-            },
-            "description": "Just Type configuration object."
-        },
-        "params": {
-            "type": "object",
-            "description": "if specified, params is included in launchPoint."
         },
         "bootLaunchParams": {
             "type": "object",
@@ -252,6 +246,11 @@
             "type": "boolean",
             "default": false,
             "description": "When set to true, a native app can be launched with native_builtin jail configuration"
+        },
+        "lockable": {
+            "type": "boolean",
+            "default": true,
+            "description": "When set to true, the app can be locked"
         }
     },
     "required": [
