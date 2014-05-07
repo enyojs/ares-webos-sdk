@@ -83,7 +83,7 @@
 				{
 					"id": "bootplate-2.3.0-pre.12",
 					"Xtype": "template",
-					"type": "null",
+					"type": null,
 					"version": "2.3.0-pre.12",
 					"isDefault": false,
 					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
@@ -135,7 +135,7 @@
 				},
 				{
 					"id": "webos-service-helloworld",
-					"xtype": "webosService",
+					"Xtype": "webosService",
 					"type" : null,
 					"version": "0.0.1",
 					"description": "webOS Service Template",
@@ -166,8 +166,8 @@
 				},
 				{
 					"id": "webos-app-config",
-					"xtype": "webosConfig",
-					"type": "null",
+					"Xtype": "webosConfig",
+					"type": null,
 					"version": "0.0.1",
 					"description": "webOS Applicatin Config data",
 					"files": [
@@ -206,7 +206,8 @@
 				},
 				{
 					"id": "bootplate-2.3.0",
-					"type": "template",
+					"Xtype": "template",
+					"type": null,
 					"version": "2.3.0-rc.19",
 					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
 					"class":"basic",
