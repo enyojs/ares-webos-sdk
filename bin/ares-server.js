@@ -79,7 +79,7 @@ function showUsage() {
 		help.format(processName + " [OPTION...] <APP_DIR>"),
 		"",
 		"OPTION",
-		help.format("-o, --open", "Run web browser to open local web server"),
+		help.format("-o, --open", "Open localhost url with a web browser"),
 		"",
 		//help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
