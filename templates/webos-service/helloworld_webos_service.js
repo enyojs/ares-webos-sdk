@@ -163,7 +163,3 @@ service.register("/do/re/me", function(message) {
 	]});
 });
 
-var service2 = new Service("@SERVICE-NAME@2");
-service2.registerPrivate("hello", function(message) {
-	message.respond({msg: "hello"});
-});
