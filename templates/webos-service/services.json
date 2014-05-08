@@ -36,13 +36,5 @@
 			"name": "do/re/me", 
 			"public": true
 		}] 
-	},
-	{
-		"name": "@SERVICE-NAME@2",
-		"description": "Second service in the same program",
-		"commands": [ { 
-			"name": "hello", 
-			"public": true
-		}]
 	} ]
 }
