@@ -182,7 +182,7 @@ PalmGenerate.prototype = {
 	checkCreateAppDir: function(next) {
 		log.info("checkCreateAppDir");
 		// Verify we have an APP_DIR parameter
-		if (this.argv.argv.remain.length != 1) {
+		if (this.argv.argv.remain.length < 1) {
 			this.showUsage();
 		}
 		this.destination = this.argv.argv.remain.splice(0,1).join("");
