@@ -1,18 +1,6 @@
 [
 	{
 		"order":"0",
-		"name": "webos3",
-		"type": "webos3",
-		"description": "HP webOS 3 Emulator",
-		"host": "127.0.0.1",
-		"port": 5522,
-		"username": "root",
-		"password": "",
-		"files":"stream",
-		"indelible": true
-	},
-	{
-		"order":"1",
 		"name": "emulator",
 		"type": "starfish",
 		"description": "LG webOS TV Emulator",
@@ -25,18 +13,5 @@
 		"files":"sftp",
 		"noPortForwarding":true,
 		"indelible": true
-	},
-	{
-		"order":"2",
-		"name": "tv",
-		"type": "starfish",
-		"description": "LG webOS TV",
-		"host": "127.0.0.1",
-		"port": 22,
-		"username": "root",
-		"password": "",
-		"files":"stream",
-		"noPortForwarding":false,
-		"indelible": false
 	}
 ]
