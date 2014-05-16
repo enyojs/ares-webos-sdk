@@ -419,6 +419,9 @@ function isJson(str) {
 
 function insertParams(params, keyPair) {
 	var values = keyPair.split('=');
+	if (values.length != 2) {
+		return;
+	}
 	params[values[0]] = values[1];
 	log.info("Inserting params " + values[0] + " = " + values[1]);
 }
@@ -428,7 +431,7 @@ function getParams(option) {
 	if (argv[option]) {
 		var arryArgs = [].concat(argv[option]);
 		arryArgs.forEach(function(strParam) {
-			var jsonFromArgv = strParam + argv.argv.remain.join("");
+			var jsonFromArgv = strParam;
 			jsonFromArgv = refineJsonString(jsonFromArgv);
 			if (isJson(jsonFromArgv)) {
 				params = JSON.parse(jsonFromArgv);
