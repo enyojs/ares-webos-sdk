@@ -117,6 +117,7 @@ function PalmGenerate() {
 		help.format("-p, --property <PROPERTY>", "Set the properties of appinfo.json"),
 		help.format(" PROPERTY can be one of the following forms"),
 		help.format("\t Linux/Mac (e.g.) -p '{\"id\": \"com.examples.helloworld\", \"version\":\"1.0.0\", \"type\":\"web\"}'"),
+		help.format("\t Windows  (e.g.) -p \"{\\\"id\\\": \\\"com.examples.helloworld\\\", \\\"version\\\":\\\"1.0.0\\\", \\\"type\\\":\\\"web\\\"}\""),		
 		help.format("\t Win/Linux/Mac (e.g.) -p \"id=com.examples.helloworld\" -p \"version=1.0.0\" -p \"type=web\""),
 		"",
 		help.format("-D, --onDevice <ENYO-VERSION>"),
