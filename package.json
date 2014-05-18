@@ -1,7 +1,7 @@
 {
 	"name": "ares-webos-sdk",
 	"main": "./lib/ipkg-tools.js",
-	"version": "0.2.7",
+	"version": "0.2.8",
 	"bin": {
 		"ares-novacom": "./bin/ares-novacom.js",
 		"ares-generate": "./bin/ares-generate.js",
@@ -27,7 +27,7 @@
 		"fstream": "0.1.x",
 		"graceful-fs": "1.2.x",
 		"combined-stream": "~0.0.4",
-		"ssh2": "0.2.22~",
+		"ssh2": ">= 0.2.22",
 		"npmlog": "~0.0.4",
 		"nopt": "~2.1.2",
 		"semver": "2.1.0",
