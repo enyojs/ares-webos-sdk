@@ -94,8 +94,8 @@ function PalmGenerate() {
 		}
 	}
 	this.configFileSubstitutions = {
-		"@ID@": dirName,
-		"@SERVICE-NAME@": dirName + ".service"
+		"@ID@": basename,
+		"@SERVICE-NAME@": basename + ".service"
 	};
 	this.substituteWords = {
 		"@ID@": basename,
