@@ -4,6 +4,7 @@ var fs 		= require("fs"),
     async 	= require('async'),
     path 	= require('path'),
     log 	= require('npmlog'),
+    vm 		= require("vm"),
     sprintf 	= require('sprintf').sprintf,
     prjgen 		= require('ares-generator'),
     versionTool = require('./../lib/version-tools'),
@@ -88,7 +89,6 @@ function PalmGenerate() {
 		dirName = dirNameArry.join(".");
 	}
 	this.configFileSubstitutions = {
-		"@PLUGINDIR@": path.dirname(this.configFile).replace(/\\/g,'/'),
 		"@ID@": dirName,
 		"@SERVICE-NAME@": dirName + ".service"
 	};
@@ -366,18 +366,110 @@ PalmGenerate.prototype = {
 		process.exit(0);
 	},
 
+	walkFolder: function(dirPath, getArray, name, next) {
+		async.waterfall([
+			fs.readdir.bind(this, dirPath),
+			function(fileNames, next) {
+				async.forEach(fileNames, function(fileName, next) {
+					var filePath = path.join(dirPath, fileName);
+					async.waterfall([
+						fs.lstat.bind(this, filePath),
+						function(stat, next) {
+							if (stat.isFile()) {
+								if (fileName === name) {
+									var fp = path.join(dirPath, fileName);
+									var dirName = path.basename(path.dirname(fp));
+									var obj = {
+										prop: dirName,
+										path: fp
+									};
+									getArray.push(obj);
+								}
+								next();
+							} else if (stat.isDirectory()) {
+								this.walkFolder(filePath, getArray, name, next);
+							} else {
+								next();
+							}
+						}.bind(this)
+					], next); // async.waterfall
+				}.bind(this), next); // async.forEach
+			}.bind(this)
+		], function(err) {
+			next(err);
+		});
+	},
+
+	getEnyoTemplateVersion: function(searchPath, next) {
+		var includeInThisContext = function(path) {
+		    var code = fs.readFileSync(path);
+		    code = "var enyo={}; enyo.version=new Object();" + code;
+		    vm.runInThisContext(code, path);
+		}.bind(this);
+
+		var maxVersion = "";
+		var versions = [];
+		async.series([
+		    this.walkFolder.bind(this, searchPath, versions, "version.js")
+		], function(err, results) {
+		    versions.forEach(function(obj) {
+		        log.verbose("getEnyoTemplateVersion#file:", obj.path);
+		        includeInThisContext(obj.path);
+		        var version;
+		        if (typeof enyo.version === 'object' && enyo.version != {}) {
+		            for (key in enyo.version) {
+		                if (typeof enyo.version[key] === 'string') {
+		                    version = enyo.version[key];
+		                    break;
+		                }
+		            }
+		        }
+		        if (!version)
+		            version = "";
+		        maxVersion = (maxVersion < version) ? version : maxVersion;
+		        log.verbose("getEnyoTemplateVersion#enyo.version[\"" + obj.prop + "\"]", version);
+		    });
+		    log.verbose("getEnyoTemplateVersion#maxVersion:", maxVersion);
+		    next(null, maxVersion);
+		});
+	},
+
 	displayTemplateList: function(type, next) {
 		log.info("displayTemplateList");
 		var templates = this.configGenZip.sources.filter(function(template){
 			return (type === template.type);
 		});
 		var sourceIds = Object.keys(templates);
-		sourceIds.forEach(function(sourceId){
+		async.forEach(sourceIds, function(sourceId, next) {
 			var source = templates[sourceId];
-			log.info("displayTemplateList()", "source:", source);
-			console.log(sprintf("%-40s\t%-10s\t%s %s", source.id, source.version, source.description, source.isDefault ? "(default)" : ""));
+			var version = "";
+			async.waterfall([
+				function(next) {
+					if (source.files && source.files[0].url && source.files[0].url.substr(0, 4) !== 'http') {
+						var configStats = fs.lstatSync(source.files[0].url);
+						if (configStats.isDirectory()) {
+							this.getEnyoTemplateVersion(source.files[0].url, next);
+						} else {
+							next();
+						}
+					} else {
+						next();
+					}
+				}.bind(this)
+			], function(err, result) {
+				var version = source.version;
+				if (err) {
+					return next(err);
+				}
+				if (result) {
+					version = result;
+				}
+				console.log(sprintf("%-40s\t%-10s\t%s %s", source.id, version, source.description, source.isDefault ? "(default)" : ""));
+				next();
+			});
+		}.bind(this), function(err) {
+			next(err);
 		});
-		next();
 	},
 
 	listSources: function(type) {
@@ -457,6 +549,7 @@ PalmGenerate.prototype = {
 			throw "Not a file: '"+configFile+"': ";
 		}
 		var configContent = fs.readFileSync(configFile, 'utf8');
+		configContent = configContent.replace(/@PLUGINDIR@/g, path.dirname(this.configFile).replace(/\\/g,'/'));
 		try {
 			var plugin = JSON.parse(configContent);
 		} catch(e) {
