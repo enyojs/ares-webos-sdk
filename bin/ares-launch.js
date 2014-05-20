@@ -29,7 +29,8 @@ var knownOpts = {
 	"device":	[String, null],
 	"inspect":	Boolean,
 	"device-list":	Boolean,
-	"close":	String,
+	"close":	Boolean,
+	"hosted":	Boolean,
 	"running":	Boolean,
 	"params":   [String, Array],
 	"version":	Boolean,
@@ -89,13 +90,16 @@ if (argv.close) {
 	op = launch;
 }
 
-
-
 var options = {
 	device: argv.device,
 	inspect: argv.inspect,
 	installMode: installMode,
 };
+
+if (argv.argv.remain.length > 1) {
+	return finish("Please check arguments");
+}
+var appId = argv.argv.remain[0];
 
 /**********************************************************************/
 
@@ -123,7 +127,10 @@ function showUsage() {
 		help.format("-r, --running", "List the running applications on device"),
 		help.format("-i, --inspect", "launch application with a web inspector"),
 		help.format("-p, --params <PARAMS>", "PARAMS is used on boot application-launching"),
-		help.format("\t PARAMS (e.g.) -p '{\"key1\":\"value2\", \"key2\":\"value2 containing space\"}'"),
+		help.format(" PARAMS can be one of the following forms"),
+		help.format("\t Linux/Mac (e.g.) -p '{\"key1\":\"value2\", \"key2\":\"value2 containing space\"}'"),
+		help.format("\t Windows  (e.g.) -p \"{\\\"key1\\\":\\\"value2\\\", \\\"key2\\\":\\\"value2 containing space\\\"}\""),
+		help.format("\t Win/Linux/Mac (e.g.) -p \"key1=value2\" -p \"key2=value2 containing space\""),
 		"",
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
@@ -154,7 +161,7 @@ function showUsage() {
 }
 
 function launch() {
-	var pkgId = argv.argv.remain.splice(0,1).join("");
+	var pkgId = appId;
 	params = getParams();
 	log.info("launch():", "pkgId:", pkgId);
 	if (!pkgId) {
@@ -165,7 +172,7 @@ function launch() {
 }
 
 function launchHostedApp() {
-	var hostedurl = fs.realpathSync(argv.argv.remain.splice(0,1).join(""));
+	var hostedurl = fs.realpathSync(appId);
 	var pkgId = "com.sdk.ares.hostedapp";
 	options.hostedurl = hostedurl;
 	params = getParams();
@@ -181,7 +188,7 @@ function getParams() {
 	var params = {};
 	if (argv.params) {
 		argv.params.forEach(function(strParam) {
-			var jsonFromArgv = strParam + argv.argv.remain.join("");
+			var jsonFromArgv = strParam;
 			jsonFromArgv = refineJsonString(jsonFromArgv);
 			if (isJson(jsonFromArgv)) {
 				params = JSON.parse(jsonFromArgv);
@@ -227,7 +234,7 @@ function isJson(str) {
 }
 
 function close() {
-	var pkgId = (argv.close === 'true')? argv.argv.remain[0] : argv.close;
+	var pkgId = appId;
 	log.info("close():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
@@ -267,8 +274,8 @@ function deviceList() {
 }
 
 function finish(err, value) {
+	log.info("finish():", "err:", err);
 	if (err) {
-		log.error('finish():', err);
 		console.log(processName + ": "+ err.toString());
 		process.exit(1);
 	} else {
@@ -281,6 +288,9 @@ function finish(err, value) {
 
 function insertParams(params, keyPair) {
 	var values = keyPair.split('=');
+	if (values.length != 2) {
+		return;
+	}
 	params[values[0]] = values[1];
 	log.info("Inserting params " + values[0] + " = " + values[1]);
 }

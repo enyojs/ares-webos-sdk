@@ -68,33 +68,38 @@ function PalmGenerate() {
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice)? this.defaultEnyoVersion:this.argv.onDevice;
 	this.argv.file = (this.argv.file == 'true' || !this.argv.file)? []:this.argv.file;
-	var dirName = path.basename(this.argv.argv.remain[0]);
-	if (dirName) {
-		var dirNameArry = dirName.split('.');
-		switch (dirNameArry.length) {
-			case 2:
-				if (dirNameArry[0] == "com") {
-					dirNameArry.splice(1, 0, "yourdomain");
-				} else {
-					dirNameArry.splice(0, 0, "com");
-				}
-				break;
-			case 1:
-				dirNameArry.splice(0, 0, "com.yourdomain");
-				break;
-			default:
-				break;
+	var basename = "";
+	if (this.argv.argv.remain.length > 0) {
+		var appDir = this.argv.argv.remain[0];
+		appDir = (fs.existsSync(appDir))? fs.realpathSync(appDir) : appDir;
+		basename = path.basename(appDir);
+		if (basename) {
+			var dirNameArry = basename.split('.');
+			switch (dirNameArry.length) {
+				case 2:
+					if (dirNameArry[0] == "com") {
+						dirNameArry.splice(1, 0, "yourdomain");
+					} else {
+						dirNameArry.splice(0, 0, "com");
+					}
+					break;
+				case 1:
+					dirNameArry.splice(0, 0, "com.yourdomain");
+					break;
+				default:
+					break;
+			}
+			basename = dirNameArry.join(".");
 		}
-		dirName = dirNameArry.join(".");
 	}
 	this.configFileSubstitutions = {
 		"@PLUGINDIR@": path.dirname(this.configFile).replace(/\\/g,'/'),
-		"@ID@": dirName,
-		"@SERVICE-NAME@": dirName + ".service"
+		"@ID@": basename,
+		"@SERVICE-NAME@": basename + ".service"
 	};
 	this.substituteWords = {
-		"@ID@": dirName,
-		"@SERVICE-NAME@": dirName + ".service",
+		"@ID@": basename,
+		"@SERVICE-NAME@": basename + ".service",
 		"@ENYO-VERSION@":this.argv.onDevice
 	};
 	this.helpString = [
@@ -115,7 +120,10 @@ function PalmGenerate() {
 		help.format("\t Available TYPE is 'template', 'webosService', 'appinfo'"),
 		"",
 		help.format("-p, --property <PROPERTY>", "Set the properties of appinfo.json"),
-		help.format("\t PROPERTY (e.g.) '{\"id\": \"com.examples.helloworld\", \"version\":\"1.0.0\", \"type\":\"web\"}'"),
+		help.format(" PROPERTY can be one of the following forms"),
+		help.format("\t Linux/Mac (e.g.) -p '{\"id\": \"com.examples.helloworld\", \"version\":\"1.0.0\", \"type\":\"web\"}'"),
+		help.format("\t Windows  (e.g.) -p \"{\\\"id\\\": \\\"com.examples.helloworld\\\", \\\"version\\\":\\\"1.0.0\\\", \\\"type\\\":\\\"web\\\"}\""),		
+		help.format("\t Win/Linux/Mac (e.g.) -p \"id=com.examples.helloworld\" -p \"version=1.0.0\" -p \"type=web\""),
 		"",
 		help.format("-D, --onDevice <ENYO-VERSION>"),
 		help.format("\t ENYO-VERSION is enyo framework version to use [default: " + this.defaultEnyoVersion + "]"),
@@ -185,7 +193,7 @@ PalmGenerate.prototype = {
 		if (this.argv.argv.remain.length < 1) {
 			this.showUsage();
 		}
-		this.destination = this.argv.argv.remain.splice(0,1).join("");
+		this.destination = this.argv.argv.remain[0];
 
 		// Create the directorie if it does not exist
 		if (fs.existsSync(this.destination)) {
@@ -292,8 +300,11 @@ PalmGenerate.prototype = {
 		return true;
 	},
 
-	insertProperty: function(prop, properties) {
+	insertProperty: function(properties, prop) {
 		var values = prop.split('=');
+		if (values.length != 2) {
+			return;
+		}
 		properties[values[0]] = values[1];
 		log.info("Inserting property " + values[0] + " = " + values[1]);
 	},
@@ -304,24 +315,16 @@ PalmGenerate.prototype = {
 		file = file.replace(/\*/g, "").replace(/$/g,"$");
 		var substitution = { fileRegexp: file };
 		if (this.argv.property) {
-			if (typeof this.argv.property === 'string') {
-				this.argv.property = this.refineJsonString(this.argv.property);
-				if (isJson(this.argv.property)) {
-					properties = JSON.parse(this.argv.property);
+			var arryProperties= [].concat(this.argv.property);
+			arryProperties.forEach(function(prop) {
+				var jsonFromArgv = this.refineJsonString(prop);
+				if (this.isJson(jsonFromArgv)) {
+					properties = JSON.parse(jsonFromArgv);
 				} else {
-					this.insertProperty(this.argv.property, properties);
+					this.insertProperty(properties, prop);
 				}
-			} else {
-				this.argv.property.forEach(function(prop) {
-					var jsonFromArgv = prop + this.argv.argv.remain.join("");
-					jsonFromArgv = this.refineJsonString(jsonFromArgv);
-					if (this.isJson(jsonFromArgv)) {
-						properties = JSON.parse(jsonFromArgv);
-					} else {
-						this.insertProperty(prop, properties);
-					}
-				}, this);
-			}
+			}, this);
+
 			//Currently property options is proper for substitution of appinfo.json
 			if (file.match(/appinfo.json/gi)) {
 				//substitution for json
