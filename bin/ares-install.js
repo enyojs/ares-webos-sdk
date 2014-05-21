@@ -141,9 +141,7 @@ function showUsage() {
 		"",
 	];
 
-	helpString.forEach(function(line) {
-		console.log(line);
-	});
+	help.print(helpString);
 }
 
 function install() {

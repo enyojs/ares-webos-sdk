@@ -161,9 +161,7 @@ if (argv.list) {
 } else if (argv.version) {
 	versionTool.showVersionAndExit();
 } else if (argv.help) {
-	helpString.forEach(function(line) {
-		console.log(line);
-	});
+	help.print(helpString);
 	process.exit(0);
 } else {
 	process.exit(1);
