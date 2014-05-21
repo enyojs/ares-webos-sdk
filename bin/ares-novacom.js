@@ -127,10 +127,9 @@ var helpString = [
 	"# Run 'ps -aux' command on emulator",
 	processName + " --run \"ps -aux\" -d emulator",
 	"",
-	"# Port forwarding between TARGET_DEVICE(22) and HOST_PC(3030)",
-	processName + " --forward --port 6622:3030 -d emulator",
-	"User can connect to emulator via 3030 port",
-	"(Linux/Mac) $ ssh -p 3030 root@127.0.0.1",
+	"# Open a connection between TARGET_DEVICE Port and Local host Port ",
+	processName + " --forward --port 22:3030 -d emulator",
+	"Local PC open 3030 port connecting to 22 port openning in the emulator",
 	"",
 ];
 
