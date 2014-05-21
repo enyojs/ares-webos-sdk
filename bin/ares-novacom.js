@@ -129,7 +129,7 @@ var helpString = [
 	"",
 	"# Open a connection between TARGET_DEVICE Port and Local host Port ",
 	processName + " --forward --port 22:3030 -d emulator",
-	"Local PC open 3030 port connecting to 22 port openning in the emulator",
+	" It opens port 3030 connected to the emulator on port 22",
 	"",
 ];
 
