@@ -107,9 +107,7 @@ PalmPackage.prototype = {
 		if (exitCode === undefined) {
 			exitCode = 0;
 		}
-		this.helpString.forEach(function(line) {
-			console.log(line);
-		});
+		help.print(this.helpString);
 		process.exit(exitCode);
 	},
 

@@ -75,18 +75,18 @@ var helpString = [
 	"",
 	help.format("To add a new device info, use '--add DEVICE_NAME -i <DEVICE_INFO>'"),
 	help.format("<DEVICE_INFO> can be one of the following forms"),
-	help.format(" Linux/Mac (e.g.) --add tv2 -i '{\"username\":\"root\", \"host\":\"127.0.0.1\",\"port\":\"22\"}'"),
-	help.format(" Windows  (e.g.) --add tv2 -i \"{\\\"username\\\":\\\"root\\\", \\\"host\\\":\\\"127.0.0.1\\\",\\\"port\\\":\\\"22\\\"}\""),
-	help.format(" Win/Linux/Mac (e.g.) --add tv2 -i \"username=root\" -i \"host=127.0.0.1\" -i \"port=22\""),
+	help.format("win32",            "\t (e.g.) --add tv2 -i \"{'username':'root', 'host':'127.0.0.1','port':'22'}\""),
+	help.format(["linux","darwin"], "\t (e.g.) --add tv2 -i '{\"username\":\"root\", \"host\":\"127.0.0.1\",\"port\":\"22\"}'"),
+	help.format("\t (e.g.) --add tv2 -i \"username=root\" -i \"host=127.0.0.1\" -i \"port=22\""),
 	"",
 	help.format("To remove DEVICE, use '--remove DEVICE_NAME'"),
-	help.format(" (e.g.) --remove tv2"),
+	help.format("\t (e.g.) --remove tv2"),
 	"",
 	help.format("To modify DEVICE_INFO, use '--modify DEVICE_NAME -i <DEVICE_INFO>'"),
 	help.format("<DEVICE_INFO> can be one of the following forms"),
-	help.format(" Linux/Mac (e.g.) --modify tv2 -i '{\"username\":\"developer\",\"host\":\"192.168.0.123\",\"port\":\"6622\"}'"),
-	help.format(" Windows  (e.g.) --modify tv2 -i \"{\\\"username\\\":\\\"developer\\\",\\\"host\\\":\\\"192.168.0.123\\\",\\\"port\\\":\\\"6622\\\"}\""),
-	help.format(" Win/Linux/Mac (e.g.) --modify tv2 -i \"username=developer\" -i \"host=192.168.0.123\" -i \"port=6622\""),
+	help.format("win32",            "\t (e.g.) --modify tv2 -i \"{'username':'developer','host':'192.168.0.123','port':'6622'}\""),
+	help.format(["linux","darwin"], "\t (e.g.) --modify tv2 -i '{\"username\":\"developer\",\"host\":\"192.168.0.123\",\"port\":\"6622\"}'"),
+	help.format("\t (e.g.) --modify tv2 -i \"username=developer\" -i \"host=192.168.0.123\" -i \"port=6622\""),
 	"",
 	"",
 	help.format("** Attributes of <DEVICE_INFO>"),
@@ -130,9 +130,7 @@ if (argv.list) {
 } else if (argv.version) {
 	versionTool.showVersionAndExit();
 } else if (argv.help) {
-	helpString.forEach(function(line) {
-		console.log(line);
-	});
+	help.print(helpString);
 	process.exit(0);
 } else {
 	op = interactiveInput;
