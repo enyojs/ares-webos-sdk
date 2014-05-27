@@ -37,8 +37,7 @@
 		"base64-stream": "~0.1.2",
 		"busboy": "~0.0.5",
 		"inherits": "~1.x",
-		"jsonschema": "~0.4.x",
-		"vm": "0.0.x"
+		"jsonschema": "~0.4.x"
 	},
 	"engines": {
 		"node": "~0.10.0",
@@ -80,8 +79,7 @@
 		"base64-stream",
 		"busboy",
 		"inherits",
-		"jsonschema",
-		"vm"
+		"jsonschema"
 	],
 	"files": [
 		"DEMO.md",

@@ -693,28 +693,6 @@
     "jsonschema": {
       "version": "0.4.0",
       "from": "jsonschema@0.4.0"
-    },
-    "vm": {
-      "version": "0.0.1",
-      "from": "vm@",
-      "dependencies": {
-        "commander": {
-          "version": "1.2.0",
-          "from": "commander@1.2.0",
-          "resolved": "https://registry.npmjs.org/commander/-/commander-1.2.0.tgz",
-          "dependencies": {
-            "keypress": {
-              "version": "0.1.0",
-              "from": "keypress@0.1.x"
-            }
-          }
-        },
-        "colorful": {
-          "version": "2.1.0",
-          "from": "colorful@2.1.0",
-          "resolved": "https://registry.npmjs.org/colorful/-/colorful-2.1.0.tgz"
-        }
-      }
     }
   }
 }
