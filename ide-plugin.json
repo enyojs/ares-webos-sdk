@@ -55,7 +55,7 @@
 				{
 					"id": "bootplate-moonstone",
 					"type": "template",
-					"version": "2.3.0-rc.19",
+					"version": "2.3.0",
 					"isDefault": true,
 					"description": "Enyo moonstone bootplate",
 					"class":"moonstone",
@@ -230,7 +230,7 @@
 					"id": "bootplate-2.3.0",
 					"Xtype": "template",
 					"type": null,
-					"version": "2.3.0-rc.19",
+					"version": "2.3.0",
 					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
 					"class":"basic",
 					"deps": ["enyoappinfo", "enyo-onyx", "enyoicon"],
@@ -257,7 +257,7 @@
 				{
 					"id": "enyo",
 					"type": "library",
-					"version": "2.3.0-rc.19",
+					"version": "2.3.0",
 					"description": "Enyo library",
 					"files": [
 						{
@@ -276,7 +276,7 @@
 				{
 					"id": "enyo-cordova",
 					"type": "library",
-					"version": "2.3.0-rc.19",
+					"version": "2.3.0",
 					"description": "Enyo cordova library",
 					"files": [
 						{
@@ -294,7 +294,7 @@
 				{
 					"id": "enyo-ilib",
 					"type": "library",
-					"version": "2.3.0-rc.19",
+					"version": "2.3.0",
 					"description": "Enyo ilib globalization/internationalization library",
 					"files": [
 						{
@@ -312,7 +312,7 @@
 				{
 					"id": "enyo-webos",
 					"type": "library",
-					"version": "2.3.0-rc.19",
+					"version": "2.3.0",
 					"description": "Enyo library for webOS",
 					"files": [
 						{
@@ -330,7 +330,7 @@
 				{
 					"id": "enyo-layout",
 					"type": "library",
-					"version": "2.3.0-rc.19",
+					"version": "2.3.0",
 					"description": "Enyo layout library",
 					"files": [
 						{
@@ -348,7 +348,7 @@
 				{
 					"id": "enyo-moonstone",
 					"type": "library",
-					"version": "2.3.0-rc.19",
+					"version": "2.3.0",
 					"description": "Enyo moonstone library",
 					"files": [
 						{
@@ -366,7 +366,7 @@
 				{
 					"id": "enyo-spotlight",
 					"type": "library",
-					"version": "2.3.0-rc.19",
+					"version": "2.3.0",
 					"description": "Enyo spotlight library",
 					"files": [
 						{
@@ -384,7 +384,7 @@
 				{
 					"id": "enyo-onyx",
 					"type": "library",
-					"version": "2.3.0-rc.19",
+					"version": "2.3.0",
 					"description": "Enyo onyx library",
 					"files": [
 						{
