@@ -450,7 +450,7 @@ function modifyDeviceInfo(next) {
 		if (argv[mode].match(/^-/)) {
 			return next(new Error("Please specify device name !!"));
 		}
-		var argName = (argv.info)? "info" : argv[mode];
+		var argName = (argv.info)? "info" : mode;
 		var inDevice = getParams(argName);
 		if (!inDevice.name) {
 			if (argv[mode] === "true") {
