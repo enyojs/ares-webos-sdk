@@ -10,6 +10,3 @@
 [submodule "templates/bootplate-moonstone"]
 	path = templates/bootplate-moonstone
 	url = ../bootplate-moonstone.git
-[submodule "templates/onyx"]
-	path = templates/onyx
-	url = ../onyx.git
