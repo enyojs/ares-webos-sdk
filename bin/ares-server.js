@@ -116,6 +116,7 @@ function runServer() {
 function finish(err, value) {
 	if (err) {
 		log.error(err);
+		log.verbose(err.stack);
 		process.exit(1);
 	} else {
 		if (value && value.msg) {

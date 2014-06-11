@@ -274,7 +274,8 @@ function deviceList() {
 function finish(err, value) {
 	log.info("finish():", "err:", err);
 	if (err) {
-		console.log(processName + ": "+ err.toString());
+		log.error(processName + ": "+ err.toString());
+		log.verbose(err.stack);
 		process.exit(1);
 	} else {
 		if (value && value.msg) {

@@ -9,7 +9,8 @@ var fs 		= require("fs"),
     prjgen 		= require('ares-generator'),
     versionTool = require('./../lib/version-tools'),
     console 	= require('./../lib/consoleSync'),
-    help 		= require('./../lib/helpFormat');
+    help 		= require('./../lib/helpFormat'),
+    errMsgHdlr  = require('./../lib/error-handler');
 
 /**********************************************************************/
 
@@ -361,7 +362,7 @@ PalmGenerate.prototype = {
 	projectReady: function(err, results) {
 		log.info("projectReady", "err:", err, "results:", results);
 		if (err) {
-			log.error("*** " + processName + ": "+ err.toString());
+			log.error(processName + ": "+ errMsgHdlr.changeErrMsg(err));
 			log.verbose(err.stack);
 			process.exit(1);
 		}

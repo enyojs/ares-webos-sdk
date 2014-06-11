@@ -157,7 +157,9 @@ PalmPackage.prototype = {
 	packageReady: function(err, results) {
 		log.info("projectReady");
 		if (err) {
-			console.error("*** " + processName + ": "+ err.toString());
+			log.error(processName + ": "+ err.toString());
+			log.verbose(err.stack);
+			process.exit(1);
 		}
 		if (results && results[results.length-1] && results[results.length-1].msg) {
 			console.log(results[results.length-1].msg);
