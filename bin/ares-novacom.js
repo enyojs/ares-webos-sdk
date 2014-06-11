@@ -3,11 +3,11 @@ var fs  	= require('fs'),
     npmlog 	= require('npmlog'),
     nopt 	= require('nopt'),
     async 	= require('async'),
-    sprintf = require('sprintf').sprintf,
     versionTool = require('./../lib/version-tools'),
     console 	= require('./../lib/consoleSync'),
     novacom 	= require('./../lib/novacom'),
-    help 		= require('./../lib/helpFormat');
+    help 		= require('./../lib/helpFormat'),
+    deviceTools	= require('./../lib/setup-device');
     
 /**********************************************************************/
 
@@ -113,10 +113,6 @@ var helpString = [
 	"",
 	help.format("To run a port forwarding between a Host PC and the target,"),
 	help.format("'--forward' is available."),
-//  "",
-//  Hidden option '--password'
-//	help.format("To Set password for a target device named <DEVICE_NAME>,"),
-//	help.format("'--password' is available"),
 	"", 
 	"Examples:",
 	"",
@@ -146,7 +142,7 @@ log.verbose("argv", argv);
 
 var op;
 if (argv.list) {
-	op = list;
+	deviceTools.showDeviceListAndExit();
 } else if (argv.getkey) {
 	op = getkey;
 } else if (argv.put) {
@@ -177,30 +173,6 @@ if (op) {
 }
 
 /**********************************************************************/
-
-function list(next) {
-	var resolver = new novacom.Resolver();
-	async.waterfall([
-		resolver.load.bind(resolver),
-		resolver.list.bind(resolver),
-		function(devices, next) {
-			log.info("list()", "devices:", devices);
-			if (Array.isArray(devices)) {
-				console.log(sprintf("%-16s %-16s %-16s %-16s %s", 
-						"<DEVICE NAME>", "<PASSWORD>", "<PRIVATE KEY>", "<PASSPHRASE>", "<SSH ADDRESS>"));
-				devices.forEach(function(device) {
-					var sshPassword = device.password || "'No Password'";
-					var sshPrvKeyName = device.privateKeyName || "'No Ssh Key'";
-					var sshPassphrase = device.passphrase || "'No passphrase'"
-					console.log(sprintf("%-16s %-16s %-16s %-16s (%s)", 
-						device.name, sshPassword, sshPrvKeyName, sshPassphrase, device.addr));
-				});
-			}
-			log.info("list()", "Success");
-			next();
-		}
-	], next);
-}
 
 function getkey(next) {
 	var resolver = new novacom.Resolver();

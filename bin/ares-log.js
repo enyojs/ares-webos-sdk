@@ -3,13 +3,13 @@ var fs  	= require('fs'),
     npmlog 	= require('npmlog'),
     nopt 	= require('nopt'),
     async 	= require('async'),
-    sprintf = require('sprintf').sprintf,
 	ipkg		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
     console 	= require('./../lib/consoleSync'),
     novacom 	= require('./../lib/novacom'),
     help 		= require('./../lib/helpFormat'),
-	util 		= require('util');
+	util 		= require('util'),
+    deviceTools	= require('./../lib/setup-device');
     
 /**********************************************************************/
 
@@ -111,7 +111,7 @@ var op;
 if (argv.list) {
 	op = list;
 } else if (argv['device-list']) {
-	op = deviceList;
+	deviceTools.showDeviceListAndExit();
 } else if (argv.run) {
 	op = run;
 } else if (argv.appId || (argv.appId === null && argv.device)) {
@@ -136,29 +136,6 @@ if (op) {
 }
 
 /**********************************************************************/
-
-function deviceList(next) {
-	var resolver = new novacom.Resolver();
-	async.waterfall([
-		resolver.load.bind(resolver),
-		resolver.list.bind(resolver),
-		function(devices, next) {
-			log.info("list()", "devices:", devices);
-			if (Array.isArray(devices)) {
-				console.log(sprintf("%-16s %-16s %-16s %-16s %s", 
-						"<DEVICE NAME>", "<PLATFORM>", "<PRIVATE KEY>", "<PASSPHRASE>", "<SSH ADDRESS>"));
-				devices.forEach(function(device) {
-					var sshPrvKeyName = device.privateKeyName || "'No Ssh Key'";
-					var sshPassphrase = device.passphrase || "'No passphrase'"
-					console.log(sprintf("%-16s %-16s %-16s %-16s (%s)", 
-						device.name, device.type, sshPrvKeyName, sshPassphrase, device.addr));
-				});
-			}
-			log.info("list()", "Success");
-			next();
-		}
-	], next);
-}
 
 function list(next) {
 	ipkg.installer.list(options, function(err, pkgs) {

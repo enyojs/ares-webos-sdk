@@ -1,6 +1,5 @@
 var fs 		= require('fs'),
     path 	= require("path"),
-    sprintf = require('sprintf').sprintf,
     npmlog 	= require('npmlog'),
     nopt 	= require('nopt'),
     ipkg 		= require('./../lib/ipkg-tools'),

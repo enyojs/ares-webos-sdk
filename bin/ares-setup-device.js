@@ -352,7 +352,10 @@ function interactiveInput(next) {
 						async.waterfall([
 							getInput.bind(this, "Select SSH auth method [ssh Key(k) or password(p)]"),
 							function(input, next) {
-								if (input.match(/pass|P/gi)){
+								if (!input) {
+									auth = 'key';
+								}
+								else if (input.match(/pass|P/gi)){
 									auth = 'pass';
 								} else {
 									auth = 'key';
