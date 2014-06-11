@@ -1,14 +1,14 @@
 var fs = require('fs'),
     path = require("path"),
     async 	= require('async'),
-    sprintf = require('sprintf').sprintf,
     npmlog = require('npmlog'),
     nopt = require('nopt'),
     ipkg = require('./../lib/ipkg-tools'),
     console = require('./../lib/consoleSync'),
     versionTool = require('./../lib/version-tools'),
     help 		= require('./../lib/helpFormat'),
-    novacom 	= require('./../lib/novacom');
+    novacom 	= require('./../lib/novacom'),
+    deviceTools	= require('./../lib/setup-device');
     
 /**********************************************************************/
 
@@ -69,7 +69,7 @@ var op;
 if (argv['version']) {
 	versionTool.showVersionAndExit();
 } else if (argv['device-list']) {
-	op = deviceList;
+	deviceTools.showDeviceListAndExit();
 } else if (argv['close']) {
 	op = close;
 } else {
@@ -139,29 +139,10 @@ function close(){
 	ipkg.gdbserver.close(options, null, finish);
 }
 
-function deviceList() {
-	var resolver = new novacom.Resolver();
-	async.waterfall([
-		resolver.load.bind(resolver),
-		resolver.list.bind(resolver),
-		function(devices, next) {
-			log.info("list()", "devices:", devices);
-			if (Array.isArray(devices)) {
-				console.log(sprintf("%-16s %-16s %-24s %s", "<DEVICE NAME>", "<PLATFORM>", "<DESCRIPTION>", "<SSH ADDRESS>"));
-				devices.forEach(function(device) {
-					console.log(sprintf("%-16s %-16s %-24s (%s)", device.name, device.type, device.description, device.addr));
-				});
-			}
-			log.info("list()", "Success");
-			next();
-		}
-	], finish);
-}
-
 function finish(err, value) {
 	if (err) {
-		log.error('finish():', err);
-		console.log(processName + ": "+ err);
+		log.error(processName + ": "+ err.toString());
+		log.verbose(err.stack);
 		process.exit(1);
 	} else {
 		if (value && value.msg) {

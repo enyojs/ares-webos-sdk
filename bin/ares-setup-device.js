@@ -352,7 +352,10 @@ function interactiveInput(next) {
 						async.waterfall([
 							getInput.bind(this, "Select SSH auth method [ssh Key(k) or password(p)]"),
 							function(input, next) {
-								if (input.match(/pass|P/gi)){
+								if (!input) {
+									auth = 'key';
+								}
+								else if (input.match(/pass|P/gi)){
 									auth = 'pass';
 								} else {
 									auth = 'key';
@@ -512,7 +515,8 @@ function removeDeviceInfo(next) {
 function finish(err, value) {
 	log.info("finish():", "err:", err);
 	if (err) {
-		console.log(processName + ": "+ err.toString());
+		log.error(processName + ": "+ err.toString());
+		log.verbose(err.stack);
 		process.exit(1);
 	} else {
 		log.info('finish():', value);

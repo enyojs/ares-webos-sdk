@@ -1,6 +1,5 @@
 var fs 		= require('fs'),
     path 	= require("path"),
-    sprintf = require('sprintf').sprintf,
     npmlog 	= require('npmlog'),
     nopt 	= require('nopt'),
     ipkg 		= require('./../lib/ipkg-tools'),
@@ -116,6 +115,7 @@ function runServer() {
 function finish(err, value) {
 	if (err) {
 		log.error(err);
+		log.verbose(err.stack);
 		process.exit(1);
 	} else {
 		if (value && value.msg) {
