@@ -3,6 +3,7 @@ var fs  	= require('fs'),
     npmlog 	= require('npmlog'),
     nopt 	= require('nopt'),
     async 	= require('async'),
+    sprintf = require('sprintf-js').sprintf,
     versionTool = require('./../lib/version-tools'),
     console 	= require('./../lib/consoleSync'),
     novacom 	= require('./../lib/novacom'),
@@ -142,7 +143,8 @@ log.verbose("argv", argv);
 
 var op;
 if (argv.list) {
-	deviceTools.showDeviceListAndExit();
+	//deviceTools.showDeviceListAndExit();
+	op = list;
 } else if (argv.getkey) {
 	op = getkey;
 } else if (argv.put) {
@@ -173,6 +175,29 @@ if (op) {
 }
 
 /**********************************************************************/
+function list(next) {
+	var resolver = new novacom.Resolver();
+	async.waterfall([
+		resolver.load.bind(resolver),
+		resolver.list.bind(resolver),
+		function(devices, next) {
+			log.info("list()", "devices:", devices);
+			if (Array.isArray(devices)) {
+				console.log(sprintf("%-16s %-16s %-16s %-16s %s",
+					"<DEVICE NAME>", "<PASSWORD>", "<PRIVATE KEY>", "<PASSPHRASE>", "<SSH ADDRESS>"));
+				devices.forEach(function(device) {
+					var sshPassword = device.password || "'No Password'";
+					var sshPrvKeyName = device.privateKeyName || "'No Ssh Key'";
+					var sshPassphrase = device.passphrase || "'No passphrase'"
+					console.log(sprintf("%-16s %-16s %-16s %-16s (%s)",
+						device.name, sshPassword, sshPrvKeyName, sshPassphrase, device.addr));
+					});
+			}
+			log.info("list()", "Success");
+			next();
+		}
+	], next);
+}
 
 function getkey(next) {
 	var resolver = new novacom.Resolver();
