@@ -2,11 +2,13 @@ var fs 		= require('fs'),
     path 	= require("path"),
     npmlog 	= require('npmlog'),
     nopt 	= require('nopt'),
+    async	= require('async'),
     ipkg 		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
     console 	= require('./../lib/consoleSync'),
     help 		= require('./../lib/helpFormat'),
-	util 		= require('./../lib/utility');
+	util 		= require('./../lib/utility'),
+	sdkenv		= require('./../lib/sdkenv');
 
 /**********************************************************************/
 
@@ -95,19 +97,34 @@ function runServer() {
 		return finish("Please check the app directory path for web server");
 	}
 	appPath = fs.realpathSync(appPath);
-	util.runServer(appPath,0, _postAction)
+	var serverUrl = "";
 
-	function _postAction(err, serverInfo) {
-		if (err) {
-			console.log(processName + ": "+ err.toString());
-			process.exit(1);
-		} else {
-			if (serverInfo && serverInfo.msg) {
-				console.log(serverInfo.msg);
-				if (argv.open && serverInfo.url) {
-					util.openBrowser(serverInfo.url);
-				}
+	async.waterfall([
+		util.runServer.bind(util, appPath, 0, _reqHandler),
+		function(serverInfo, next) {
+			if (serverInfo && serverInfo.port) {
+				serverUrl = 'http://localhost:' + serverInfo.port;
+				var openUrl = 'http://localhost:' + serverInfo.port + '/ares_cli/frame.html';
+				console.log("Local server running on " + openUrl);
 			}
+			if (argv.open && serverInfo.port) {
+				var env = new sdkenv.Env();
+				async.series([
+					env.getEnvValue.bind(env, "BROWSER")
+				], function(err, browserPath) {
+					if (err) 
+						return next(err);
+					util.openBrowser(openUrl, browserPath);
+				});
+			}
+		}
+	], finish);
+
+	function _reqHandler(code, res) {
+		if (code === "@@ARES_CLOSE@@") {
+			process.exit(0);
+		} else if (code === "@@GET_URL@@") {
+			res.status(200).send(serverUrl);
 		}
 	}
 }
