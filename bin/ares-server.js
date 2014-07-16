@@ -97,6 +97,7 @@ function runServer() {
 		return finish("Please check the app directory path for web server");
 	}
 	appPath = fs.realpathSync(appPath);
+	var killTimer;
 	var serverUrl = "";
 
 	async.waterfall([
@@ -122,8 +123,12 @@ function runServer() {
 
 	function _reqHandler(code, res) {
 		if (code === "@@ARES_CLOSE@@") {
-			process.exit(0);
+			res.status(200).send();
+			killTimer = setTimeout(function() {
+				process.exit(0);
+			}, 2 * 1000);
 		} else if (code === "@@GET_URL@@") {
+			clearTimeout(killTimer);
 			res.status(200).send(serverUrl);
 		}
 	}
