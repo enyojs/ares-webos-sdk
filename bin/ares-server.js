@@ -105,7 +105,7 @@ function runServer() {
 		function(serverInfo, next) {
 			if (serverInfo && serverInfo.port) {
 				serverUrl = 'http://localhost:' + serverInfo.port;
-				var openUrl = 'http://localhost:' + serverInfo.port + '/ares_cli/frame.html';
+				var openUrl = 'http://localhost:' + serverInfo.port + '/ares_cli/ares.html';
 				console.log("Local server running on " + openUrl);
 			}
 			if (argv.open && serverInfo.port) {
