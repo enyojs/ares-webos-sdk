@@ -19,10 +19,6 @@ process.on('uncaughtException', function (err) {
 	process.exit(1);
 });
 
-if (process.env['ARES_BUNDLE_BROWSER'] && !argv['bundledbrowser']) {
-	delete process.env['ARES_BUNDLE_BROWSER'];
-}
-
 if (process.argv.length === 2) {
 	process.argv.splice(2, 0, '--help');
 }
@@ -34,7 +30,6 @@ var knownOpts = {
 	"app":	[String, null],
 	"service":	[String, Array],
 	"browser":	Boolean,
-	"bundledbrowser": Boolean,
 	"device-list":	Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
@@ -45,7 +40,6 @@ var shortHands = {
 	"a": ["--app"],
 	"s": ["--service"],
 	"b": ["--browser"],
-	"B": ["--bundledbrowser"],
 	"D": ["--device-list"],
 	"V": ["--version"],
 	"h": ["--help"],
@@ -84,8 +78,7 @@ var options = {
 	device: argv.device,
 	appId: argv.app,
 	serviceId: argv.service,
-	browser: argv.browser,
-	bundledBrowser: argv.bundledbrowser
+	browser: argv.browser
 };
 
 /**********************************************************************/
@@ -122,10 +115,6 @@ function showUsage() {
 		"",
 		help.format("APP_ID is an application id described in appinfo.json"),
 		help.format("SERVICE_ID is a service id described in services.json"),
-//		"",
-//		help.format("--bundledbrowser|-B"),
-//		help.format("\t Open web or node inspector on the bundled browser"),
-//		help.format("\t (Note) Only jenkins output or installer version of ares have a bundled browser"),
 		""
 	];
 
