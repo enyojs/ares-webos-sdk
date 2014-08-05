@@ -1,8 +1,9 @@
-var f 		= require("fs"),
+var fs  	= require("fs"),
     util 	= require('util'),
     path 	= require('path'),
     async 	= require('async'),
     log 	= require('npmlog'),
+    mkdir	= require('mkdirp'),
     versionTool = require('./../lib/version-tools'),
     console 	= require('./../lib/consoleSync'),
     tools 		= require('./../lib/ipkg-tools'),
@@ -195,7 +196,8 @@ PalmPackage.prototype = {
 				this.exitOnError("'" + this.destination + "' is not a directory");
 			}
 		} else {
-			this.exitOnError("'" + this.destination + "' does not exist");
+			log.verbose("creating directory '" + this.destination + "' ...");
+			mkdirp.sync(this.destination);
 		}
 		this.destination = fs.realpathSync(this.destination);
 		next();
