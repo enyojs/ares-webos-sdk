@@ -4,7 +4,7 @@ var fs = require('fs'),
     npmlog = require('npmlog'),
     nopt = require('nopt'),
     ipkg = require('./../lib/ipkg-tools'),
-    console = require('./../lib/consoleSync'),
+    cliControl 	= require('./../lib/cli-control'),
     versionTool = require('./../lib/version-tools'),
     help 		= require('./../lib/helpFormat'),
     novacom 	= require('./../lib/novacom'),
@@ -16,7 +16,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.toString());
-	process.exit(1);
+	cliControl.end();
 });
 
 if (process.argv.length === 2) {
@@ -59,7 +59,7 @@ log.level = argv.level || 'warn';
 
 if (argv.help) {
 	showUsage();
-	process.exit(0);
+	cliControl.end();
 }
 
 log.verbose("argv", argv);
@@ -125,7 +125,7 @@ function inspect(){
 	log.info("inspect():", "AppId:", options.appId, "ServiceId:", options.serviceId);
 	if(!options.appId && !options.serviceId){
 		showUsage();
-		process.exit(1);
+		cliControl.end();
 	}
 	ipkg.inspector.inspect(options, null, finish);
 }
@@ -134,13 +134,12 @@ function finish(err, value) {
 	if (err) {
 		log.error(processName + ": " + err.toString());
 		log.verbose(err.stack);
-		process.exit(1);
 	} else {
 		if (value && value.msg) {
 			console.log(value.msg);
 		}
-		process.exit(0);
 	}
+	cliControl.end();
 }
 
 process.on('uncaughtException', function (err) {

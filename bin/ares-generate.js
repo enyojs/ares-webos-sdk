@@ -8,7 +8,7 @@ var fs 		= require("fs"),
     sprintf 	= require('sprintf-js').sprintf,
     prjgen 		= require('ares-generator'),
     versionTool = require('./../lib/version-tools'),
-    console 	= require('./../lib/consoleSync'),
+    cliControl 	= require('./../lib/cli-control'),
     help 		= require('./../lib/helpFormat'),
     errMsgHdlr  = require('./../lib/error-handler');
 
@@ -19,7 +19,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 process.on('uncaughtException', function (err) {
 	log.error("*** " + processName + ": "+ err.toString());
 	log.info('uncaughtException', err.stack);
-	process.exit(1);
+	cliControl.end();
 });
 
 if (process.argv.length === 2) {
@@ -201,7 +201,7 @@ PalmGenerate.prototype = {
 			var stats = fs.statSync(this.destination);
 			if ( ! stats.isDirectory()) {
 				log.error('checkCreateAppDir', "'" + this.destination + "' is not a directory");
-				process.exit(1);
+				cliControl.end();
 			}
 			var childFiles = fs.readdirSync(this.destination).filter(function(file){
 				return (['.', '..'].indexOf(file) === -1);
@@ -364,10 +364,9 @@ PalmGenerate.prototype = {
 		if (err) {
 			log.error(processName + ": "+ errMsgHdlr.changeErrMsg(err));
 			log.verbose(err.stack);
-			process.exit(1);
 		}
 		console.log("Success");
-		process.exit(0);
+		cliControl.end();
 	},
 
 	walkFolder: function(dirPath, getArray, name, next) {
@@ -484,9 +483,8 @@ PalmGenerate.prototype = {
 				if (err) {
 					log.error("*** " + processName + ": "+ err.toString());
 					log.verbose(err.stack);
-					process.exit(1);
 				}
-				process.exit(0);
+				cliControl.end();
 			}).bind(this));
 	},
 
@@ -495,7 +493,7 @@ PalmGenerate.prototype = {
 			exitCode = 0;
 		}
 		help.print(this.helpString);
-		process.exit(exitCode);
+		cliControl.end(exitCode);
 	},
 
 	checkAndShowHelp: function() {

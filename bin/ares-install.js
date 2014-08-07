@@ -5,7 +5,7 @@ var fs 		= require('fs'),
     nopt 	= require('nopt'),
     ipkg 		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
-    console 	= require('./../lib/consoleSync'),
+    cliControl 	= require('./../lib/cli-control'),
     help 		= require('./../lib/helpFormat'),
     novacom 	= require('./../lib/novacom'),
     deviceTools	= require('./../lib/setup-device');
@@ -17,7 +17,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.toString());
 	log.info('uncaughtException', err.stack);
-	process.exit(1);
+	cliControl.end();
 });
 
 if (process.argv.length === 2) {
@@ -62,7 +62,7 @@ ipkg.installer.log.level = log.level;
 
 if (argv.help) {
 	showUsage();
-	process.exit(0);
+	cliControl.end();
 }
 
 log.verbose("argv", argv);
@@ -149,7 +149,7 @@ function install() {
 	log.info("install():", "pkgPath:", pkgPath);
 	if (!pkgPath) {
 		help();
-		process.exit(1);
+		cliControl.end();
 	}
 	ipkg.installer.install(options, pkgPath, finish);
 }
@@ -197,7 +197,7 @@ function remove() {
 	log.info("remove():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
-		process.exit(1);
+		cliControl.end();
 	}
 	ipkg.installer.remove(options, pkgId, finish);
 }
@@ -209,12 +209,11 @@ function finish(err, value) {
 	if (err) {
 		log.error(processName + ": "+ err.toString());
 		log.verbose(err.stack);
-		process.exit(1);
 	} else {
 		log.info('finish():', value);
 		if (value && value.msg) {
 			console.log(value.msg);
 		}
-		process.exit(0);
 	}
+	cliControl.end();
 }
