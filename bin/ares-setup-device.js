@@ -149,7 +149,7 @@ if (op) {
 var defaultDeviceInfo = {
 	type: "starfish",
 	host: "127.0.0.1",
-	port: "22",
+	port: 22,
 	username: "root",
 	description: "new device description",
 	files: "stream",
@@ -393,6 +393,9 @@ function interactiveInput(next) {
 					return next(err);
 				}
 				replaceDefaultDeviceInfo(inDevice);
+				if (inDevice.port) {
+					inDevice.port = Number(inDevice.port);
+				}
 				var resolver = new novacom.Resolver();
 				async.series([
 					resolver.load.bind(resolver),
@@ -467,12 +470,15 @@ function modifyDeviceInfo(next) {
 			delete inDevice.privatekey;
 			inDevice.password = "@DELETE@";
 		}
-		if (typeof inDevice.password && inDevice.password !== "@DELETE@") {
+		if (typeof inDevice.password !== "undefined" && inDevice.password !== "@DELETE@") {
 			inDevice.privateKey = "@DELETE@";
 			inDevice.passphrase = "@DELETE@";
 		}
 		if (mode === "add") {
 			replaceDefaultDeviceInfo(inDevice);
+		}
+		if (inDevice.port) {
+			inDevice.port = Number(inDevice.port);
 		}
 		var resolver = new novacom.Resolver();
 		async.series([
