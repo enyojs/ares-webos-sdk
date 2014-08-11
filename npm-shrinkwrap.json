@@ -437,6 +437,11 @@
         }
       }
     },
+    "easy-table": {
+      "version": "0.3.0",
+      "from": "easy-table@",
+      "resolved": "https://registry.npmjs.org/easy-table/-/easy-table-0.3.0.tgz"
+    },
     "express": {
       "version": "3.3.4",
       "from": "https://registry.npmjs.org/express/-/express-3.3.4.tgz",
@@ -658,7 +663,7 @@
     },
     "ssh2": {
       "version": "0.2.22",
-      "from": "https://registry.npmjs.org/ssh2/-/ssh2-0.2.22.tgz",
+      "from": "ssh2@0.2.22",
       "resolved": "https://registry.npmjs.org/ssh2/-/ssh2-0.2.22.tgz",
       "dependencies": {
         "streamsearch": {
@@ -668,7 +673,7 @@
         },
         "asn1": {
           "version": "0.1.11",
-          "from": "https://registry.npmjs.org/asn1/-/asn1-0.1.11.tgz",
+          "from": "asn1@0.1.11",
           "resolved": "https://registry.npmjs.org/asn1/-/asn1-0.1.11.tgz"
         }
       }
