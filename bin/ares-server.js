@@ -5,7 +5,7 @@ var fs 		= require('fs'),
     async	= require('async'),
     ipkg 		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
-    console 	= require('./../lib/consoleSync'),
+    cliControl 	= require('./../lib/cli-control'),
     help 		= require('./../lib/helpFormat'),
 	util 		= require('./../lib/utility'),
 	sdkenv		= require('./../lib/sdkenv');
@@ -16,7 +16,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.toString());
-	process.exit(1);
+	cliControl.end();
 });
 
 if (process.argv.length === 2) {
@@ -50,7 +50,7 @@ ipkg.launcher.log.level = log.level;
 
 if (argv.help) {
 	showUsage();
-	process.exit(0);
+	cliControl.end();
 }
 
 log.verbose("argv", argv);
@@ -125,7 +125,7 @@ function runServer() {
 		if (code === "@@ARES_CLOSE@@") {
 			res.status(200).send();
 			killTimer = setTimeout(function() {
-				process.exit(0);
+				cliControl.end();
 			}, 2 * 1000);
 		} else if (code === "@@GET_URL@@") {
 			clearTimeout(killTimer);
@@ -138,13 +138,12 @@ function finish(err, value) {
 	if (err) {
 		log.error(err);
 		log.verbose(err.stack);
-		process.exit(1);
 	} else {
 		if (value && value.msg) {
 			console.log(value.msg);
 		}
-		process.exit(0);
 	}
+	cliControl.end();
 }
 
 process.on('uncaughtException', function (err) {

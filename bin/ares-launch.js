@@ -5,7 +5,7 @@ var fs 		= require('fs'),
     nopt 	= require('nopt'),
     ipkg 		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
-    console 	= require('./../lib/consoleSync'),
+    cliControl 	= require('./../lib/cli-control'),
     help 		= require('./../lib/helpFormat'),
 	novacom 	= require('./../lib/novacom'),
 	deviceTools	= require('./../lib/setup-device');
@@ -16,7 +16,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.toString());
-	process.exit(1);
+	cliControl.end();
 });
 
 if (process.argv.length === 2) {
@@ -62,7 +62,7 @@ ipkg.launcher.log.level = log.level;
 
 if (argv.help) {
 	showUsage();
-	process.exit(0);
+	cliControl.end();
 }
 
 log.verbose("argv", argv);
@@ -164,7 +164,7 @@ function launch() {
 	log.info("launch():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
-		process.exit(1);
+		cliControl.end();
 	}
 	ipkg.launcher.launch(options, pkgId, params, finish);
 }
@@ -177,7 +177,7 @@ function launchHostedApp() {
 	log.info("launch():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
-		process.exit(1);
+		cliControl.end();
 	}
 	ipkg.launcher.launch(options, pkgId, params, finish);
 }
@@ -236,7 +236,7 @@ function close() {
 	log.info("close():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
-		process.exit(1);
+		cliControl.end();
 	}
 	ipkg.launcher.close(options, pkgId, params, finish);
 }
@@ -257,13 +257,12 @@ function finish(err, value) {
 	if (err) {
 		log.error(processName + ": "+ err.toString());
 		log.verbose(err.stack);
-		process.exit(1);
 	} else {
 		if (value && value.msg) {
 			console.log(value.msg);
 		}
-		process.exit(0);
 	}
+	cliControl.end();
 }
 
 function insertParams(params, keyPair) {

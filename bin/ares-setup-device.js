@@ -5,7 +5,7 @@ var fs = require('fs'),
     async = require('async'),
     sprintf = require('sprintf-js').sprintf,
     versionTool = require('./../lib/version-tools'),
-    console = require('./../lib/consoleSync'),
+    cliControl 	= require('./../lib/cli-control'),
     novacom = require('./../lib/novacom'),
     help 	= require('./../lib/helpFormat');
 
@@ -16,7 +16,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 process.on('uncaughtException', function (err) {
 	log.info('exit', err);
 	log.error('exit', err.toString());
-	process.exit(1);
+	cliControl.end();
 });
 
 var processName = path.basename(process.argv[1]).replace(/.js/, '');
@@ -131,7 +131,7 @@ if (argv.list) {
 	versionTool.showVersionAndExit();
 } else if (argv.help) {
 	help.print(helpString);
-	process.exit(0);
+	cliControl.end();
 } else {
 	op = interactiveInput;
 }
@@ -523,14 +523,13 @@ function finish(err, value) {
 	if (err) {
 		log.error(processName + ": "+ err.toString());
 		log.verbose(err.stack);
-		process.exit(1);
 	} else {
 		log.info('finish():', value);
 		if (value && value.msg) {
 			console.log(value.msg);
 		}
-		process.exit(0);
 	}
+	cliControl.end();
 }
 
 process.on('uncaughtException', function (err) {

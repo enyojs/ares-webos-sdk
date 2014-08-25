@@ -5,7 +5,7 @@ var fs  	= require("fs"),
     log 	= require('npmlog'),
     mkdir	= require('mkdirp'),
     versionTool = require('./../lib/version-tools'),
-    console 	= require('./../lib/consoleSync'),
+    cliControl 	= require('./../lib/cli-control'),
     tools 		= require('./../lib/ipkg-tools'),
     help 		= require('./../lib/helpFormat');
 
@@ -16,7 +16,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 process.on('uncaughtException', function (err) {
 	log.error("*** " + processName + ": "+ err.toString());
 	log.info('uncaughtException', err.stack);
-	process.exit(1);
+	cliControl.end();
 });
 
 if (process.argv.length === 2) {
@@ -109,7 +109,7 @@ PalmPackage.prototype = {
 			exitCode = 0;
 		}
 		help.print(this.helpString);
-		process.exit(exitCode);
+		cliControl.end(exitCode);
 	},
 
 	checkAndShowHelp: function() {
@@ -152,7 +152,7 @@ PalmPackage.prototype = {
 
 	exitOnError: function(msg) {
 		console.error("*** " + processName + ": "+ msg);
-		process.exit(1);
+		cliControl.end();
 	},
 
 	packageReady: function(err, results) {
@@ -160,22 +160,20 @@ PalmPackage.prototype = {
 		if (err) {
 			log.error(processName + ": "+ err.toString());
 			log.verbose(err.stack);
-			process.exit(1);
 		}
 		if (results && results[results.length-1] && results[results.length-1].msg) {
 			console.log(results[results.length-1].msg);
 		}
-		process.exit(0);
+		cliControl.end();
 	},
 
 	appOk: function(err, results) {
 		log.info("appOk");
 		if (err) {
 			console.error("*** " + processName + ": "+ err.toString());
-			process.exit(-1);
 		}
 		console.log("no problems detected");
-		process.exit(0);
+		cliControl.end();
 	},
 
 	setOutputDir: function(next) {
