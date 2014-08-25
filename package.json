@@ -38,7 +38,8 @@
 		"busboy": "~0.0.5",
 		"inherits": "~1.x",
 		"jsonschema": "~0.4.x",
-		"body-parser" : "1.4.x"
+		"body-parser" : "1.4.x",
+		"easy-table" : "~0.3.0"
 	},
 	"engines": {
 		"node": "~0.10.0",
@@ -81,7 +82,8 @@
 		"busboy",
 		"inherits",
 		"jsonschema",
-		"body-parser"
+		"body-parser",
+		"easy-table"
 	],
 	"files": [
 		"DEMO.md",

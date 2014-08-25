@@ -4,6 +4,7 @@ var fs = require('fs'),
     nopt = require('nopt'),
     async = require('async'),
     sprintf = require('sprintf-js').sprintf,
+	Table = require('easy-table'),
     versionTool = require('./../lib/version-tools'),
     cliControl 	= require('./../lib/cli-control'),
     novacom = require('./../lib/novacom'),
@@ -188,6 +189,8 @@ function reset(next) {
 }
 
 function list(next) {
+	var table = new Table;
+	var data = [];
 	var resolver = new novacom.Resolver();
 	async.waterfall([
 		resolver.load.bind(resolver),
@@ -195,11 +198,18 @@ function list(next) {
 		function(devices, next) {
 			log.info("list()", "devices:", devices);
 			if (Array.isArray(devices)) {
-				console.log(sprintf("%-16s %-16s %-16s %-24s %s", "<DEVICE NAME>", "<PLATFORM>", "<FILE STREAM>", "<DESCRIPTION>", "<SSH ADDRESS>"));
 				devices.forEach(function(device) {
-					console.log(sprintf("%-16s %-16s %-16s %-24s (%s)", device.name, device.type, device.files, device.description, device.addr));
+					var info = device.username + '@' + device.host + ':' + device.port;
+					data.push( {name: device.name, info:info, connection:'ssh' } );
 				});
 			}
+			data.forEach(function(item){
+				table.cell('name', item.name);
+				table.cell('deviceinfo', item.info);
+				table.cell('connection', item.connection);
+				table.newRow();
+			});
+			console.log(table.toString());
 			log.info("list()", "Success");
 			next();
 		}
@@ -208,13 +218,37 @@ function list(next) {
 
 
 function listFull(next) {
+	var outputJson = []
 	var resolver = new novacom.Resolver();
 	async.waterfall([
 		resolver.load.bind(resolver),
-		resolver.getRawDeviceString.bind(resolver),
-		function(deviceContentsString, next) {
-			log.info("listFull()");
-			console.log(deviceContentsString);
+		resolver.list.bind(resolver),
+		function(devices, next) {
+			log.info("list()", "devices:", devices);
+			if (Array.isArray(devices)) {
+				devices.forEach(function(device) {
+					var item = {
+						name : device.name,
+						deviceinfo : {
+							ip: device.host,
+							port: Number(device.port),
+							user: device.username
+						},
+						connection: 'ssh',
+						details: {
+							password: device.password,
+							privatekey: device.privateKeyName,
+							passphrase: device.passphrase,
+							platform: device.type,
+							files: device.files,
+							description: device.description
+						}
+					};
+					outputJson.push(item);
+					var info = device.username + '@' + device.host + ':' + device.port;
+				});
+			}
+			console.log(JSON.stringify(outputJson, null, 4));
 			log.info("listFull()", "Success");
 			next();
 		}
@@ -470,17 +504,17 @@ function modifyDeviceInfo(next) {
 			delete inDevice.privatekey;
 			inDevice.password = "@DELETE@";
 		}
-		if (typeof inDevice.password !== "undefined" && inDevice.password !== "@DELETE@") {
+		if (typeof inDevice.password !== "undefined"  && inDevice.password !== "@DELETE@") {
 			inDevice.privateKey = "@DELETE@";
 			inDevice.passphrase = "@DELETE@";
 		}
 		if (mode === "add") {
 			replaceDefaultDeviceInfo(inDevice);
 		}
+		var resolver = new novacom.Resolver();
 		if (inDevice.port) {
 			inDevice.port = Number(inDevice.port);
 		}
-		var resolver = new novacom.Resolver();
 		async.series([
 			resolver.load.bind(resolver),
 			resolver.modifyDeviceFile.bind(resolver, mode, inDevice),
