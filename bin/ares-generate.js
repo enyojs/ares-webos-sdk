@@ -72,10 +72,6 @@ function PalmGenerate() {
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice)? this.defaultEnyoVersion:this.argv.onDevice;
 	this.argv.file = (this.argv.file == 'true' || !this.argv.file)? []:this.argv.file;
-	if (this.argv.argv.remain.length > 0) {
-		var appDir = this.argv.argv.remain[0];
-		appDir = (fs.existsSync(appDir))? fs.realpathSync(appDir) : appDir;
-	}
 	this.substituteWords = {
 		"@SERVICE-NAME@": this.argv.servicename || "com.yourdomain.app.service",
 		"@ENYO-VERSION@":this.argv.onDevice
