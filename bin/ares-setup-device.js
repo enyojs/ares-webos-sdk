@@ -231,7 +231,7 @@ function listFull(next) {
 						name : device.name,
 						deviceinfo : {
 							ip: device.host,
-							port: Number(device.port),
+							port: String(device.port),
 							user: device.username
 						},
 						connection: 'ssh',
@@ -348,7 +348,7 @@ function interactiveInput(next) {
 					inDevice[key] = device[key];
 					return next();
 				}
-				var defaultValue = (typeof defaultDeviceInfo[key] === 'string')? "(default: " + defaultDeviceInfo[key] + ")" : "";
+				var defaultValue = (defaultDeviceInfo[key] !== 'undefined')? "(default: " + defaultDeviceInfo[key] + ")" : "";
 				var currentValue = (device[key])? "(" + device[key] + ")" : defaultValue;
 				async.waterfall([
 					getInput.bind(this, key + " " + currentValue),
