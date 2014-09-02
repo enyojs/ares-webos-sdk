@@ -227,8 +227,9 @@ PalmGenerate.prototype = {
 		if (reqGenSvc) {
 //			if (this.argv.servicename) {
 				if (appinfo) {
-					if (this.argv.servicename.indexOf(appinfo.id + ".") === -1) {
-						return next(new Error("serivce name '"+ this.argv.servicename +"' must be subdomain of app id '" + appinfo.id + "'"));
+					var svcName = this.substituteWords["@SERVICE-NAME@"];
+					if (svcName.indexOf(appinfo.id + ".") === -1) {
+						return next(new Error("serivce name '"+ svcName +"' must be subdomain of app id '" + appinfo.id + "'"));
 					}
 				}
 //			} else {
@@ -604,7 +605,7 @@ PalmGenerate.prototype = {
 		if ( reqGenSvc ) {
 			if ( (this.argv.template.length > 1 && reqGenTemp)
 			|| appinfoExist  ) {
-				prefixToAdd = "services/" + this.substituteWords("@SERVICE-NAME@");
+				prefixToAdd = "services/" + this.substituteWords["@SERVICE-NAME@"];
 				this.configGenZip.sources.forEach(function(source) {
 					if (source.id === svcName) {
 						source.files.forEach(function(filePath){
