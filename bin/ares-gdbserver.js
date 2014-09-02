@@ -16,7 +16,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.toString());
-	pcliControl.end();
+	cliControl.end();
 });
 
 if (process.argv.length === 2) {
@@ -30,6 +30,8 @@ var knownOpts = {
 	"port":	[String, null],
 	"host-port":	[String, null],
 	"close":	Boolean,
+	"app":	[String, null],
+	"service":	[String, null],
 	"device-list":	Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
@@ -40,6 +42,8 @@ var shortHands = {
 	"p": ["--port"],
 	"H": ["--host-port"],
 	"c": ["--close"],
+	"a": ["--app"],
+	"s": ["--service"],
 	"D": ["--device-list"],
 	"V": ["--version"],
 	"h": ["--help"],
@@ -78,7 +82,8 @@ if (argv['version']) {
 
 var options = {
 	device: argv.device,
-	appId: argv.argv.remain[0],
+	appId: argv.app || argv.argv.remain[0],
+	serviceId: argv.service,
 	hostPort: argv['host-port'],
 	port: argv.port
 };
@@ -98,7 +103,8 @@ function showUsage() {
 		help.format(processName + " - Command line interface for gdbserver"),
 		"",
 		"SYNOPSIS",
-		help.format(processName + " [OPTION...] <APP_ID>"),
+		help.format(processName + " [OPTION...] [-a, --app] <APP_ID>"),
+		help.format(processName + " [OPTION...] -s, --service <SERVICE_ID>"),
 		"",
 		"OPTION",
 		help.format("-d, --device <DEVICE>", "Specify DEVICE to use"),
@@ -123,7 +129,7 @@ function showUsage() {
 
 function gdbserver(){
 	log.info("gdbserver():", "AppId:", options.appId);
-	if(!options.appId){
+	if(!options.appId && !options.serviceId){
 		showUsage();
 		cliControl.end();
 	}
