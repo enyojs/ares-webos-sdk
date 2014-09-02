@@ -126,10 +126,10 @@ function PalmGenerate() {
 		"EXAMPLES",
 		"",
 		"# Create an app with id 'com.domain.app'",
-		processName+" APP_DIR -p \"id=com.domain.app\"",
+		processName+" -t bootplate-web -p \"id=com.domain.app\" ~/projects/app",
 		"",
 		"# Create an webOS service named 'com.domain.app.service'",
-		processName+" SVC_DIR -t webos-service -s com.domain.app.service",
+		processName+" -t webos-service -s com.domain.app.service ~/projects/service",
 		""
 	];
 
