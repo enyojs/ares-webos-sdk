@@ -209,7 +209,7 @@ PalmGenerate.prototype = {
 	checkServiceOption: function(next) {
 		var reqGenSvc = false;
 		this.argv.template.forEach(function(name) {
-			if (this.templatesWithID[name].type === "webosService") {
+			if (this.templatesWithID[name].type.match(/Service/i)) {
 				reqGenSvc = true;
 			}
 		}.bind(this));
@@ -596,7 +596,7 @@ PalmGenerate.prototype = {
 			if (this.templatesWithID[name].type === "template") {
 				reqGenTemp = true;
 			}
-			if (this.templatesWithID[name].type === "webosService") {
+			if (this.templatesWithID[name].type.match(/Service/i)) {
 				reqGenSvc = true;
 				svcName = name;
 			}
