@@ -76,7 +76,7 @@ if (argv['version']) {
 
 var options = {
 	device: argv.device,
-	appId: argv.app,
+	appId: argv.app || argv.argv.remain[0],
 	serviceId: argv.service,
 	browser: argv.browser
 };
@@ -96,7 +96,7 @@ function showUsage() {
 		help.format(processName + " - Provides the debugging Web/Node Inspector"),
 		"",
 		"SYNOPSIS",
-		help.format(processName + " [OPTION...] -a, --app <APP_ID>"),
+		help.format(processName + " [OPTION...] [-a, --app] <APP_ID>"),
 		help.format(processName + " [OPTION...] -s, --service <SERVICE_ID>"),
 //		help.format(processName + " [OPTIONS]|[COMMAND] --browser, -b"), * TBD *
 		"",
