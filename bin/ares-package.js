@@ -59,7 +59,7 @@ function PalmPackage() {
 		help.format(processName + " - Create a webOS application package file"),
 		"",
 		"SYNOPSIS",
-		help.format(processName + " [OPTION...] APP_DIR [SERVICE_DIR] [PKG_DIR]"),
+		help.format(processName + " [OPTION...] APP_DIR [SERVICE_DIR [...]] [PKG_DIR]"),
 		"",
 		"OPTION",
 		help.format("-c, --check", "Check the application but don't package it"),
@@ -91,6 +91,9 @@ function PalmPackage() {
 		"",
 		"# Create a package for the webOS application excluding all text files and the tests directory.",
 		processName+" --exclude *.txt --exclude tests",
+		"",
+		"# Create a package for the webOS application with multiple webOS services",
+		processName+" APP_DIR SVC1_DIR SVC2_DIR SVC3_DIR",
 		""
 	];
 
