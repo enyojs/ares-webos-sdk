@@ -244,8 +244,10 @@ function close() {
 function running() {
 	ipkg.launcher.listRunningApp(options, null, function(err, runningApps) {
 		var strRunApps = "";
+		var cnt = 0;
 		if (runningApps instanceof Array) runningApps.forEach(function (runApp) {
-			strRunApps = strRunApps.concat(runApp.id).concat('\n');
+			if (cnt++ !== 0) strRunApps = strRunApps.concat('\n');
+			strRunApps = strRunApps.concat(runApp.id);
 		});
 		console.log(strRunApps);
 		finish(err);
