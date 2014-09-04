@@ -157,13 +157,15 @@ function install() {
 function list() {
 	ipkg.installer.list(options, function(err, pkgs) {
 		var strPkgs = "";
+		var cnt = 0;
 		if (pkgs instanceof Array) pkgs.forEach(function (pkg) {
 			if (argv.type) {
 				if (argv.type !== pkg.type) {
 					return;
 				}
 			}
-				strPkgs = strPkgs.concat(pkg.id).concat('\n');
+			if (cnt++ !== 0) strPkgs = strPkgs.concat('\n');
+			strPkgs = strPkgs.concat(pkg.id);
 		});
 		console.log(strPkgs);
 		finish(err);
