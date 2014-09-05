@@ -47,6 +47,7 @@ function PalmGenerate() {
 		"version":	Boolean,
 		"list":		String,
 		"overwrite":	Boolean,
+		"servicename": String,
 		"template":	[String, Array],
 		"property":	[String, Array],
 		"file":	[String, Array],
@@ -61,6 +62,7 @@ function PalmGenerate() {
 		"f":		"--overwrite",
 		"t":		"--template",
 		"p":		"--property",
+		"s":		"--servicename",
 		"F":		"--file",
 		"P":		"--proxy-url",
 		"D":		"--onDevice",
@@ -70,37 +72,8 @@ function PalmGenerate() {
 	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
 	this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice)? this.defaultEnyoVersion:this.argv.onDevice;
 	this.argv.file = (this.argv.file == 'true' || !this.argv.file)? []:this.argv.file;
-	var basename = "";
-	if (this.argv.argv.remain.length > 0) {
-		var appDir = this.argv.argv.remain[0];
-		appDir = (fs.existsSync(appDir))? fs.realpathSync(appDir) : appDir;
-		basename = path.basename(appDir);
-		if (basename) {
-			var dirNameArry = basename.split('.');
-			switch (dirNameArry.length) {
-				case 2:
-					if (dirNameArry[0] == "com") {
-						dirNameArry.splice(1, 0, "yourdomain");
-					} else {
-						dirNameArry.splice(0, 0, "com");
-					}
-					break;
-				case 1:
-					dirNameArry.splice(0, 0, "com.yourdomain");
-					break;
-				default:
-					break;
-			}
-			basename = dirNameArry.join(".");
-		}
-	}
-	this.configFileSubstitutions = {
-		"@ID@": basename,
-		"@SERVICE-NAME@": basename + ".service"
-	};
 	this.substituteWords = {
-		"@ID@": basename,
-		"@SERVICE-NAME@": basename + ".service",
+		"@SERVICE-NAME@": this.argv.servicename || "com.yourdomain.app.service",
 		"@ENYO-VERSION@":this.argv.onDevice
 	};
 	this.helpString = [
@@ -130,6 +103,9 @@ function PalmGenerate() {
 		help.format("\t ENYO-VERSION is enyo framework version to use [default: " + this.defaultEnyoVersion + "]"),
 		help.format("\t This option is applied to 'enyoVersion', 'onDeviceSource' field in appinfo.json"),
 		"",
+		help.format("-s, --servicename <SERVICENAME>", "Set the servicename for webOS Service"),
+		help.format("\t (e.g.) -s \"com.examples.helloworld.service\""),
+		"",
 		help.format("-f, --overwrite", "Overwrite existing files [boolean]"),
 		help.format("--level <LEVEL>", "Tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
@@ -142,6 +118,14 @@ function PalmGenerate() {
 		help.format("Properties can be specified as key-value pairs of the form \"key=value\""),
 		help.format("or as JSON objects of the form '{\"key1\":\"value1\", \"key2\":\"value2\", ...}'."),
 		help.format("Surrounding quotes are required in both cases."),
+		"",
+		"EXAMPLES",
+		"",
+		"# Create an app with id 'com.domain.app'",
+		processName+" -t bootplate-web -p \"id=com.domain.app\" ~/projects/app",
+		"",
+		"# Create an webOS service named 'com.domain.app.service'",
+		processName+" -t webos-service -s com.domain.app.service ~/projects/service",
 		""
 	];
 
@@ -216,6 +200,38 @@ PalmGenerate.prototype = {
 			this.existed = false;
 		}
 		this.destination = fs.realpathSync(this.destination);
+		next();
+	},
+	checkServiceOption: function(next) {
+		var reqGenSvc = false;
+		this.argv.template.forEach(function(name) {
+			if (this.templatesWithID[name].type.match(/Service/i)) {
+				reqGenSvc = true;
+			}
+		}.bind(this));
+		var appinfoPath = path.join(this.destination, 'appinfo.json');
+		try {
+			if(fs.existsSync(appinfoPath)) {
+				var data = fs.readFileSync(appinfoPath);
+				var appinfo = JSON.parse(data);
+			}
+		} catch(err) {
+			return next(err);
+		}
+
+		//webos-service type template need this.argv.servicename
+		if (reqGenSvc) {
+//			if (this.argv.servicename) {
+				if (appinfo) {
+					var svcName = this.substituteWords["@SERVICE-NAME@"];
+					if (svcName.indexOf(appinfo.id + ".") === -1) {
+						return next(new Error("serivce name '"+ svcName +"' must be subdomain of app id '" + appinfo.id + "'"));
+					}
+				}
+//			} else {
+//				return next(new Error("To generate webosService, '-s, --servicename' is needed"));
+//			}
+		}
 		next();
 	},
 
@@ -340,17 +356,6 @@ PalmGenerate.prototype = {
 				var word = "@"+propKey.toUpperCase()+"@";
 				var value = properties[propKey];
 				this.substituteWords[word] = properties[propKey];
-				this.configFileSubstitutions[word] = properties[propKey];
-
-				//FIXME: hard coded for webos-service tempalte source substitutions
-				if (word === "@ID@") {
-					var serviceName = properties[propKey];
-					if (!properties[propKey].match(/.service$/g)) {
-						serviceName = serviceName.concat(".service");
-					} 
-					this.substituteWords["@SERVICE-NAME@"] = serviceName;
-					this.configFileSubstitutions["@SERVICE-NAME@"] = serviceName;					
-				}
 			}
 		}
 		//substitution for string
@@ -508,9 +513,10 @@ PalmGenerate.prototype = {
 				versionTool.checkNodeVersion,
 				this.checkTemplateValid.bind(this),
 				this.checkCreateAppDir.bind(this),
+				this.checkServiceOption.bind(this),
+				this.changePluginConfig.bind(this),
 				this.getSubstFileListFromConfig.bind(this),
 				this.setSubstitutions.bind(this),
-				this.substituteConfigGenZip.bind(this),
 				this.loadGenerator.bind(this),
 				this.instantiateProject.bind(this)
 			],
@@ -570,19 +576,50 @@ PalmGenerate.prototype = {
 		next();
 	},
 
-	substituteConfigGenZip: function(next) {
-		log.info("substituteConfigGenZip");
-		try {
-			configGenZipString = JSON.stringify(this.configGenZip);
-			for(key in this.configFileSubstitutions) {
-				var regexp = new RegExp(key, "g");
-				configGenZipString = configGenZipString.replace(regexp, this.configFileSubstitutions[key]);
-			}
-			this.configGenZip = JSON.parse(configGenZipString);
-			next();
-		} catch(err) {
-			next(err);
+	changePluginConfig: function(next) {
+		if (!this.configGenZip) {
+			return next(new Error("loadPluginConfig() should be called first"));
 		}
+		//   Template num >= 2 && Templates contains Template  && webos-service
+		//   ||  dst dir is app_dir
+		//      change webos-service template dst path (prefixToAdd)
+		var appinfoExist = fs.existsSync(path.join(this.destination, 'appinfo.json'));
+		var reqGenTemp = false;
+		var reqGenSvc = false;
+		var svcName;
+		var prefixToAdd;
+		this.argv.template.forEach(function(name) {
+			if (this.templatesWithID[name].type === "template") {
+				reqGenTemp = true;
+			}
+			if (this.templatesWithID[name].type.match(/Service/i)) {
+				reqGenSvc = true;
+				svcName = name;
+			}
+		}.bind(this));
+
+		if ( reqGenSvc ) {
+			if ( (this.argv.template.length > 1 && reqGenTemp)
+			|| appinfoExist  ) {
+				prefixToAdd = "services/" + this.substituteWords["@SERVICE-NAME@"];
+				this.configGenZip.sources.forEach(function(source) {
+					if (source.id === svcName) {
+						source.files.forEach(function(filePath){
+							filePath.prefixToAdd = prefixToAdd;
+						});
+					}
+				});
+			}
+		}
+		if (appinfoExist && !this.argv.overwrite ) {
+			var svcPath = (prefixToAdd)? path.join(this.destination, prefixToAdd) : this.destination;
+			if (fs.existsSync(svcPath)) {
+				return next(new Error(svcPath + " already exists"));
+			} else {
+				this.existed = false;
+			}
+		}
+		next();
 	},
 
 	loadGenerator: function(next) {
