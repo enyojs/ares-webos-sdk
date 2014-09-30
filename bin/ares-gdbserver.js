@@ -124,6 +124,15 @@ function showUsage() {
 		"",
 		" Launch a native service with gdbserver (port: 9932) in the device",
 		processName + "-s com.native.app.service -p 9932 -d emulator",
+		"",
+		" This command displays the address gdbserver runs like the following",
+		" >> gdb can connect to [target remote 10.123.123.123:9930] ",
+		"",
+		" This means gdb can connect to the gdbserver remotely",
+		" > (gdb) file NATIVE_BIN",
+		" > (gdb) set sysroot remote:/",
+		" > (gdb) target remote 10.123.123.123:9930",
+		" > (gdb) c",
 		""
 	];
 
