@@ -47,8 +47,7 @@
 					"deps": ["webappinfo", "webicon"],
 					"files": [
 						{
-							"url": "@PLUGINDIR@/templates/bootplate-web.zip",
-							"prefixToRemove": "bootplate"
+							"url": "@PLUGINDIR@/templates/bootplate-web"
 						}
 					]
 				},
