@@ -28,7 +28,6 @@ if (process.argv.length === 2) {
 var knownOpts = {
 	"device":	[String, null],
 	"port":	[String, null],
-	"host-port":	[String, null],
 	"close":	Boolean,
 	"app":	[String, null],
 	"service":	[String, null],
@@ -40,7 +39,6 @@ var knownOpts = {
 var shortHands = {
 	"d": ["--device"],
 	"p": ["--port"],
-	"H": ["--host-port"],
 	"c": ["--close"],
 	"a": ["--app"],
 	"s": ["--service"],
@@ -84,7 +82,6 @@ var options = {
 	device: argv.device,
 	appId: argv.app || argv.argv.remain[0],
 	serviceId: argv.service,
-	hostPort: argv['host-port'],
 	port: argv.port
 };
 
@@ -111,7 +108,6 @@ function showUsage() {
 		help.format("-D, --device-list", "List the available DEVICEs"),
 		help.format("-c, --close", "close running gdbserver"),
 		help.format("-p, --port", "gdbserver port to be used on device [default:9930]"),
-		help.format("-H, --host-port", "Host PC's port to connect gdbserver's port  [default:9930]"),
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
 		help.format("-V, --version", "Display version info"),
@@ -121,6 +117,22 @@ function showUsage() {
 		help.format("(Notice) A native app should have been installed first."),
 		"",
 		help.format("APP_ID is an application id described in appinfo.json"),
+		"",
+		"Examples:",
+		" Launch a native app with gdbserver (port: 9932) in the device",
+		processName + "com.native.app -p 9932 -d emulator",
+		"",
+		" Launch a native service with gdbserver (port: 9932) in the device",
+		processName + "-s com.native.app.service -p 9932 -d emulator",
+		"",
+		" This command displays the address gdbserver runs like the following",
+		" >> gdb can connect to [target remote 10.123.123.123:9930] ",
+		"",
+		" This means gdb can connect to the gdbserver remotely",
+		" > (gdb) file NATIVE_BIN",
+		" > (gdb) set sysroot remote:/",
+		" > (gdb) target remote 10.123.123.123:9930",
+		" > (gdb) c",
 		""
 	];
 
