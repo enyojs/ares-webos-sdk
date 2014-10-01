@@ -115,7 +115,7 @@ function runServer() {
 				], function(err, browserPath) {
 					if (err) 
 						return next(err);
-					util.openBrowser(openUrl, browserPath);
+					util.openBrowser(openUrl, browserPath[0]);
 				});
 			}
 		}
