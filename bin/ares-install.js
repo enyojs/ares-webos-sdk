@@ -148,7 +148,7 @@ function install() {
 	var pkgPath = argv.install || argv.argv.remain[0];
 	log.info("install():", "pkgPath:", pkgPath);
 	if (!pkgPath) {
-		help();
+		showUsage();
 		cliControl.end();
 	}
 	ipkg.installer.install(options, pkgPath, finish);
@@ -198,8 +198,7 @@ function remove() {
 	var pkgId = (argv.remove === 'true')? argv.argv.remain[0] : argv.remove;
 	log.info("remove():", "pkgId:", pkgId);
 	if (!pkgId) {
-		help();
-		cliControl.end();
+		return finish(new Error("APP_ID must be specified"));
 	}
 	ipkg.installer.remove(options, pkgId, finish);
 }
