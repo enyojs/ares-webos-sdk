@@ -150,6 +150,10 @@ function install() {
 	if (!pkgPath) {
 		showUsage();
 		cliControl.end();
+	} else {
+		if (!fs.existsSync(path.normalize(pkgPath))) {
+			return finish(new Error(pkgPath + " does not exist."));
+		}
 	}
 	ipkg.installer.install(options, pkgPath, finish);
 }
