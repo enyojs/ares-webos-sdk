@@ -39,7 +39,8 @@ function PalmPackage() {
 		"no-minify":	Boolean,
 		"app-exclude" : [String, Array],
 		"rom":		Boolean,
-		"deployscript": String
+		"deployscript": String,
+		"force": Boolean
 	};
 	var shortHands = {
 		"h":		"--help",
@@ -50,6 +51,7 @@ function PalmPackage() {
 		"e":		"--app-exclude",
 		"r":		"--rom",
 		"d":		"--deployscript",
+		"f":		"--force",
 		"v":		["--level", "verbose"]
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
@@ -104,7 +106,8 @@ function PalmPackage() {
 PalmPackage.prototype = {
 
 	unsupportedOptions: {
-		"noclean": 1			// Do not cleanup temporary directories - For debug only
+		"noclean": 1,			// Do not cleanup temporary directories - For debug only,
+        "force": 1
 	},
 
 	showUsage: function(exitCode) {
