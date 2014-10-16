@@ -32,6 +32,7 @@ function PalmPackage() {
 
 	var knownOpts = {
 		"help":		Boolean,
+		"hidden-help":		Boolean,
 		"version":	Boolean,
 		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 		"outdir":	path,
@@ -40,10 +41,13 @@ function PalmPackage() {
 		"app-exclude" : [String, Array],
 		"rom":		Boolean,
 		"deployscript": String,
-		"force": Boolean
+		"force": Boolean,
+		"pkgname": String,
+		"pkgversion": String
 	};
 	var shortHands = {
 		"h":		"--help",
+		"hh":		"--hidden-help",
 		"V":		"--version",
 		"o":		"--outdir",
 		"c":		"--check",
@@ -52,6 +56,8 @@ function PalmPackage() {
 		"r":		"--rom",
 		"d":		"--deployscript",
 		"f":		"--force",
+		"pn":		"--pkgname",
+		"pv":		"--pkgversion",
 		"v":		["--level", "verbose"]
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
@@ -99,6 +105,29 @@ function PalmPackage() {
 		""
 	];
 
+	this.hiddenhelpString = [
+		"",
+		"EXTRA-OPTION",
+		help.format("-f, --force", "Make .ipk package forcely with same file structure in APP_DIR"),
+		help.format("\t If file/directories in APP_DIR consists of the following structure"),
+		help.format("\t (ex) APP_DIR/"),
+		help.format("\t           +-- usr/"),
+		help.format("\t           +-- usr/bin"),
+		help.format("\t           +-- usr/bin/foo"),
+		help.format("\t           +-- etc/"),
+		help.format("\t           +-- etc/boo.conf"),
+		help.format("\t '-f, --force' option will keep this structure in .ipk"),
+		help.format("-pn, --pkgname <NAME>", "Set package name"),
+		help.format("-pv, --pkgversion <VERSION>", "Set package version"),
+		"EXAMPLES",
+		"",
+		"# Create a package although directory has no appinfo.json and no services.json",
+		"  make a ipk file which of package name is 'foopkg' and package version is '1.0.1'",
+		"  the following command should generate a foopkg_1.0.1.ipk",
+		processName+" APP_DIR -f -pn foopkg -pv 1.0.1",
+		""
+	];
+
 	log.heading = processName;
 	log.level = this.argv.level || 'warn';
 }
@@ -107,20 +136,27 @@ PalmPackage.prototype = {
 
 	unsupportedOptions: {
 		"noclean": 1,			// Do not cleanup temporary directories - For debug only,
-        "force": 1
+        "force": 1,
+        "pkgname": 1,
+        "pkgversion": 1,
 	},
 
-	showUsage: function(exitCode) {
+	showUsage: function(hiddenFlag, exitCode) {
 		if (exitCode === undefined) {
 			exitCode = 0;
 		}
 		help.print(this.helpString);
+		if (hiddenFlag) {
+			help.print(this.hiddenhelpString);
+		}
 		cliControl.end(exitCode);
 	},
 
 	checkAndShowHelp: function() {
 		if (this.argv.help) {
-			this.showUsage();
+			this.showUsage(false, 0);
+		} else if (this.argv["hidden-help"]) {
+			this.showUsage(true, 0);
 		}
 	},
 
