@@ -108,7 +108,7 @@ function PalmPackage() {
 	this.hiddenhelpString = [
 		"",
 		"EXTRA-OPTION",
-		help.format("-f, --force", "Make .ipk package forcely with same file structure in APP_DIR"),
+		help.format("-f, --force", "Make .ipk package forcibly with same file structure in APP_DIR"),
 		help.format("","If file/directories in APP_DIR consists of the following structure"),
 		help.format("\t (ex) APP_DIR/"),
 		help.format("\t           +-- usr/"),
