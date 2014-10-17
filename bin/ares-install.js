@@ -34,6 +34,7 @@ var knownOpts = {
 	"install":	path,
 	"remove":	String,
 	"opkg":	Boolean,
+	"opkg-param":	[String, null],
 	"version":	Boolean,
 	"help":		Boolean,
 	"hidden-help":		Boolean,
@@ -44,6 +45,7 @@ var shortHands = {
 	"i": ["--install"],
 	"r": ["--remove"],
 	"o": ["--opkg"],
+	"op": ["--opkg-param"],
 	"l": ["--list"],
 	"F": ["--listfull"],
 	"t": ["--type"],
@@ -91,7 +93,8 @@ if (argv.list) {
 var options = {
 	appId: 'com.ares.defaultName',
 	device: argv.device,
-	opkg: argv['opkg'] || false
+	opkg: argv['opkg'] || false,
+	opkg_param:  argv['opkg-param']
 };
 
 /**********************************************************************/
