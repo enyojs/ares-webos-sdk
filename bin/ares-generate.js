@@ -179,7 +179,10 @@ PalmGenerate.prototype = {
 			this.showUsage();
 		}
 		this.destination = this.argv.argv.remain[0];
-
+		// check the destination has special charater and white space or not
+		if (!(/^[a-zA-Z0-9\.]*$/.test(this.destination))){
+			return next(new Error("Not available AppDir name"));
+		}
 		// Create the directorie if it does not exist
 		if (fs.existsSync(this.destination)) {
 			var stats = fs.statSync(this.destination);
@@ -369,8 +372,9 @@ PalmGenerate.prototype = {
 		if (err) {
 			log.error(processName + ": "+ errMsgHdlr.changeErrMsg(err));
 			log.verbose(err.stack);
+		} else {
+			console.log("Success");
 		}
-		console.log("Success");
 		cliControl.end();
 	},
 
