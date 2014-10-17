@@ -373,8 +373,8 @@ PalmGenerate.prototype = {
 			log.error(processName + ": "+ errMsgHdlr.changeErrMsg(err));
 			log.verbose(err.stack);
 		} else {
-		    console.log("Success");
-        }
+			console.log("Success");
+		}
 		cliControl.end();
 	},
 
