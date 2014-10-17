@@ -153,6 +153,7 @@ function showUsage(hiddenFlag) {
 		"",
 		"EXTRA-OPTION",
 		help.format("-o, --opkg", "Use opkg tool for installing/removing package"),
+		help.format("-op, --opkg-param <PARAMS>", "parameters for opkg tool"),
 		help.format("", "this option is available only for the device allowing root-connection"),
 		"EXAMPLES",
 		"",
@@ -163,7 +164,10 @@ function showUsage(hiddenFlag) {
 		"# (Note.) To remove a package by opkg command, <PACKAG_NAME> should be specified instead of <APP_ID>",
 		"# (Note.) Please refer to 'ares-package --hidden-help', it provides '--pkgname' option for making .ipk",
 		processName+" -r <PACKAGE_NAME> -d <DEVICE> --opkg",
-		""
+		"",
+		"# Install .ipk by 'opkg install' with parameters",
+		processName+" <PACKAGE_FILE> -d <DEVICE> --opkg --opkg-param \"-o /media/developer/apps\"",
+		"",
 	];
 
 	help.print(helpString);
