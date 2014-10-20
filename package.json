@@ -95,6 +95,8 @@
 		"lib",
 		"scripts",
 		"templates",
-		"test"
+		"test",
+		"enyo/tools",
+		"enyo/loader.js"
 	]
 }
