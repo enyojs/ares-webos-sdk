@@ -180,7 +180,7 @@ PalmGenerate.prototype = {
 		}
 		this.destination = this.argv.argv.remain[0];
 		// check the destination has special charater and white space or not
-		if (!(/^[a-zA-Z0-9\.]*$/.test(this.destination))){
+		if (!(/^[a-zA-Z0-9\.\_]*$/.test(path.basename(path.resolve(this.destination))))){
 			return next(new Error("Not available AppDir name"));
 		}
 		// Create the directorie if it does not exist
