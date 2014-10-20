@@ -33,20 +33,26 @@ var knownOpts = {
 	"type":		[String, null],
 	"install":	path,
 	"remove":	String,
+	"opkg":	Boolean,
+	"opkg-param":	[String, null],
 	"version":	Boolean,
 	"help":		Boolean,
+	"hidden-help":		Boolean,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
 };
 var shortHands = {
 	"d": ["--device"],
 	"i": ["--install"],
 	"r": ["--remove"],
+	"o": ["--opkg"],
+	"op": ["--opkg-param"],
 	"l": ["--list"],
 	"F": ["--listfull"],
 	"t": ["--type"],
 	"D": ["--device-list"],
 	"V": ["--version"],
 	"h": ["--help"],
+	"hh": ["--hidden-help"],
 	"v": ["--level", "verbose"]
 };
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-install.js'*/);
@@ -60,8 +66,8 @@ ipkg.installer.log.level = log.level;
 
 /**********************************************************************/
 
-if (argv.help) {
-	showUsage();
+if (argv.help || argv['hidden-help']) {
+	showUsage(argv['hidden-help']);
 	cliControl.end();
 }
 
@@ -86,7 +92,9 @@ if (argv.list) {
 
 var options = {
 	appId: 'com.ares.defaultName',
-	device: argv.device
+	device: argv.device,
+	opkg: argv['opkg'] || false,
+	opkg_param:  argv['opkg-param']
 };
 
 /**********************************************************************/
@@ -97,7 +105,7 @@ if (op) {
 	});
 }
 
-function showUsage() {
+function showUsage(hiddenFlag) {
 	var helpString = [
 		"",
 		"NAME",
@@ -141,7 +149,31 @@ function showUsage() {
 		"",
 	];
 
+	this.hiddenhelpString = [
+		"",
+		"EXTRA-OPTION",
+		help.format("-o, --opkg", "Use opkg tool for installing/removing package"),
+		help.format("-op, --opkg-param <PARAMS>", "parameters for opkg tool"),
+		help.format("", "this option is available only for the device allowing root-connection"),
+		"EXAMPLES",
+		"",
+		"# Install .ipk by 'opkg install' command",
+		processName+" <PACKAGE_FILE> -d <DEVICE> --opkg",
+		"",
+		"# Remove .ipk by 'opkg remove' command",
+		"# (Note.) To remove a package by opkg command, <PACKAG_NAME> should be specified instead of <APP_ID>",
+		"# (Note.) Please refer to 'ares-package --hidden-help', it provides '--pkgname' option for making .ipk",
+		processName+" -r <PACKAGE_NAME> -d <DEVICE> --opkg",
+		"",
+		"# Install .ipk by 'opkg install' with parameters",
+		processName+" <PACKAGE_FILE> -d <DEVICE> --opkg --opkg-param \"-o /media/developer/apps\"",
+		"",
+	];
+
 	help.print(helpString);
+	if (hiddenFlag) {
+		help.print(hiddenhelpString);
+	}
 }
 
 function install() {
