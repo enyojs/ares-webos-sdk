@@ -52,7 +52,7 @@
 					]
 				},
 				{
-					"id": "bootplate-moonstone",
+					"id": "bootplate-moonstone-old",
 					"xtype": "template",
 					"type": null,
 					"version": "2.3.0",
