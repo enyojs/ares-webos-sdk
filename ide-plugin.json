@@ -53,9 +53,10 @@
 				},
 				{
 					"id": "bootplate-moonstone",
-					"type": "template",
+					"xtype": "template",
+					"type": null,
 					"version": "2.3.0",
-					"isDefault": true,
+					"isDefault": false,
 					"description": "Enyo moonstone bootplate",
 					"class":"moonstone",
 					"deps": ["enyoappinfo", "enyoicon"],
@@ -78,6 +79,22 @@
 							]
 						}
 					]
+				},
+				{
+					"id": "bootplate-moonstone",
+					"type": "template",
+					"version": "0.2.3",
+					"isDefault": true,
+					"description": "Enyo moonstone app",
+					"class": "moonstone",
+					"deps": ["enyoappinfo", "enyoicon"],
+					"files": [{
+						"url": "@PLUGINDIR@/templates/app-moonstone",
+						"symlink": {
+							"enyo": "@PLUGINDIR@/templates/bootplate-moonstone/enyo",
+							"lib": "@PLUGINDIR@/templates/bootplate-moonstone/lib"
+						}
+					}]
 				},
 				{
 					"id": "bootplate-2.3.0-pre.12",
