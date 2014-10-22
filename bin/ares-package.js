@@ -41,6 +41,9 @@ function PalmPackage() {
 		"app-exclude" : [String, Array],
 		"rom":		Boolean,
 		"deployscript": String,
+		"deploy-enyo": String,
+		"deploy-lib": String,
+		"deploy-srcroot": String,
 		"force": Boolean,
 		"pkgname": String,
 		"pkgversion": String
@@ -55,6 +58,9 @@ function PalmPackage() {
 		"e":		"--app-exclude",
 		"r":		"--rom",
 		"d":		"--deployscript",
+		"de":		"--deploy-enyo",
+		"dl":		"--deploy-lib",
+		"ds":		"--deploy-srcroot",
 		"f":		"--force",
 		"pn":		"--pkgname",
 		"pv":		"--pkgversion",
@@ -79,13 +85,28 @@ function PalmPackage() {
 		help.format("\t to OUTPUT_DIR suitable for inclusion in webOS ROM image"),
 		"",
 		help.format("-d, --deployscript <deploy.js Path>"),
-		help.format("\t Set path to enyo deploy script"),
+		help.format("\t (For minifying enyo app) Set path to enyo deploy script"),
+		help.format("\t [default: CLI's built-in enyo deploy script]"),
 		"",
+		//help.format("-de, --deploy-enyo <enyo Path>"),
+		//help.format("\t (For minifying enyo app) Set path to enyo directory"),
+		//help.format("\t [default: 'enyo' directory in APP_DIR]"),
+		//"",
+		//help.format("-dl, --deploy-lib <lib Path>"),
+		//help.format("\t (For minifying enyo app) Set path to lib directory"),
+		//help.format("\t [default: 'lib' directory in APP_DIR]"),
+		//"",
+		//help.format("-ds, --deploy-srcroot <source root Path>"),
+		//help.format("\t (For minifying enyo app) Set path to source code root directory"),
+		//help.format("\t [default: APP_DIR]"),
+		//"",
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
 		help.format("-V, --version", "Display version info"),
 		"",
 		"DESCRIPTION",
+		help.format("Enyo app can be minified by default"),
+		"",
 		help.format("Make .ipk package. APP_DIR means a directory path having app source."),
 		"",
 		help.format("SERVICE_DIR means a directory path having service source."),
@@ -190,7 +211,15 @@ PalmPackage.prototype = {
 		if (this.argv.hasOwnProperty('deployscript')) {
 			this.options.deployscript = this.argv.deployscript;
 		}
-
+		if (this.argv.hasOwnProperty('deploy-enyo')) {
+			this.options['deploy-enyo'] = this.argv['deploy-enyo'];
+		}
+		if (this.argv.hasOwnProperty('deploy-lib')) {
+			this.options['deploy-lib'] = this.argv['deploy-lib'];
+		}
+		if (this.argv.hasOwnProperty('deploy-srcroot')) {
+			this.options['deploy-srcroot'] = this.argv['deploy-srcroot'];
+		}		
 	},
 
 	exitOnError: function(msg) {
