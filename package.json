@@ -15,7 +15,7 @@
 	},
 	"dependencies": {
 		"ares-generator": "0.3.4",
-		"shelljs": "~0.1.4",
+		"shelljs": "~0.3.0",
 		"request": "2.12.x",
 		"async": "~0.2.9",
 		"mkdirp": "~0.3.5",
