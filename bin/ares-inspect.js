@@ -14,11 +14,6 @@ var fs = require('fs'),
 
 var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
-process.on('uncaughtException', function (err) {
-	log.error('uncaughtException', err.toString());
-	cliControl.end();
-});
-
 if (process.argv.length === 2) {
 	process.argv.splice(2, 0, '--help');
 }
@@ -56,6 +51,11 @@ log.level = argv.level || 'warn';
 
 
 /**********************************************************************/
+
+process.on('uncaughtException', function (err) {
+	log.error('uncaughtException', err.toString());
+	cliControl.end();
+});
 
 if (argv.help) {
 	showUsage();
