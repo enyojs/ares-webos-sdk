@@ -448,7 +448,7 @@ PalmGenerate.prototype = {
 
 	displayTemplateList: function(type, next) {
 		log.info("displayTemplateList");
-		var templates = this.configGenZip.sources.filter(function(template){
+		var templates = this.configGenZip.sources.filter(function(template) {
 			return (type === template.type);
 		});
 		var sourceIds = Object.keys(templates);
@@ -456,28 +456,29 @@ PalmGenerate.prototype = {
 			var source = templates[sourceId];
 			var version = "";
 			async.waterfall([
+
 				function(next) {
 					if (source.files && source.files[0].url && source.files[0].url.substr(0, 4) !== 'http') {
-                        if (source.files[0].symlink) {
-                            var symlinkList = Object.keys(source.files[0].symlink).map(function(key) {
-                                return source.files[0].symlink[key];
-                            });
-                        }
-                        var checkPaths = [source.files[0].url].concat(symlinkList || []);
-                        var maxVersion = "";
-                        async.forEachSeries( checkPaths, function(checkPath, next) {
-						        var configStats = fs.lstatSync(checkPath);
-						        if (configStats.isDirectory()) {
-							        this.getEnyoTemplateVersion(checkPath, function(err, version) {
-		                                maxVersion = (maxVersion < version) ? version : maxVersion;
-                                        next();
-                                    });
-						        } else {
-							        next();
-						        }
-                            }.bind(this), function(err, result) {
-                            next(null, maxVersion);
-                        });
+						if (source.files[0].symlink) {
+							var symlinkList = Object.keys(source.files[0].symlink).map(function(key) {
+								return source.files[0].symlink[key];
+							});
+						}
+						var checkPaths = [source.files[0].url].concat(symlinkList || []);
+						var maxVersion = "";
+						async.forEachSeries(checkPaths, function(checkPath, next) {
+							var configStats = fs.lstatSync(checkPath);
+							if (configStats.isDirectory()) {
+								this.getEnyoTemplateVersion(checkPath, function(err, version) {
+									maxVersion = (maxVersion < version) ? version : maxVersion;
+									next();
+								});
+							} else {
+								next();
+							}
+						}.bind(this), function(err, result) {
+							next(null, maxVersion);
+						});
 					} else {
 						next();
 					}
