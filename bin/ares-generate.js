@@ -40,7 +40,7 @@ function PalmGenerate() {
 	this.templatesWithID = {};
 
 	this.defaultSourceType = 'template';
-	this.defaultEnyoVersion = '2.3.0';
+	this.defaultEnyoVersion = '2.5';
 
 	var knownOpts = {
 		"help":		Boolean,
@@ -458,12 +458,26 @@ PalmGenerate.prototype = {
 			async.waterfall([
 				function(next) {
 					if (source.files && source.files[0].url && source.files[0].url.substr(0, 4) !== 'http') {
-						var configStats = fs.lstatSync(source.files[0].url);
-						if (configStats.isDirectory()) {
-							this.getEnyoTemplateVersion(source.files[0].url, next);
-						} else {
-							next();
-						}
+                        if (source.files[0].symlink) {
+                            var symlinkList = Object.keys(source.files[0].symlink).map(function(key) {
+                                return source.files[0].symlink[key];
+                            });
+                        }
+                        var checkPaths = [source.files[0].url].concat(symlinkList || []);
+                        var maxVersion = "";
+                        async.forEachSeries( checkPaths, function(checkPath, next) {
+						        var configStats = fs.lstatSync(checkPath);
+						        if (configStats.isDirectory()) {
+							        this.getEnyoTemplateVersion(checkPath, function(err, version) {
+		                                maxVersion = (maxVersion < version) ? version : maxVersion;
+                                        next();
+                                    });
+						        } else {
+							        next();
+						        }
+                            }.bind(this), function(err, result) {
+                            next(null, maxVersion);
+                        });
 					} else {
 						next();
 					}
