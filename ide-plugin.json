@@ -55,7 +55,7 @@
 					"id": "bootplate-moonstone-old",
 					"xtype": "template",
 					"type": null,
-					"version": "2.3.0",
+					"version": "2.5",
 					"isDefault": false,
 					"description": "Enyo moonstone bootplate",
 					"class":"moonstone",
@@ -83,7 +83,7 @@
 				{
 					"id": "bootplate-moonstone",
 					"type": "template",
-					"version": "0.2.3",
+					"version": "2.5",
 					"isDefault": true,
 					"description": "Enyo moonstone app",
 					"class": "moonstone",
@@ -239,161 +239,6 @@
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/enyoicon"
-						}
-					]
-				},
-				{
-					"id": "bootplate-2.3.0",
-					"Xtype": "template",
-					"type": null,
-					"version": "2.3.0",
-					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
-					"class":"basic",
-					"deps": ["enyoappinfo", "enyoicon"],
-					"files": [
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
-							"excluded": [	
-								".git",
-								".gitignore",
-								".gitmodules",
-								"enyo/.git",
-								"enyo/.gitignore",
-								"lib/enyo-cordova",
-								"lib/enyo-ilib",
-								"lib/enyo-webos",
-								"lib/layout/.git",
-								"lib/moonstone/.git",
-								"lib/moonstone/.gitignore",
-								"lib/spotlight/.git"
-							]
-						}
-					]
-				},
-				{
-					"id": "enyo",
-					"type": "library",
-					"version": "2.3.0",
-					"description": "Enyo library",
-					"files": [
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone/enyo",
-							"prefixToAdd": "enyo",
-							"excluded": [	
-								".git",
-								".gitignore",
-								".gitmodules",
-								"enyo/.git",
-								"enyo/.gitignore"
-							]
-						}
-					]
-				},
-				{
-					"id": "enyo-cordova",
-					"type": "library",
-					"version": "2.3.0",
-					"description": "Enyo cordova library",
-					"files": [
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/enyo-cordova",
-							"prefixToAdd": "lib/enyo-cordova",
-							"excluded": [	
-								".git",
-								".gitignore",
-								".gitmodules",
-								"lib/enyo-cordova/.git"
-							]
-						}
-					]
-				},
-				{
-					"id": "enyo-ilib",
-					"type": "library",
-					"version": "2.3.0",
-					"description": "Enyo ilib globalization/internationalization library",
-					"files": [
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/enyo-ilib",
-							"prefixToAdd": "lib/enyo-ilib",
-							"excluded": [	
-								".git",
-								".gitignore",
-								".gitmodules",
-								"lib/enyo-ilib/.git"
-							]
-						}
-					]
-				},
-				{
-					"id": "enyo-webos",
-					"type": "library",
-					"version": "2.3.0",
-					"description": "Enyo library for webOS",
-					"files": [
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/enyo-webos",
-							"prefixToAdd": "lib/enyo-webos",
-							"excluded": [	
-								".git",
-								".gitignore",
-								".gitmodules",
-								"lib/enyo-webos/.git"
-							]
-						}
-					]
-				},
-				{
-					"id": "enyo-layout",
-					"type": "library",
-					"version": "2.3.0",
-					"description": "Enyo layout library",
-					"files": [
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/layout",
-							"prefixToAdd": "lib/layout",
-							"excluded": [	
-								".git",
-								".gitignore",
-								".gitmodules",
-								"lib/layout/.git"
-							]
-						}
-					]
-				},
-				{
-					"id": "enyo-moonstone",
-					"type": "library",
-					"version": "2.3.0",
-					"description": "Enyo moonstone library",
-					"files": [
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/moonstone",
-							"prefixToAdd": "lib/moonstone",
-							"excluded": [	
-								".git",
-								".gitignore",
-								".gitmodules",
-								"lib/moonstone/.git"
-							]
-						}
-					]
-				},
-				{
-					"id": "enyo-spotlight",
-					"type": "library",
-					"version": "2.3.0",
-					"description": "Enyo spotlight library",
-					"files": [
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone/lib/spotlight",
-							"prefixToAdd": "lib/spotlight",
-							"excluded": [	
-								".git",
-								".gitignore",
-								".gitmodules",
-								"lib/spotlight/.git"
-							]
 						}
 					]
 				}

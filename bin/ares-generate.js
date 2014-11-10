@@ -40,7 +40,7 @@ function PalmGenerate() {
 	this.templatesWithID = {};
 
 	this.defaultSourceType = 'template';
-	this.defaultEnyoVersion = '2.3.0';
+	this.defaultEnyoVersion = '2.5';
 
 	var knownOpts = {
 		"help":		Boolean,
@@ -446,9 +446,9 @@ PalmGenerate.prototype = {
 		});
 	},
 
-	displayTemplateList: function(type, next) {
+	displayTemplateList: function(type, readVersionJs, next) {
 		log.info("displayTemplateList");
-		var templates = this.configGenZip.sources.filter(function(template){
+		var templates = this.configGenZip.sources.filter(function(template) {
 			return (type === template.type);
 		});
 		var sourceIds = Object.keys(templates);
@@ -456,25 +456,51 @@ PalmGenerate.prototype = {
 			var source = templates[sourceId];
 			var version = "";
 			async.waterfall([
+
 				function(next) {
-					if (source.files && source.files[0].url && source.files[0].url.substr(0, 4) !== 'http') {
-						var configStats = fs.lstatSync(source.files[0].url);
-						if (configStats.isDirectory()) {
-							this.getEnyoTemplateVersion(source.files[0].url, next);
+					if (!readVersionJs) {
+						return next(null, source.version);
+					}
+					var maxVersion = "";
+					async.forEachSeries(source.files, _findMaxVersion.bind(this), function(err) {
+						if (err) {
+							return next(err);
+						}
+						next(null, maxVersion || source.version);
+					});
+
+					function _findMaxVersion(tmpl, next) {
+						if (tmpl.url && tmpl.url.substr(0, 4) !== 'http') {
+							if (tmpl.symlink) {
+								var symlinkList = Object.keys(tmpl.symlink).map(function(key) {
+									return tmpl.symlink[key];
+								});
+							}
+							var checkPaths = [tmpl.url].concat(symlinkList || []);
+							async.forEachSeries(checkPaths, function(checkPath, next) {
+								var configStats = fs.lstatSync(checkPath);
+								if (configStats.isDirectory()) {
+									this.getEnyoTemplateVersion(checkPath, function(err, version) {
+										maxVersion = (maxVersion < version) ? version : maxVersion;
+										next();
+									});
+								} else {
+									next();
+								}
+							}.bind(this), function(err) {
+								if (err) {
+									return next(err);
+								}
+								next();
+							});
 						} else {
 							next();
 						}
-					} else {
-						next();
 					}
 				}.bind(this)
-			], function(err, result) {
-				var version = source.version;
+			], function(err, version) {
 				if (err) {
 					return next(err);
-				}
-				if (result) {
-					version = result;
 				}
 				console.log(sprintf("%-40s\t%-10s\t%s %s", source.id, version, source.description, source.isDefault ? "(default)" : ""));
 				next();
@@ -487,7 +513,7 @@ PalmGenerate.prototype = {
 	listSources: function(type) {
 		async.series([
 				versionTool.checkNodeVersion,
-				this.displayTemplateList.bind(this, type)
+				this.displayTemplateList.bind(this, type, true)
 			], (function(err, results) {
 				if (err) {
 					log.error("*** " + processName + ": "+ err.toString());
