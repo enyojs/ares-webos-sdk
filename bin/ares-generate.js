@@ -75,26 +75,29 @@ PalmGenerate.prototype = {
 
 	initialize: function() {
 		this.argv.list = (this.argv.list === 'true') ? this.defaultSourceType : this.argv.list || false;
-		this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice) ? this.defaultEnyoVersion : this.argv.onDevice;
 		var defaultVersionFilePath = path.join(__dirname, '..', 'templates/bootplate-moonstone/enyo/source/boot/version.js');
 		var versionFile = path.join(defaultVersionFilePath);
 		if (fs.existsSync(versionFile)) {
 			var code = fs.readFileSync(versionFile);
 			code = "var enyo={}; enyo.version=new Object();" + code;
-			vm.runInThisContext(code, versionFile);
-			if (typeof enyo.version === 'object' && enyo.version != {}) {
-				for (key in enyo.version) {
-					if (typeof enyo.version[key] === 'string') {
-						version = enyo.version[key];
-						break;
+			try {
+				vm.runInThisContext(code, versionFile);
+				if (typeof enyo.version === 'object' && enyo.version != {}) {
+					for (key in enyo.version) {
+						if (typeof enyo.version[key] === 'string') {
+							var version = enyo.version[key];
+							break;
+						}
 					}
 				}
+				if (version) {
+					this.defaultEnyoVersion = version.split('-')[0];
+				}
+			} catch (err) {
+				// In case of causing exception while parsing verion.js, just use the hard-coded default version.
 			}
-			this.argv.onDevice = version.split('-')[0];
-		} else {
-			this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice) ? this.defaultEnyoVersion : this.argv.onDevice;
 		}
-
+		this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice) ? this.defaultEnyoVersion : this.argv.onDevice;
 		this.argv.file = (this.argv.file == 'true' || !this.argv.file) ? [] : this.argv.file;
 		this.substituteWords = {
 			"@SERVICE-NAME@": this.argv.servicename || "com.yourdomain.app.service",
