@@ -69,74 +69,98 @@ function PalmGenerate() {
 		"v":		["--level", "verbose"]
 	};
 	this.argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
-	this.argv.list = (this.argv.list === 'true')? this.defaultSourceType:this.argv.list || false;
-	this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice)? this.defaultEnyoVersion:this.argv.onDevice;
-	this.argv.file = (this.argv.file == 'true' || !this.argv.file)? []:this.argv.file;
-	this.substituteWords = {
-		"@SERVICE-NAME@": this.argv.servicename || "com.yourdomain.app.service",
-		"@ENYO-VERSION@":this.argv.onDevice
-	};
-	this.helpString = [
-		"",
-		"NAME",
-		help.format(processName + " - Create webOS app projects from templates"),
-		"",
-		"SYNOPSIS",
-		help.format(processName + " [OPTION...] <APP_DIR>"),
-		help.format("\t APP_DIR is the application directory. It will be created if it does not exist."),
-		"",
-		"OPTION",
-		help.format("-t,--template <TEMPLATE>", "specify TEMPLATE to use"),
-		help.format("", "TEMPLATE can be listed via " + processName + " --list, -l"),
-		"",
-		help.format("-l, --list <TYPE>"),
-		help.format("\t List the available templates corresponding with TYPE [default: " + this.defaultSourceType + "]"),
-		help.format("\t Available TYPE is 'template', 'webosService', 'appinfo'"),
-		"",
-		help.format("-p, --property <PROPERTY>", "Set the properties of appinfo.json"),
-		help.format(" PROPERTY can be one of the following forms"),
-		help.format("win32",            "\t (e.g.) -p \"{'id': 'com.examples.helloworld', 'version':'1.0.0', 'type':'web'}\""),		
-		help.format(["linux","darwin"], "\t (e.g.) -p '{\"id\": \"com.examples.helloworld\", \"version\":\"1.0.0\", \"type\":\"web\"}'"),
-		help.format("\t (e.g.) -p \"id=com.examples.helloworld\" -p \"version=1.0.0\" -p \"type=web\""),
-		"",
-		help.format("-D, --onDevice <ENYO-VERSION>"),
-		help.format("\t ENYO-VERSION is enyo framework version to use [default: " + this.defaultEnyoVersion + "]"),
-		help.format("\t This option is applied to 'enyoVersion', 'onDeviceSource' field in appinfo.json"),
-		"",
-		help.format("-s, --servicename <SERVICENAME>", "Set the servicename for webOS Service"),
-		help.format("\t (e.g.) -s \"com.examples.helloworld.service\""),
-		"",
-		help.format("-f, --overwrite", "Overwrite existing files [boolean]"),
-		help.format("--level <LEVEL>", "Tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
-		help.format("-h, --help", "Display this help"),
-		help.format("-V, --version", "Display version info"),
-//		help.format("--proxy-url, -P", "Use the given HTTP/S proxy URL [url]"),
-		"",
-		"DESCRIPTION",
-		"",
-		help.format("PROPERTY defines properties to be used during generation."),
-		help.format("Properties can be specified as key-value pairs of the form \"key=value\""),
-		help.format("or as JSON objects of the form '{\"key1\":\"value1\", \"key2\":\"value2\", ...}'."),
-		help.format("Surrounding quotes are required in both cases."),
-		"",
-		"EXAMPLES",
-		"",
-		"# Create an app with id 'com.domain.app'",
-		processName+" -t bootplate-web -p \"id=com.domain.app\" ~/projects/app",
-		"",
-		"# Create an webOS service named 'com.domain.app.service'",
-		processName+" -t webos-service -s com.domain.app.service ~/projects/service",
-		""
-	];
-
-	log.heading = processName;
-	log.level = this.argv.level || 'warn';
-
-	this.existed = false;
 }
 
 PalmGenerate.prototype = {
 
+	initialize: function() {
+		this.argv.list = (this.argv.list === 'true') ? this.defaultSourceType : this.argv.list || false;
+		var defaultVersionFilePath = path.join(__dirname, '..', 'templates/bootplate-moonstone/enyo/source/boot/version.js');
+		var versionFile = path.join(defaultVersionFilePath);
+		if (fs.existsSync(versionFile)) {
+			var code = fs.readFileSync(versionFile);
+			code = "var enyo={}; enyo.version=new Object();" + code;
+			try {
+				vm.runInThisContext(code, versionFile);
+				if (typeof enyo.version === 'object' && enyo.version != {}) {
+					for (key in enyo.version) {
+						if (typeof enyo.version[key] === 'string') {
+							var version = enyo.version[key];
+							break;
+						}
+					}
+				}
+				if (version) {
+					this.defaultEnyoVersion = version.split('-')[0];
+				}
+			} catch (err) {
+				// In case of causing exception while parsing verion.js, just use the hard-coded default version.
+			}
+		}
+		this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice) ? this.defaultEnyoVersion : this.argv.onDevice;
+		this.argv.file = (this.argv.file == 'true' || !this.argv.file) ? [] : this.argv.file;
+		this.substituteWords = {
+			"@SERVICE-NAME@": this.argv.servicename || "com.yourdomain.app.service",
+			"@ENYO-VERSION@": this.argv.onDevice
+		};
+		this.helpString = [
+			"",
+			"NAME",
+			help.format(processName + " - Create webOS app projects from templates"),
+			"",
+			"SYNOPSIS",
+			help.format(processName + " [OPTION...] <APP_DIR>"),
+			help.format("\t APP_DIR is the application directory. It will be created if it does not exist."),
+			"",
+			"OPTION",
+			help.format("-t,--template <TEMPLATE>", "specify TEMPLATE to use"),
+			help.format("", "TEMPLATE can be listed via " + processName + " --list, -l"),
+			"",
+			help.format("-l, --list <TYPE>"),
+			help.format("\t List the available templates corresponding with TYPE [default: " + this.defaultSourceType + "]"),
+			help.format("\t Available TYPE is 'template', 'webosService', 'appinfo'"),
+			"",
+			help.format("-p, --property <PROPERTY>", "Set the properties of appinfo.json"),
+			help.format(" PROPERTY can be one of the following forms"),
+			help.format("win32", "\t (e.g.) -p \"{'id': 'com.examples.helloworld', 'version':'1.0.0', 'type':'web'}\""),
+			help.format(["linux", "darwin"], "\t (e.g.) -p '{\"id\": \"com.examples.helloworld\", \"version\":\"1.0.0\", \"type\":\"web\"}'"),
+			help.format("\t (e.g.) -p \"id=com.examples.helloworld\" -p \"version=1.0.0\" -p \"type=web\""),
+			"",
+			help.format("-D, --onDevice <ENYO-VERSION>"),
+			help.format("\t ENYO-VERSION is enyo framework version to use [default: " + this.argv.onDevice + "]"),
+			help.format("\t This option is applied to 'enyoVersion', 'onDeviceSource' field in appinfo.json"),
+			"",
+			help.format("-s, --servicename <SERVICENAME>", "Set the servicename for webOS Service"),
+			help.format("\t (e.g.) -s \"com.examples.helloworld.service\""),
+			"",
+			help.format("-f, --overwrite", "Overwrite existing files [boolean]"),
+			help.format("--level <LEVEL>", "Tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
+			help.format("-h, --help", "Display this help"),
+			help.format("-V, --version", "Display version info"),
+			//		help.format("--proxy-url, -P", "Use the given HTTP/S proxy URL [url]"),
+			"",
+			"DESCRIPTION",
+			"",
+			help.format("PROPERTY defines properties to be used during generation."),
+			help.format("Properties can be specified as key-value pairs of the form \"key=value\""),
+			help.format("or as JSON objects of the form '{\"key1\":\"value1\", \"key2\":\"value2\", ...}'."),
+			help.format("Surrounding quotes are required in both cases."),
+			"",
+			"EXAMPLES",
+			"",
+			"# Create an app with id 'com.domain.app'",
+			processName + " -t bootplate-web -p \"id=com.domain.app\" ~/projects/app",
+			"",
+			"# Create an webOS service named 'com.domain.app.service'",
+			processName + " -t webos-service -s com.domain.app.service ~/projects/service",
+			""
+		];
+
+		log.heading = processName;
+		log.level = this.argv.level || 'warn';
+
+		this.existed = false;
+	},
 	applyDefaultTemplate: function(next) {
 		log.info("applyDefaultTemplate");
 		var defaultTemplates = this.configGenZip.sources.filter(function(template){
@@ -665,4 +689,5 @@ PalmGenerate.prototype = {
 
 // Main
 var cmd = new PalmGenerate();
+cmd.initialize();
 cmd.exec();
