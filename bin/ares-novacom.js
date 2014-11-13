@@ -57,13 +57,15 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 var knownOpts = {
 	//generic options
 	"help":		Boolean,
+	"hidden-help":		Boolean,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 	"version":	Boolean,
 	// command-specific options
 	"list":		Boolean,
 	"forward":  Boolean, 
 	"port":		[String, Array],
-	"getkey":   Boolean, 
+	"getkey":   Boolean,
+	"passphrase": [String, null],
 	"device":	[String, null],
 	// no shortHands
 	"run":		[String, null],
@@ -74,6 +76,7 @@ var knownOpts = {
 var shortHands = {
 	// generic aliases
 	"h": ["--help"],
+	"hh": ["--hidden-help"],
 	"v": ["--level", "verbose"],
 	"V": ["--version"],
 	// command-specific aliases
@@ -81,6 +84,7 @@ var shortHands = {
 	"f": ["--forward"],
 	"p": ["--port"],
 	"k": ["--getkey"],
+	"pass": ["--passphrase"],
 	"d": ["--device"]
 };
 
@@ -130,6 +134,17 @@ var helpString = [
 	"",
 ];
 
+var hiddenhelpString = [
+	"",
+	"EXTRA-OPTION",
+	help.format(processName + " [OPTION...] -pass, --passphrase PASSPHRASE"),
+	"EXAMPLES",
+	"",
+	"# Get ssh key and set passphrase value in the device info",
+	processName+" <PACKAGE_FILE> -d <DEVICE> --getkey --passphrase ABCDEF",
+	""
+];
+
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-*.js'*/);
 
 /**********************************************************************/
@@ -157,8 +172,11 @@ if (argv.list) {
 	op = forward;
 } else if (argv.version) {
 	versionTool.showVersionAndExit();
-} else if (argv.help) {
+} else if (argv.help || argv['hidden-help']) {
 	help.print(helpString);
+	if (argv['hidden-help']) {
+		help.print(hiddenhelpString);
+	}
 	cliControl.end();
 } else {
 	cliControl.end();
@@ -206,31 +224,45 @@ function getkey(next) {
 		resolver.getSshPrvKey.bind(resolver, options),
 		function(keyFileName, next) {
 			if (keyFileName) {
-				var target = {};
-				target.name = options.name;
-				target.privateKey = { "openSsh": keyFileName };
+				if (argv.passphrase) {
+					return next(null, keyFileName, argv.passphrase);
+				}
 				process.stdin.resume();
 				process.stdin.setEncoding('utf8');
 				process.stdout.write('input passphrase [default: webos]:');
-				process.stdin.on('data', function (text) {
+				process.stdin.on('data', function(text) {
 					var passphrase = text.toString().trim();
 					if (passphrase === '') {
 						passphrase = 'webos';
 					}
 					log.info('registed passphrase is ', passphrase);
-					target.passphrase = passphrase;
-					target.files = 'sftp';
-					target.port = '9922';
-					target.username = 'prisoner';
-					target.password = '@DELETE@';
-					next(null, target);
+					next(null, keyFileName, passphrase);
 				});
 			} else {
-				next(null, null);
+				return next(new Error("Error getting key file from the device"));
 			}
 		},
+		function(keyFileName, passphrase, next) {
+			var target = {};
+			target.name = options.name;
+			target.privateKey = {
+				"openSsh": keyFileName
+			};
+			target.passphrase = passphrase;
+			target.files = 'sftp';
+			target.port = '9922';
+			target.username = 'prisoner';
+			target.password = '@DELETE@';
+			next(null, target);
+		},
 		resolver.modifyDeviceFile.bind(resolver, 'modify')
-	], next);
+	], function(err) {
+		if (err)
+			return next(err);
+		next(null, {
+			"msg": "Success"
+		});
+	});
 }
 
 function put(next) {
