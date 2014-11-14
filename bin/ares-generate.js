@@ -44,7 +44,7 @@ function PalmGenerate() {
 
 	this.defaultSourceType = 'template';
 	this.defaultEnyoVersion = '2.5';
-	this.defaultVersionForAppinfo = 'bootplate-moonstone';
+	this.defaultTemplateForVersion = 'bootplate-moonstone';
 	this.templateVersionFilePath = {
 		'bootplate-moonstone': 'templates/bootplate-moonstone/enyo/source/boot/version.js',
 		'bootplate-garnet': 'templates/bootplate-garnet/lib/garnet/version.js',
@@ -87,7 +87,7 @@ PalmGenerate.prototype = {
 
 	initialize: function() {
 		this.argv.list = (this.argv.list === 'true') ? this.defaultSourceType : this.argv.list || false;
-		var templateVersionFilePath = path.join(__dirname, '..', this.templateVersionFilePath[this.defaultVersionForAppinfo]);
+		var templateVersionFilePath = path.join(__dirname, '..', this.templateVersionFilePath[this.defaultTemplateForVersion]);
 		var versionFile = path.join(templateVersionFilePath);
 		if (fs.existsSync(versionFile)) {
 			try {
