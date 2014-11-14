@@ -636,6 +636,7 @@ PalmGenerate.prototype = {
 					var initAndExit = this.argv.initialize;
 					this.moveBootplateToCliAppDataDir(function(err) {
 						if (initAndExit) {
+							console.log("Success");
 							return cliControl.end();
 						}
 						next(err);
