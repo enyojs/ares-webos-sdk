@@ -1,16 +1,19 @@
-var fs 		= require("fs"),
+var fs 		= require('fs'),
     url 	= require("url"),
     util 	= require('util'),
     async 	= require('async'),
     path 	= require('path'),
     log 	= require('npmlog'),
-    vm 		= require("vm"),
+    vm 		= require('vm'),
+    shelljs = require('shelljs'),
+    mkdirp  = require('mkdirp'),
     sprintf 	= require('sprintf-js').sprintf,
     prjgen 		= require('ares-generator'),
     versionTool = require('./../lib/version-tools'),
     cliControl 	= require('./../lib/cli-control'),
     help 		= require('./../lib/helpFormat'),
-    errMsgHdlr  = require('./../lib/error-handler');
+    errMsgHdlr  = require('./../lib/error-handler'),
+    cliAppData  = require('./../lib/cli-appdata');
 
 /**********************************************************************/
 
@@ -41,9 +44,16 @@ function PalmGenerate() {
 
 	this.defaultSourceType = 'template';
 	this.defaultEnyoVersion = '2.5';
+	this.defaultTemplateForVersion = 'bootplate-moonstone';
+	this.templateVersionFilePath = {
+		'bootplate-moonstone': 'templates/bootplate-moonstone/enyo/source/boot/version.js',
+		'bootplate-garnet': 'templates/bootplate-garnet/lib/garnet/version.js',
+		'bootplate-sunstone': 'templates/bootplate-sunstone/lib/sunstone/version.js'
+	};
 
 	var knownOpts = {
 		"help":		Boolean,
+		"hidden-help":		Boolean,
 		"version":	Boolean,
 		"list":		String,
 		"overwrite":	Boolean,
@@ -53,10 +63,12 @@ function PalmGenerate() {
 		"file":	[String, Array],
 		"proxy-url":	url,
 		"onDevice": String,
+        "initialize": Boolean,
 		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
 	};
 	var shortHands = {
 		"h":		"--help",
+		"hh": ["--hidden-help"],
 		"V":		"--version",
 		"l":		"--list",
 		"f":		"--overwrite",
@@ -75,21 +87,11 @@ PalmGenerate.prototype = {
 
 	initialize: function() {
 		this.argv.list = (this.argv.list === 'true') ? this.defaultSourceType : this.argv.list || false;
-		var defaultVersionFilePath = path.join(__dirname, '..', 'templates/bootplate-moonstone/enyo/source/boot/version.js');
-		var versionFile = path.join(defaultVersionFilePath);
+		var templateVersionFilePath = path.join(__dirname, '..', this.templateVersionFilePath[this.defaultTemplateForVersion]);
+		var versionFile = path.join(templateVersionFilePath);
 		if (fs.existsSync(versionFile)) {
-			var code = fs.readFileSync(versionFile);
-			code = "var enyo={}; enyo.version=new Object();" + code;
 			try {
-				vm.runInThisContext(code, versionFile);
-				if (typeof enyo.version === 'object' && enyo.version != {}) {
-					for (key in enyo.version) {
-						if (typeof enyo.version[key] === 'string') {
-							var version = enyo.version[key];
-							break;
-						}
-					}
-				}
+				var version = this.getEnyoVersion(versionFile);
 				if (version) {
 					this.defaultEnyoVersion = version.split('-')[0];
 				}
@@ -154,6 +156,18 @@ PalmGenerate.prototype = {
 			"# Create an webOS service named 'com.domain.app.service'",
 			processName + " -t webos-service -s com.domain.app.service ~/projects/service",
 			""
+		];
+
+		this.hiddenhelpString = [
+			"",
+			"EXTRA-OPTION",
+			help.format("--initialize", "initialize ares-generate command."),
+			help.format("", "Make copies of bootplate templates in CLI app data directory"),
+			"EXAMPLES",
+			"",
+			"# Initialize ares-generate command",
+			processName+" --initialize",
+			"",
 		];
 
 		log.heading = processName;
@@ -325,11 +339,11 @@ PalmGenerate.prototype = {
 		}
 		if (refnStr.indexOf("\"") === -1) {
 			return refnStr.replace(/\s*"/g, "")
-	 				.replace(/\s*'/g, "")
-	 				.replace("{", "{\"")
-	 				.replace("}","\"}")
-	 				.replace(/\s*,\s*/g, "\",\"")
-	 				.replace(/\s*:\s*/g, "\":\"");
+					.replace(/\s*'/g, "")
+					.replace("{", "{\"")
+					.replace("}","\"}")
+					.replace(/\s*,\s*/g, "\",\"")
+					.replace(/\s*:\s*/g, "\":\"");
 		} else {
 			return refnStr.replace(/\s*'/g, "\"");
 		}
@@ -436,37 +450,49 @@ PalmGenerate.prototype = {
 		});
 	},
 
-	getEnyoTemplateVersion: function(searchPath, next) {
+	getEnyoVersion: function(versionFilePath) {
 		var includeInThisContext = function(path) {
-		    var code = fs.readFileSync(path);
-		    code = "var enyo={}; enyo.version=new Object();" + code;
-		    vm.runInThisContext(code, path);
-		}.bind(this);
+			var code = fs.readFileSync(path);
+			code = "var enyo={}; enyo.version=new Object();" + code;
+			vm.runInThisContext(code, path);
+		};
+		includeInThisContext(versionFilePath);
+		var version;
+		if (typeof enyo.version === 'object' && enyo.version != {}) {
+			for (key in enyo.version) {
+				if (typeof enyo.version[key] === 'string') {
+					version = enyo.version[key];
+					break;
+				}
+			}
+		}
+		return version;
+	},
 
+	getEnyoTemplateVersion: function(searchPath, next) {
 		var maxVersion = "";
 		var versions = [];
 		async.series([
-		    this.walkFolder.bind(this, searchPath, versions, "version.js")
-		], function(err, results) {
-		    versions.forEach(function(obj) {
-		        log.verbose("getEnyoTemplateVersion#file:", obj.path);
-		        includeInThisContext(obj.path);
-		        var version;
-		        if (typeof enyo.version === 'object' && enyo.version != {}) {
-		            for (key in enyo.version) {
-		                if (typeof enyo.version[key] === 'string') {
-		                    version = enyo.version[key];
-		                    break;
-		                }
-		            }
-		        }
-		        if (!version)
-		            version = "";
-		        maxVersion = (maxVersion < version) ? version : maxVersion;
-		        log.verbose("getEnyoTemplateVersion#enyo.version[\"" + obj.prop + "\"]", version);
-		    });
-		    log.verbose("getEnyoTemplateVersion#maxVersion:", maxVersion);
-		    next(null, maxVersion);
+			this.walkFolder.bind(this, searchPath, versions, "version.js"),
+			function(next) {
+				versions.forEach(function(obj) {
+					log.verbose("getEnyoTemplateVersion#file:", obj.path);
+					var version;
+					try {
+						version = this.getEnyoVersion(obj.path);
+					} catch (err) {
+						//ignore exception
+					}
+					if (!version)
+						version = "";
+					maxVersion = (maxVersion < version) ? version : maxVersion;
+					log.verbose("getEnyoTemplateVersion#enyo.version[\"" + obj.prop + "\"]", version);
+				}.bind(this));
+				next();
+			}.bind(this)
+		], function(err) {
+			log.verbose("getEnyoTemplateVersion#maxVersion:", maxVersion);
+			next(err, maxVersion);
 		});
 	},
 
@@ -501,6 +527,25 @@ PalmGenerate.prototype = {
 								});
 							}
 							var checkPaths = [tmpl.url].concat(symlinkList || []);
+							var tmplName = Object.keys(this.templateVersionFilePath);
+							var exit = false;
+							checkPaths.forEach(function(filePath) {
+								if (exit) return;
+								tmplName.forEach(function(name) {
+									if (exit) return;
+									if (filePath.indexOf(name) > 0) {
+										var verFile = path.join(__dirname, '..', this.templateVersionFilePath[name]);
+										if (fs.existsSync(verFile)) {
+											try {
+												maxVersion = this.getEnyoVersion(verFile);
+												exit = true;
+											} catch (err) {}
+										}
+									}
+								}.bind(this));
+							}.bind(this));
+							if (exit) return next();
+
 							async.forEachSeries(checkPaths, function(checkPath, next) {
 								var configStats = fs.lstatSync(checkPath);
 								if (configStats.isDirectory()) {
@@ -547,17 +592,17 @@ PalmGenerate.prototype = {
 			}).bind(this));
 	},
 
-	showUsage: function(exitCode) {
-		if (exitCode === undefined) {
-			exitCode = 0;
-		}
+	showUsage: function(hiddenFlag) {
 		help.print(this.helpString);
-		cliControl.end(exitCode);
+		if (hiddenFlag) {
+			help.print(this.hiddenhelpString);
+		}
+		cliControl.end();
 	},
 
 	checkAndShowHelp: function() {
-		if (this.argv.help) {
-			this.showUsage();
+		if (this.argv.help || this.argv['hidden-help']) {
+			this.showUsage(this.argv['hidden-help']);
 		}
 	},
 
@@ -584,14 +629,21 @@ PalmGenerate.prototype = {
 			versionTool.showVersionAndExit();
 		}
 		async.series([
-			this.loadPluginConfig.bind(this, this.configFile),
-			(function(next) {
+			this.loadPluginConfig.bind(this, this.configFile), (function(next) {
 				if (this.argv.list) {
 					this.listSources(this.argv.list);
 				} else {
-					this.generateProject();
+					var initAndExit = this.argv.initialize;
+					this.moveBootplateToCliAppDataDir(function(err) {
+						if (initAndExit) {
+							console.log("Success");
+							return cliControl.end();
+						}
+						next(err);
+					});
 				}
-			}).bind(this)
+			}).bind(this),
+			this.generateProject.bind(this)
 		], function(err) {
 			if (err) {
 				log.error("exec", err.toString());
@@ -623,10 +675,45 @@ PalmGenerate.prototype = {
 		});
 		this.configGenZip = plugin.services[0];
 		plugin.services[0].sources.forEach(function(source){
-			if (source.id && source.type != null) {
+			if (source.id && source.type !== null) {
 				this.templatesWithID[source.id] = source;
 			}
 		}.bind(this));
+		next();
+	},
+
+	moveBootplateToCliAppDataDir: function(next) {
+		log.verbose("moveBootplateToCliAppDataDir");
+		if (!this.configGenZip) {
+			return next(new Error("loadPluginConfig() should be called first"));
+		}
+		var cliData = cliAppData.create();
+		var cliDataPath = cliData.getPath();
+		for (tmplName in this.templateVersionFilePath) {
+			var templateVersionFilePath = path.join(__dirname, '..', this.templateVersionFilePath[tmplName]);
+			var versionFile = path.join(templateVersionFilePath);
+			var version;
+			if (fs.existsSync(versionFile)) {
+				try {
+					version = this.getEnyoVersion(versionFile);
+				} catch (err) {
+					return next();
+				}
+			} else {
+				version = null;
+			}
+			if (version) {
+				var subPath = path.join("templates", version, tmplName);
+				var builtinPath = path.join(path.dirname(this.configFile), 'templates', tmplName);
+				if (!cliData.isExist(subPath)) {
+					cliData.put(path.join(builtinPath, "*"), subPath);
+				}
+				var configString = JSON.stringify(this.configGenZip, null, "\t");
+				var templatesInAppData = path.join(cliDataPath, subPath);
+				configString = configString.replace(new RegExp(builtinPath, "g"), templatesInAppData);
+				this.configGenZip = JSON.parse(configString);
+			}
+		}
 		next();
 	},
 
