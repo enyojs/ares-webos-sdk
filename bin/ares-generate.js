@@ -474,26 +474,26 @@ PalmGenerate.prototype = {
 		var maxVersion = "";
 		var versions = [];
 		async.series([
-		    this.walkFolder.bind(this, searchPath, versions, "version.js"),
-            function(next) {
-                versions.forEach(function(obj) {
-                    log.verbose("getEnyoTemplateVersion#file:", obj.path);
-                    var version;
-                    try {
-                        version = this.getEnyoVersion(obj.path);
-                    } catch(err) {
-                        //ignore exception
-                    }
-                    if (!version)
-                        version = "";
-                    maxVersion = (maxVersion < version) ? version : maxVersion;
-                    log.verbose("getEnyoTemplateVersion#enyo.version[\"" + obj.prop + "\"]", version);
-                }.bind(this));
-                next();
-            }.bind(this)
+			this.walkFolder.bind(this, searchPath, versions, "version.js"),
+			function(next) {
+				versions.forEach(function(obj) {
+					log.verbose("getEnyoTemplateVersion#file:", obj.path);
+					var version;
+					try {
+						version = this.getEnyoVersion(obj.path);
+					} catch (err) {
+						//ignore exception
+					}
+					if (!version)
+						version = "";
+					maxVersion = (maxVersion < version) ? version : maxVersion;
+					log.verbose("getEnyoTemplateVersion#enyo.version[\"" + obj.prop + "\"]", version);
+				}.bind(this));
+				next();
+			}.bind(this)
 		], function(err) {
-		    log.verbose("getEnyoTemplateVersion#maxVersion:", maxVersion);
-		    next(err, maxVersion);
+			log.verbose("getEnyoTemplateVersion#maxVersion:", maxVersion);
+			next(err, maxVersion);
 		});
 	},
 
