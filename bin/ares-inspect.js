@@ -81,7 +81,7 @@ var options = {
 	appId: argv.app || argv.argv.remain[0],
 	serviceId: argv.service,
 	browser: argv.browser,
-    open: argv.open
+	open: argv.open
 };
 
 /**********************************************************************/
