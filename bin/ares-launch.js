@@ -28,6 +28,7 @@ if (process.argv.length === 2) {
 var knownOpts = {
 	"device":	[String, null],
 	"inspect":	Boolean,
+	"open":	Boolean,
 	"device-list":	Boolean,
 	"close":	Boolean,
 	"hosted":	Boolean,
@@ -40,6 +41,7 @@ var knownOpts = {
 var shortHands = {
 	"d": ["--device"],
 	"i": ["--inspect"],
+	"o": ["--open"],
 	"D": ["--device-list"],
 	"c": ["--close"],
 	"r": ["--running"],
@@ -92,7 +94,8 @@ if (argv.close) {
 
 var options = {
 	device: argv.device,
-	inspect: argv.inspect,
+	inspect: argv.open || argv.inspect,
+	open: argv.open,
 	installMode: installMode,
 };
 
@@ -125,7 +128,8 @@ function showUsage() {
 		help.format("-D, --device-list", "List the available DEVICEs"),
 		help.format("-c, --close", "Terminate appication on device"),
 		help.format("-r, --running", "List the running applications on device"),
-		help.format("-i, --inspect", "launch application with a web inspector"),
+		help.format("-i, --inspect", "Launch application with a web inspector"),
+		help.format("-o, --open", "Open the web inspector url with a web browser"),
 		help.format("-p, --params <PARAMS>", "PARAMS is used on boot application-launching"),
 		help.format(" PARAMS can be one of the following forms"),
 		help.format("win32",            "\t (e.g.) -p \"{'key1':'value2', 'key2':'value2 containing space'}\""),

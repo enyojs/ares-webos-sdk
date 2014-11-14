@@ -26,6 +26,7 @@ var knownOpts = {
 	"service":	[String, Array],
 	"browser":	Boolean,
 	"device-list":	Boolean,
+	"open":	Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
@@ -36,6 +37,7 @@ var shortHands = {
 	"s": ["--service"],
 	"b": ["--browser"],
 	"D": ["--device-list"],
+	"o": ["--open"],
 	"V": ["--version"],
 	"h": ["--help"],
 	"v": ["--level", "verbose"]
@@ -78,7 +80,8 @@ var options = {
 	device: argv.device,
 	appId: argv.app || argv.argv.remain[0],
 	serviceId: argv.service,
-	browser: argv.browser
+	browser: argv.browser,
+	open: argv.open
 };
 
 /**********************************************************************/
@@ -101,6 +104,7 @@ function showUsage() {
 //		help.format(processName + " [OPTIONS]|[COMMAND] --browser, -b"), * TBD *
 		"",
 		"OPTION",
+		help.format("-o, --open", "Open url with a web browser"),
 		help.format("-d, --device <DEVICE>", "Specify DEVICE to use"),
 		help.format("-D, --device-list", "List the available DEVICEs"),
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),

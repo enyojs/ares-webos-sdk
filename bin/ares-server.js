@@ -105,8 +105,8 @@ function runServer() {
 		function(serverInfo, next) {
 			if (serverInfo && serverInfo.port) {
 				serverUrl = 'http://localhost:' + serverInfo.port;
-				var openUrl = 'http://localhost:' + serverInfo.port + '/ares_cli/ares.html';
-				console.log("Local server running on " + openUrl);
+				var openUrl = serverUrl + '/ares_cli/ares.html';
+				console.log("Local server running on " + serverUrl);
 			}
 			if (argv.open && serverInfo.port) {
 				var env = new sdkenv.Env();
