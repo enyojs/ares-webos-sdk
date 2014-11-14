@@ -90,8 +90,6 @@ PalmGenerate.prototype = {
 		var templateVersionFilePath = path.join(__dirname, '..', this.templateVersionFilePath[this.defaultVersionForAppinfo]);
 		var versionFile = path.join(templateVersionFilePath);
 		if (fs.existsSync(versionFile)) {
-			var code = fs.readFileSync(versionFile);
-			code = "var enyo={}; enyo.version=new Object();" + code;
 			try {
                 var version = this.getEnyoVersion(versionFile);
 				if (version) {
@@ -341,11 +339,11 @@ PalmGenerate.prototype = {
 		}
 		if (refnStr.indexOf("\"") === -1) {
 			return refnStr.replace(/\s*"/g, "")
-	 				.replace(/\s*'/g, "")
-	 				.replace("{", "{\"")
-	 				.replace("}","\"}")
-	 				.replace(/\s*,\s*/g, "\",\"")
-	 				.replace(/\s*:\s*/g, "\":\"");
+					.replace(/\s*'/g, "")
+					.replace("{", "{\"")
+					.replace("}","\"}")
+					.replace(/\s*,\s*/g, "\",\"")
+					.replace(/\s*:\s*/g, "\":\"");
 		} else {
 			return refnStr.replace(/\s*'/g, "\"");
 		}
@@ -641,7 +639,7 @@ PalmGenerate.prototype = {
 							return cliControl.end();
 						}
 						next(err);
-					})
+					});
 				}
 			}).bind(this),
 			this.generateProject.bind(this)
@@ -676,13 +674,13 @@ PalmGenerate.prototype = {
 		});
 		this.configGenZip = plugin.services[0];
 		plugin.services[0].sources.forEach(function(source){
-			if (source.id && source.type != null) {
+			if (source.id && source.type !== null) {
 				this.templatesWithID[source.id] = source;
 			}
 		}.bind(this));
 		next();
 	},
-                      
+
 	moveBootplateToCliAppDataDir: function(next) {
 		log.verbose("moveBootplateToCliAppDataDir");
 		if (!this.configGenZip) {
