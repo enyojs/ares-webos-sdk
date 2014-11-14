@@ -91,7 +91,7 @@ PalmGenerate.prototype = {
 		var versionFile = path.join(templateVersionFilePath);
 		if (fs.existsSync(versionFile)) {
 			try {
-                var version = this.getEnyoVersion(versionFile);
+				var version = this.getEnyoVersion(versionFile);
 				if (version) {
 					this.defaultEnyoVersion = version.split('-')[0];
 				}
