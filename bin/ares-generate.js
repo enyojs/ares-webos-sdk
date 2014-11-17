@@ -42,29 +42,29 @@ function PalmGenerate() {
 	this.configGenZip = {};
 	this.templatesWithID = {};
 
-	this.defaultSourceType = 'template';
-	this.defaultEnyoVersion = '2.5';
-	this.defaultTemplateForVersion = 'bootplate-moonstone';
-	this.templateVersionFilePath = {
+	this.defSrcType = 'template';
+	this.defEnyoVer = '2.5';
+	this.defTmplForVer = 'bootplate-moonstone';
+	this.tmplVerFilePath = {
 		'bootplate-moonstone': 'templates/bootplate-moonstone/enyo/source/boot/version.js',
 		'bootplate-garnet': 'templates/bootplate-garnet/lib/garnet/version.js',
 		'bootplate-sunstone': 'templates/bootplate-sunstone/lib/sunstone/version.js'
 	};
 
 	var knownOpts = {
-		"help":		Boolean,
-		"hidden-help":		Boolean,
-		"version":	Boolean,
-		"list":		String,
-		"overwrite":	Boolean,
+		"help": Boolean,
+		"hidden-help": Boolean,
+		"version": Boolean,
+		"list": String,
+		"overwrite": Boolean,
 		"servicename": String,
-		"template":	[String, Array],
-		"property":	[String, Array],
-		"file":	[String, Array],
-		"proxy-url":	url,
+		"template": [String, Array],
+		"property": [String, Array],
+		"file": [String, Array],
+		"proxy-url": url,
 		"onDevice": String,
-        "initialize": Boolean,
-		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
+		"initialize": Boolean,
+		"level": ['silly', 'verbose', 'info', 'http', 'warn', 'error']
 	};
 	var shortHands = {
 		"h":		"--help",
@@ -86,21 +86,21 @@ function PalmGenerate() {
 PalmGenerate.prototype = {
 
 	initialize: function() {
-		this.argv.list = (this.argv.list === 'true') ? this.defaultSourceType : this.argv.list || false;
-		var templateVersionFilePath = path.join(__dirname, '..', this.templateVersionFilePath[this.defaultTemplateForVersion]);
-		var versionFile = path.join(templateVersionFilePath);
+		this.argv.list = (this.argv.list === 'true') ? this.defSrcType : this.argv.list || false;
+		var tmplVerFilePath = path.join(__dirname, '..', this.tmplVerFilePath[this.defTmplForVer]);
+		var versionFile = path.join(tmplVerFilePath);
 		if (fs.existsSync(versionFile)) {
 			try {
 				var version = this.getEnyoVersion(versionFile);
 				if (version) {
 					version = version.split('-')[0];
-					this.defaultEnyoVersion = version.split('.').slice(0,2).join('.');
+					this.defEnyoVer = version.split('.').slice(0,2).join('.');
 				}
 			} catch (err) {
 				// In case of causing exception while parsing verion.js, just use the hard-coded default version.
 			}
 		}
-		this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice) ? this.defaultEnyoVersion : this.argv.onDevice;
+		this.argv.onDevice = (this.argv.onDevice === 'true' || !this.argv.onDevice) ? this.defEnyoVer : this.argv.onDevice;
 		this.argv.file = (this.argv.file == 'true' || !this.argv.file) ? [] : this.argv.file;
 		this.substituteWords = {
 			"@SERVICE-NAME@": this.argv.servicename || "com.yourdomain.app.service",
@@ -120,7 +120,7 @@ PalmGenerate.prototype = {
 			help.format("", "TEMPLATE can be listed via " + processName + " --list, -l"),
 			"",
 			help.format("-l, --list <TYPE>"),
-			help.format("\t List the available templates corresponding with TYPE [default: " + this.defaultSourceType + "]"),
+			help.format("\t List the available templates corresponding with TYPE [default: " + this.defSrcType + "]"),
 			help.format("\t Available TYPE is 'template', 'webosService', 'appinfo'"),
 			"",
 			help.format("-p, --property <PROPERTY>", "Set the properties of appinfo.json"),
@@ -162,8 +162,8 @@ PalmGenerate.prototype = {
 		this.hiddenhelpString = [
 			"",
 			"EXTRA-OPTION",
-			help.format("--initialize", "initialize ares-generate command."),
-			help.format("", "Make copies of bootplate templates in CLI app data directory"),
+			help.format("--initialize", "Initialize ares-generate command."),
+			help.format("", "Make copies of bootplate templates in CLI data directory"),
 			"EXAMPLES",
 			"",
 			"# Initialize ares-generate command",
@@ -179,7 +179,7 @@ PalmGenerate.prototype = {
 	applyDefaultTemplate: function(next) {
 		log.info("applyDefaultTemplate");
 		var defaultTemplates = this.configGenZip.sources.filter(function(template){
-			return (this.defaultSourceType === template.type && template.isDefault == true);
+			return (this.defSrcType === template.type && template.isDefault == true);
 		}.bind(this));
 		if (defaultTemplates.length < 1) {
 			return next(new Error("failed to get a default template name, please specify the template name"));
@@ -528,14 +528,14 @@ PalmGenerate.prototype = {
 								});
 							}
 							var checkPaths = [tmpl.url].concat(symlinkList || []);
-							var tmplName = Object.keys(this.templateVersionFilePath);
+							var tmplName = Object.keys(this.tmplVerFilePath);
 							var exit = false;
 							checkPaths.forEach(function(filePath) {
 								if (exit) return;
 								tmplName.forEach(function(name) {
 									if (exit) return;
 									if (filePath.indexOf(name) > 0) {
-										var verFile = path.join(__dirname, '..', this.templateVersionFilePath[name]);
+										var verFile = path.join(__dirname, '..', this.tmplVerFilePath[name]);
 										if (fs.existsSync(verFile)) {
 											try {
 												maxVersion = this.getEnyoVersion(verFile);
@@ -635,7 +635,7 @@ PalmGenerate.prototype = {
 					this.listSources(this.argv.list);
 				} else {
 					var initAndExit = this.argv.initialize;
-					this.moveBootplateToCliAppDataDir(function(err) {
+					this.copyBPtoCliData(initAndExit, function(err) {
 						if (initAndExit) {
 							console.log("Success");
 							return cliControl.end();
@@ -683,16 +683,16 @@ PalmGenerate.prototype = {
 		next();
 	},
 
-	moveBootplateToCliAppDataDir: function(next) {
-		log.verbose("moveBootplateToCliAppDataDir");
+	copyBPtoCliData: function(reset, next) {
+		log.verbose("copyBPtoCliData");
 		if (!this.configGenZip) {
 			return next(new Error("loadPluginConfig() should be called first"));
 		}
 		var cliData = cliAppData.create();
 		var cliDataPath = cliData.getPath();
-		for (tmplName in this.templateVersionFilePath) {
-			var templateVersionFilePath = path.join(__dirname, '..', this.templateVersionFilePath[tmplName]);
-			var versionFile = path.join(templateVersionFilePath);
+		for (tmplName in this.tmplVerFilePath) {
+			var tmplVerFilePath = path.join(__dirname, '..', this.tmplVerFilePath[tmplName]);
+			var versionFile = path.join(tmplVerFilePath);
 			var version;
 			if (fs.existsSync(versionFile)) {
 				try {
@@ -706,6 +706,9 @@ PalmGenerate.prototype = {
 			if (version) {
 				var subPath = path.join("templates", version, tmplName);
 				var builtinPath = path.join(path.dirname(this.configFile), 'templates', tmplName);
+				if (reset && cliData.isExist(subPath)) {
+					cliData.remove(subPath);
+				}
 				if (!cliData.isExist(subPath)) {
 					cliData.put(path.join(builtinPath, "*"), subPath);
 				}
