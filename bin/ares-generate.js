@@ -93,7 +93,8 @@ PalmGenerate.prototype = {
 			try {
 				var version = this.getEnyoVersion(versionFile);
 				if (version) {
-					this.defaultEnyoVersion = version.split('-')[0];
+					version = version.split('-')[0];
+					this.defaultEnyoVersion = version.split('.').slice(0,2).join('.');
 				}
 			} catch (err) {
 				// In case of causing exception while parsing verion.js, just use the hard-coded default version.
@@ -218,7 +219,7 @@ PalmGenerate.prototype = {
 		}
 		this.destination = this.argv.argv.remain[0];
 		// check the destination has special charater and white space or not
-		if (!(/^[a-zA-Z0-9\.\_]*$/.test(path.basename(path.resolve(this.destination))))){
+		if (!(/^[a-zA-Z0-9\.\_\-]*$/.test(path.basename(path.resolve(this.destination))))){
 			return next(new Error("Not available AppDir name"));
 		}
 		// Create the directorie if it does not exist
