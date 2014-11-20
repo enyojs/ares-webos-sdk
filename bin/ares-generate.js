@@ -705,7 +705,7 @@ PalmGenerate.prototype = {
 			}
 			if (version) {
 				var subPath = path.join("templates", version, tmplName);
-				var builtinPath = path.join(path.dirname(this.configFile), 'templates', tmplName);
+				var builtinPath = path.join(path.dirname(this.configFile), 'templates', tmplName).replace(/\\/g,'/');
 				if (reset && cliData.isExist(subPath)) {
 					cliData.remove(subPath);
 				}
@@ -713,7 +713,7 @@ PalmGenerate.prototype = {
 					cliData.put(path.join(builtinPath, "*"), subPath);
 				}
 				var configString = JSON.stringify(this.configGenZip, null, "\t");
-				var templatesInAppData = path.join(cliDataPath, subPath);
+				var templatesInAppData = path.join(cliDataPath, subPath).replace(/\\/g,'/');
 				configString = configString.replace(new RegExp(builtinPath, "g"), templatesInAppData);
 				this.configGenZip = JSON.parse(configString);
 			}
