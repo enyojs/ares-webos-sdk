@@ -34,8 +34,10 @@ var knownOpts = {
 	"hosted":	Boolean,
 	"running":	Boolean,
 	"params":   [String, Array],
+	"host-port": [String, null],
 	"version":	Boolean,
 	"help":		Boolean,
+	"hidden-help":		Boolean,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
 };
 var shortHands = {
@@ -46,8 +48,10 @@ var shortHands = {
 	"c": ["--close"],
 	"r": ["--running"],
 	"p": ["--params"],
+	"P": ["--host-port"],
 	"V": ["--version"],
 	"h": ["--help"],
+	"hh": ["--hidden-help"],
 	"H": ["--hosted"],
 	"v": ["--level", "verbose"]
 };
@@ -62,8 +66,8 @@ ipkg.launcher.log.level = log.level;
 
 /**********************************************************************/
 
-if (argv.help) {
-	showUsage();
+if (argv.help || argv['hidden-help']) {
+	showUsage(argv['hidden-help']);
 	cliControl.end();
 }
 
@@ -97,6 +101,7 @@ var options = {
 	inspect: argv.open || argv.inspect,
 	open: argv.open,
 	installMode: installMode,
+	hostPort: argv["host-port"]
 };
 
 if (argv.argv.remain.length > 1) {
@@ -112,7 +117,7 @@ if (op) {
 	});
 }
 
-function showUsage() {
+function showUsage(hiddenFlag) {
 	var helpString = [
 		"",
 		"NAME",
@@ -159,7 +164,24 @@ function showUsage() {
 		""
 	];
 
+	var hiddenhelpString = [
+		"",
+		"EXTRA-OPTION",
+		help.format("-P, --host-port", "Set Host PC's port for remote web inspector"),
+		"",
+		"EXAMPLES",
+		"",
+		"# Set the host-pc's port (2043) to connect to the remote web inspector",
+		processName+" com.yourdomain.app -d DEVICE -i -P 2043",
+		"# If -P options is not used, a random port will be assigned",
+		processName+" com.yourdomain.app -d DEVICE -i",
+		""
+	];
+
 	help.print(helpString);
+	if (hiddenFlag) {
+		help.print(hiddenhelpString);
+	}
 }
 
 function launch() {

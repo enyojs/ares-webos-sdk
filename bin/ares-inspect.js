@@ -27,8 +27,10 @@ var knownOpts = {
 	"browser":	Boolean,
 	"device-list":	Boolean,
 	"open":	Boolean,
+	"host-port": [String, null],
 	"version":	Boolean,
 	"help":		Boolean,
+	"hidden-help":		Boolean,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
 };
 var shortHands = {
@@ -38,8 +40,11 @@ var shortHands = {
 	"b": ["--browser"],
 	"D": ["--device-list"],
 	"o": ["--open"],
+	"P": ["--host-port"],
+	"D": ["--device-list"],
 	"V": ["--version"],
 	"h": ["--help"],
+	"hh": ["--hidden-help"],
 	"v": ["--level", "verbose"]
 };
 
@@ -59,8 +64,8 @@ process.on('uncaughtException', function (err) {
 	cliControl.end();
 });
 
-if (argv.help) {
-	showUsage();
+if (argv.help || argv['hidden-help']) {
+	showUsage(argv['hidden-help']);
 	cliControl.end();
 }
 
@@ -81,7 +86,8 @@ var options = {
 	appId: argv.app || argv.argv.remain[0],
 	serviceId: argv.service,
 	browser: argv.browser,
-	open: argv.open
+	open: argv.open,
+	hostPort: argv["host-port"]
 };
 
 /**********************************************************************/
@@ -92,7 +98,7 @@ if (op) {
 	});
 }
 
-function showUsage() {
+function showUsage(hiddenFlag) {
 	var helpString = [
 		"",
 		"NAME",
@@ -122,7 +128,24 @@ function showUsage() {
 		""
 	];
 
+	var hiddenhelpString = [
+		"",
+		"EXTRA-OPTION",
+		help.format("-P, --host-port", "Set Host PC's port for remote web/node inspector"),
+		"",
+		"EXAMPLES",
+		"",
+		"# Set the host-pc's port (2043) to connect to the remote web inspector",
+		processName+" com.yourdomain.app -d DEVICE -P 2043",
+		"# If -P options is not used, a random port will be assigned",
+		processName+" com.yourdomain.app -d DEVICE",
+		""
+	];
+
 	help.print(helpString);
+	if (hiddenFlag) {
+		help.print(hiddenhelpString);
+	}
 }
 
 function inspect(){
