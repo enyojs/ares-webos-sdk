@@ -202,11 +202,16 @@ PalmGenerate.prototype = {
 		if (this.configGenZip.sources.length === 0) {
 			return next(new Error("Not available templates..."));
 		} else {
+			var wrongTmpl = [];
 			this.argv.template.forEach(function(name) {
 				if (!this.templatesWithID[name]) {
-					return next(new Error("Not available template named " + name));
+					log.warn("Not available template named " + name);
+					wrongTmpl.push(name);
 				}
 			}.bind(this));
+			if (wrongTmpl.length > 0) {
+				return next(new Error("Please check the template name"));
+			}
 		}
 		next();
 	},
@@ -710,6 +715,7 @@ PalmGenerate.prototype = {
 					cliData.remove(subPath);
 				}
 				if (!cliData.isExist(subPath)) {
+					console.log("Initializing template directories. Please wait for a while...");
 					cliData.put(path.join(builtinPath, "*"), subPath);
 				}
 				var configString = JSON.stringify(this.configGenZip, null, "\t");
