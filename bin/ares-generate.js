@@ -22,7 +22,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 process.on('uncaughtException', function (err) {
 	log.error("*** " + processName + ": "+ err.toString());
 	log.info('uncaughtException', err.stack);
-	cliControl.end();
+	cliControl.end(-1);
 });
 
 if (process.argv.length === 2) {
@@ -232,7 +232,7 @@ PalmGenerate.prototype = {
 			var stats = fs.statSync(this.destination);
 			if ( ! stats.isDirectory()) {
 				log.error('checkCreateAppDir', "'" + this.destination + "' is not a directory");
-				cliControl.end();
+				cliControl.end(-1);
 			}
 			var childFiles = fs.readdirSync(this.destination).filter(function(file){
 				return (['.', '..'].indexOf(file) === -1);
@@ -416,10 +416,11 @@ PalmGenerate.prototype = {
 		if (err) {
 			log.error(processName + ": "+ errMsgHdlr.changeErrMsg(err));
 			log.verbose(err.stack);
+			cliControl.end(-1);
 		} else {
 			console.log("Success");
+			cliControl.end();
 		}
-		cliControl.end();
 	},
 
 	walkFolder: function(dirPath, getArray, name, next) {
@@ -593,8 +594,10 @@ PalmGenerate.prototype = {
 				if (err) {
 					log.error("*** " + processName + ": "+ err.toString());
 					log.verbose(err.stack);
+					cliControl.end(-1);
+				} else {
+					cliControl.end();
 				}
-				cliControl.end();
 			}).bind(this));
 	},
 

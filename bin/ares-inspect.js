@@ -1,7 +1,7 @@
 var fs = require('fs'),
     path = require("path"),
     async 	= require('async'),
-    npmlog = require('npmlog'),
+    log = require('npmlog'),
     nopt = require('nopt'),
     ipkg = require('./../lib/ipkg-tools'),
     cliControl 	= require('./../lib/cli-control'),
@@ -52,7 +52,6 @@ var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-ins
 
 /**********************************************************************/
 
-var log = npmlog;
 log.heading = processName;
 log.level = argv.level || 'warn';
 
@@ -61,7 +60,7 @@ log.level = argv.level || 'warn';
 
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.toString());
-	cliControl.end();
+	cliControl.end(-1);
 });
 
 if (argv.help || argv['hidden-help']) {
@@ -152,7 +151,7 @@ function inspect(){
 	log.info("inspect():", "AppId:", options.appId, "ServiceId:", options.serviceId);
 	if(!options.appId && !options.serviceId){
 		showUsage();
-		cliControl.end();
+		cliControl.end(-1);
 	}
 	ipkg.inspector.inspect(options, null, finish);
 }
@@ -161,12 +160,13 @@ function finish(err, value) {
 	if (err) {
 		log.error(processName + ": " + err.toString());
 		log.verbose(err.stack);
+		cliControl.end(-1);
 	} else {
 		if (value && value.msg) {
 			console.log(value.msg);
 		}
+		cliControl.end();
 	}
-	cliControl.end();
 }
 
 process.on('uncaughtException', function (err) {

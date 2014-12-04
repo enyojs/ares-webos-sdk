@@ -1,7 +1,7 @@
 var fs = require('fs'),
     path = require("path"),
     async 	= require('async'),
-    npmlog = require('npmlog'),
+    log = require('npmlog'),
     nopt = require('nopt'),
     ipkg = require('./../lib/ipkg-tools'),
     cliControl 	= require('./../lib/cli-control'),
@@ -16,7 +16,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.toString());
-	cliControl.end();
+	cliControl.end(-1);
 });
 
 if (process.argv.length === 2) {
@@ -52,7 +52,6 @@ var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-ins
 
 /**********************************************************************/
 
-var log = npmlog;
 log.heading = processName;
 log.level = argv.level || 'warn';
 
@@ -143,7 +142,7 @@ function gdbserver(){
 	log.info("gdbserver():", "AppId:", options.appId);
 	if(!options.appId && !options.serviceId){
 		showUsage();
-		cliControl.end();
+		cliControl.end(-1);
 	}
 	ipkg.gdbserver.run(options, null, finish);
 }
@@ -152,7 +151,7 @@ function close(){
 	log.info("gdbserver():", "close");
 	if(!options.device){
 		showUsage();
-		cliControl.end();
+		cliControl.end(-1);
 	}
 	ipkg.gdbserver.close(options, null, finish);
 }
@@ -161,12 +160,13 @@ function finish(err, value) {
 	if (err) {
 		log.error(processName + ": "+ err.toString());
 		log.verbose(err.stack);
+		cliControl.end(-1);
 	} else {
 		if (value && value.msg) {
 			console.log(value.msg);
 		}
+		cliControl.end();
 	}
-	cliControl.end();
 }
 
 process.on('uncaughtException', function (err) {

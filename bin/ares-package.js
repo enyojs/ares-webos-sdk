@@ -16,7 +16,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 process.on('uncaughtException', function (err) {
 	log.error("*** " + processName + ": "+ err.toString());
 	log.info('uncaughtException', err.stack);
-	cliControl.end();
+	cliControl.end(-1);
 });
 
 if (process.argv.length === 2) {
@@ -224,7 +224,7 @@ PalmPackage.prototype = {
 
 	exitOnError: function(msg) {
 		console.error("*** " + processName + ": "+ msg);
-		cliControl.end();
+		cliControl.end(-1);
 	},
 
 	packageReady: function(err, results) {
@@ -232,20 +232,24 @@ PalmPackage.prototype = {
 		if (err) {
 			log.error(processName + ": "+ err.toString());
 			log.verbose(err.stack);
+			cliControl.end(-1);
+		} else {
+			if (results && results[results.length-1] && results[results.length-1].msg) {
+				console.log(results[results.length-1].msg);
+			}
+			cliControl.end();
 		}
-		if (results && results[results.length-1] && results[results.length-1].msg) {
-			console.log(results[results.length-1].msg);
-		}
-		cliControl.end();
 	},
 
 	appOk: function(err, results) {
 		log.info("appOk");
 		if (err) {
 			console.error("*** " + processName + ": "+ err.toString());
+			cliControl.end(-1);
+		} else {
+			console.log("no problems detected");
+			cliControl.end();
 		}
-		console.log("no problems detected");
-		cliControl.end();
 	},
 
 	setOutputDir: function(next) {
