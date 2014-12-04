@@ -1,7 +1,7 @@
 var fs 		= require('fs'),
     path 	= require("path"),
     async 	= require('async'),
-    npmlog 	= require('npmlog'),
+    log 	= require('npmlog'),
     nopt 	= require('nopt'),
     ipkg 		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
@@ -17,7 +17,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.toString());
 	log.info('uncaughtException', err.stack);
-	cliControl.end();
+	cliControl.end(-1);
 });
 
 if (process.argv.length === 2) {
@@ -59,7 +59,6 @@ var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-ins
 
 /**********************************************************************/
 
-var log = npmlog;
 log.heading = processName;
 log.level = argv.level || 'warn';
 ipkg.installer.log.level = log.level;
@@ -181,7 +180,7 @@ function install() {
 	log.info("install():", "pkgPath:", pkgPath);
 	if (!pkgPath) {
 		showUsage();
-		cliControl.end();
+		cliControl.end(-1);
 	} else {
 		if (!fs.existsSync(path.normalize(pkgPath))) {
 			return finish(new Error(pkgPath + " does not exist."));
@@ -246,11 +245,12 @@ function finish(err, value) {
 	if (err) {
 		log.error(processName + ": "+ err.toString());
 		log.verbose(err.stack);
+		cliControl.end(-1);
 	} else {
 		log.info('finish():', value);
 		if (value && value.msg) {
 			console.log(value.msg);
 		}
+		cliControl.end();
 	}
-	cliControl.end();
 }

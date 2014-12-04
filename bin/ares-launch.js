@@ -1,7 +1,7 @@
 var fs 		= require('fs'),
     path 	= require("path"),
     async 	= require('async'),
-    npmlog 	= require('npmlog'),
+    log 	= require('npmlog'),
     nopt 	= require('nopt'),
     ipkg 		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
@@ -16,7 +16,7 @@ var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.toString());
-	cliControl.end();
+	cliControl.end(-1);
 });
 
 if (process.argv.length === 2) {
@@ -59,7 +59,6 @@ var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-ins
 
 /**********************************************************************/
 
-var log = npmlog;
 log.heading = processName;
 log.level = argv.level || 'warn';
 ipkg.launcher.log.level = log.level;
@@ -190,7 +189,7 @@ function launch() {
 	log.info("launch():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
-		cliControl.end();
+		cliControl.end(-1);
 	}
 	ipkg.launcher.launch(options, pkgId, params, finish);
 }
@@ -203,7 +202,7 @@ function launchHostedApp() {
 	log.info("launch():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
-		cliControl.end();
+		cliControl.end(-1);
 	}
 	ipkg.launcher.launch(options, pkgId, params, finish);
 }
@@ -262,7 +261,7 @@ function close() {
 	log.info("close():", "pkgId:", pkgId);
 	if (!pkgId) {
 		help();
-		cliControl.end();
+		cliControl.end(-1);
 	}
 	ipkg.launcher.close(options, pkgId, params, finish);
 }
@@ -285,12 +284,13 @@ function finish(err, value) {
 	if (err) {
 		log.error(processName + ": "+ err.toString());
 		log.verbose(err.stack);
+		cliControl.end(-1);
 	} else {
 		if (value && value.msg) {
 			console.log(value.msg);
 		}
+		cliControl.end();
 	}
-	cliControl.end();
 }
 
 function insertParams(params, keyPair) {
