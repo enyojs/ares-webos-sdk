@@ -11,7 +11,7 @@
 			"openSsh": "webos_emul"
 		},
 		"files":"sftp",
-		"noPortForwarding":true,
+		"noPortForwarding":false,
 		"indelible": true
 	}
 ]
