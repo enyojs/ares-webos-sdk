@@ -17,27 +17,6 @@
 			"id": "genZip",
 			"sources": [
 				{
-				"id": "WebOS-Ports",
-				"type": null
-				}, 
-				{
-					"id": "bootplate-sample-local",
-					"Xtype": "template",
-					"type": null,
-					"description": "Local Bootplate Sample(Local)",
-					"deps": ["webos-app-config"],
-					"files": [
-						{
-							"url": "@PLUGINDIR@/../bootplate-folder-name",
-							"excluded": [	
-								".git/",
-								"enyo/.git/",
-								"lib/enyo-sample/.git/"
-							]
-						}
-					]
-				},
-				{
 					"id": "bootplate-web",
 					"type": "template",
 					"version": "0.0.1",
@@ -52,35 +31,6 @@
 					]
 				},
 				{
-					"id": "bootplate-moonstone-old",
-					"xtype": "template",
-					"type": null,
-					"version": "2.5",
-					"isDefault": false,
-					"description": "Enyo moonstone bootplate",
-					"class":"moonstone",
-					"deps": ["enyoappinfo", "enyoicon"],
-					"files": [
-						{
-							"url": "@PLUGINDIR@/templates/bootplate-moonstone",
-							"excluded": [	
-								".git",
-								".gitignore",
-								".gitmodules",
-								"enyo/.git",
-								"enyo/.gitignore",
-								"lib/enyo-cordova/.git",
-								"lib/enyo-ilib/.git",
-								"lib/enyo-webos/.git",
-								"lib/layout/.git",
-								"lib/moonstone/.git",
-								"lib/moonstone/.gitignore",
-								"lib/spotlight/.git"
-							]
-						}
-					]
-				},
-				{
 					"id": "bootplate-moonstone",
 					"type": "template",
 					"version": "2.5",
@@ -89,83 +39,13 @@
 					"class": "moonstone",
 					"deps": ["enyoappinfo", "enyoicon"],
 					"files": [{
-						"url": "@PLUGINDIR@/templates/app-moonstone",
-						"symlink": {
-							"enyo": "@PLUGINDIR@/templates/bootplate-moonstone/enyo",
-							"lib": "@PLUGINDIR@/templates/bootplate-moonstone/lib"
-						}
+						"url": "@PLUGINDIR@/templates/app-moonstone"
 					}]
-				},
-				{
-					"id": "bootplate-2.3.0-pre.12",
-					"Xtype": "template",
-					"type": null,
-					"version": "2.3.0-pre.12",
-					"isDefault": false,
-					"description": "Enyo bootplate 2.3.0 (No webOS specific library)",
-					"class":"basic",
-					"deps": ["webappinfo"],
-					"files": [
-						{
-							"url": "http://enyojs.com/archive/bootplate-2.3.0-pre.12.zip",
-							"prefixToRemove": "bootplate",
-							"excluded": [
-								"bootplate/api/"
-							]
-						}
-					]
-				},
-				{
-					"id": "bootplate-2.2.0",
-					"type": "null",
-					"version": "2.2.0",
-					"description": "Enyo bootplate 2.2.0",
-					"deps": ["webos-app-config"],
-					"class":"basic",
-					"files": [
-						{
-							"url": "http://enyojs.com/archive/bootplate-2.2.0.zip",
-							"prefixToRemove": "bootplate",
-							"excluded": [
-								"bootplate/api/"
-							]
-						}
-					]
-				},
-				{
-					"id": "bootplate-2.1.1",
-					"type": "null",
-					"version": "2.1.1",
-					"description": "Enyo bootplate 2.1.1",
-					"deps": ["webos-app-config"],
-					"class":"basic",
-					"files": [
-						{
-							"url": "http://enyojs.com/archive/bootplate-2.1.1.zip",
-							"prefixToRemove": "bootplate",
-							"excluded": [
-								"bootplate/api/"
-							]
-						}
-					]
-				},
-				{
-					"id": "webos-service-helloworld",
-					"Xtype": "webosService",
-					"type" : null,
-					"version": "0.0.1",
-					"description": "webOS Node.js Service Template",
-					"files": [
-						{
-							"url": "http://enyojs.com/webos/webos-service-config.zip",
-							"prefixToAdd": "services/com.example.helloworld"
-						}
-					]
 				},
 				{
 					"id": "webos-service",
 					"type": "webosService",
-					"version": "0.0.1",
+					"version": "0.1",
 					"description": "webOS Node.js Service Template",
 					"files": [
 						{
@@ -181,22 +61,10 @@
 					]
 				},
 				{
-					"id": "webos-app-config",
-					"Xtype": "webosConfig",
-					"type": null,
-					"version": "0.0.1",
-					"description": "webOS Applicatin Config data",
-					"files": [
-						{
-							"url": "http://enyojs.com/webos/webos-app-config.zip"
-						}
-					]
-				},
-				{
 					"id": "webappinfo",
 					"type": "appinfo",
 					"version": "0.0.1",
-					"description": "minimal appinfo.json for webOS Applicatin",
+					"description": "minimal appinfo.json for webOS Application",
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/webappinfo"
@@ -241,6 +109,34 @@
 							"url": "@PLUGINDIR@/templates/enyoicon"
 						}
 					]
+				},
+				{
+					"id": "moonstone-2.5",
+					"type": "bootplate",
+					"version": "2.5",
+					"onDevice": true,
+					"description": "bootplate-moonstone",
+					"files": [{
+						"url": "@PLUGINDIR@/templates/empty",
+						"symlink": {
+							"enyo": "@PLUGINDIR@/templates/bootplate-moonstone/enyo",
+							"lib": "@PLUGINDIR@/templates/bootplate-moonstone/lib"
+						}
+					}]
+				},
+				{
+					"id": "moonstone-2.3",
+					"type": "bootplate",
+					"version": "2.3",
+					"onDevice": true,
+					"description": "bootplate-moonstone",
+					"files": [{
+						"url": "@PLUGINDIR@/templates/empty",
+						"symlink": {
+							"enyo": "@PLUGINDIR@/templates/bootplate-moonstone-2.3/enyo",
+							"lib": "@PLUGINDIR@/templates/bootplate-moonstone-2.3/lib"
+						}
+					}]
 				}
 			]
 		}
