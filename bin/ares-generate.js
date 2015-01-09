@@ -407,7 +407,7 @@ function _loadTemplConf(transMaps, next) {
 function _getEnyoVersion (versionFilePath) {
     var includeInThisContext = function(path) {
         var code = fs.readFileSync(path);
-        code = "var enyo={}; enyo.version=new Object();" + code;
+        code = "var enyo={}; enyo.version=new Object(); enyo.mixin=function(){};" + code;
         vm.runInThisContext(code, path);
     };
     includeInThisContext(versionFilePath);
