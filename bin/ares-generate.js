@@ -542,8 +542,12 @@ function _substParams(next) {
         setImmediate(next);
     };
     var _subsFiles = function(next) {
+        var savDefBpVer;
+        if (fs.existsSync(DEF_BP_FILE)) {
+            savDefBpVer = fs.readFileSync(DEF_BP_FILE, 'utf8');
+        }
         var wordMaps = {
-            "@ENYO-VERSION@": options.bpVer || DEF_BP_VER,
+            "@ENYO-VERSION@": options.bpVer || savDefBpVer || DEF_BP_VER,
             "@SERVICE-NAME@": (options.svcName || DEF_SVC_NAME)
         };
         var substitution = { fileRegexp: '[.]?' };
