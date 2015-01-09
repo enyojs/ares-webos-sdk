@@ -441,7 +441,7 @@ function _getTransMaps (next) {
                             log.silly("Found:", verFile, ", version:", version);
                             transMaps.push({
                                 from: basePath.replace(/\\/g,'/') + '/',
-                                to: path.join(cliDataPath, "templates", version).replace(/\\/g,'/') + '/',
+                                to: path.join(cliDataPath, "templates", version, "bootplate-"+key).replace(/\\/g,'/') + '/',
                                 version: version
                             })
                             break;
