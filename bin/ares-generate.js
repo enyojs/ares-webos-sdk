@@ -550,7 +550,7 @@ function _substParams(next) {
             "@ENYO-VERSION@": options.bpVer || savDefBpVer || DEF_BP_VER,
             "@SERVICE-NAME@": (options.svcName || DEF_SVC_NAME)
         };
-        var substitution = { fileRegexp: '[.]?' };
+        var substitution = { fileRegexp: '\.[js|json|c|cpp|cc|css|less|mm|h|hpp|hh]$' };
         substitution.regexp = wordMaps;
         substs.push(substitution);
         setImmediate(next);
