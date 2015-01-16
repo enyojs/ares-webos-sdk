@@ -16,6 +16,8 @@ var fs      = require('fs'),
     errMsgHdlr  = require('./../lib/error-handler'),
     cliData  = require('./../lib/cli-appdata').create('.ares');
 
+shelljs.config.fatal = true;  // Abort on all shelljs errors (e.g. cp/rm/mkdir)
+
 /**********************************************************************/
 var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
