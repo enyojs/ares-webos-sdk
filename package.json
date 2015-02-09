@@ -1,7 +1,7 @@
 {
 	"name": "ares-webos-sdk",
 	"main": "./lib/ipkg-tools.js",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"bin": {
 		"ares-novacom": "./bin/ares-novacom.js",
 		"ares-generate": "./bin/ares-generate.js",
