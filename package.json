@@ -42,7 +42,7 @@
 		"easy-table" : "~0.3.0"
 	},
 	"engines": {
-		"node": "~0.10.0",
+		"node": ">=0.10.0",
 		"npm": ">=1.2.11"
 	},
 	"engineStrict": true,
