@@ -3,6 +3,8 @@ var fs 		= require('fs'),
     async 	= require('async'),
     log 	= require('npmlog'),
     nopt 	= require('nopt'),
+    Table 	= require('easy-table'),
+    sprintf = require('sprintf-js').sprintf,
     ipkg 		= require('./../lib/ipkg-tools'),
     versionTool = require('./../lib/version-tools'),
     cliControl 	= require('./../lib/cli-control'),
@@ -35,6 +37,8 @@ var knownOpts = {
 	"remove":	String,
 	"opkg":	Boolean,
 	"opkg-param":	[String, null],
+	"storage": [String, null],
+	"storage-list": Boolean,
 	"version":	Boolean,
 	"help":		Boolean,
 	"hidden-help":		Boolean,
@@ -49,6 +53,8 @@ var shortHands = {
 	"l": ["--list"],
 	"F": ["--listfull"],
 	"t": ["--type"],
+	"s": ["--storage"],
+	"S": ["--storage-list"],
 	"D": ["--device-list"],
 	"V": ["--version"],
 	"h": ["--help"],
@@ -81,6 +87,8 @@ if (argv.list) {
 	op = install;
 } else if (argv.remove) {
 	op = remove;
+} else if (argv['storage-list']) {
+	op = listStorage;
 } else if (argv['device-list']) {
 	deviceTools.showDeviceListAndExit();
 } else if (argv['version']) {
@@ -93,7 +101,8 @@ var options = {
 	appId: 'com.ares.defaultName',
 	device: argv.device,
 	opkg: argv['opkg'] || false,
-	opkg_param:  argv['opkg-param']
+	opkg_param:  argv['opkg-param'],
+	storage: argv.storage
 };
 
 /**********************************************************************/
@@ -122,6 +131,8 @@ function showUsage(hiddenFlag) {
 		help.format("-F, --listfull", "List the installed app detailed infomatins"),
 		help.format("-t, --type <TYPE>", "Specify app TYPE (web, native, ...)"),
 		help.format("", 					"followed by '--list' or '--listfull'"),
+		help.format("-S, --list-storage", "List the STORAGEs in DEVICE"),
+		help.format("-s, --storage", "Specify STORAGE to install"),
 		help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 		help.format("-h, --help", "Display this help"),
 		help.format("-V, --version", "Display version info"),
@@ -145,6 +156,12 @@ function showUsage(hiddenFlag) {
 		"",
 		"# List web type apps among the applications installed in emulator",
 		processName + " -l -t web -d emulator",
+		"",
+		"# List the storages in device",
+		processName + " -S -d device",
+		"",
+		"# Install package into device in the attached USB storage",
+		processName + " ~/projects/packages/com.examples.app_1.0_all.ipk -d device -s usb1",
 		"",
 	];
 
@@ -225,6 +242,23 @@ function listFull() {
 			strPkgs = strPkgs.concat('\n');
 		});
 		process.stdout.write(strPkgs);
+		finish(err);
+	});
+}
+
+function listStorage() {
+	var table = new Table;
+	ipkg.installer.listStorage(options, function(err, result) {
+		if (Array.isArray(result)) {
+			log.verbose(JSON.stringify(result, null, "\t"));
+			result.forEach(function(storage){
+				table.cell('name', storage.name);
+				table.cell('type', storage.type);
+				table.cell('uri', storage.uri);
+				table.newRow();
+			});
+			console.log(table.toString());
+		}
 		finish(err);
 	});
 }
