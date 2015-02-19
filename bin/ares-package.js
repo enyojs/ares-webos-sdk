@@ -44,6 +44,7 @@ function PalmPackage() {
 		"deploy-enyo": String,
 		"deploy-lib": String,
 		"deploy-srcroot": String,
+		"override-appinfo": String,
 		"force": Boolean,
 		"pkgname": String,
 		"pkgversion": String
@@ -61,6 +62,7 @@ function PalmPackage() {
 		"de":		"--deploy-enyo",
 		"dl":		"--deploy-lib",
 		"ds":		"--deploy-srcroot",
+		"oi":       "--override-appinfo",
 		"f":		"--force",
 		"pn":		"--pkgname",
 		"pv":		"--pkgversion",
@@ -219,6 +221,9 @@ PalmPackage.prototype = {
 		}
 		if (this.argv.hasOwnProperty('deploy-srcroot')) {
 			this.options['deploy-srcroot'] = this.argv['deploy-srcroot'];
+		}		
+		if (this.argv.hasOwnProperty('override-appinfo')) {
+			this.options['override-appinfo'] = this.argv['override-appinfo'];
 		}		
 	},
 
