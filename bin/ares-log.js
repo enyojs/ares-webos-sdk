@@ -218,7 +218,8 @@ function printLog(next) {
 			"logThreadId" : true,
 			"logContext" : true,
 			"logMessageId" : true,
-			"logJson" : true
+			"logJson" : true,
+			"logUserTag" : true
 		},
 			"filters":{
 			"logTime" : "",
@@ -231,6 +232,7 @@ function printLog(next) {
 			"logContext" : "",
 			"logMessageId" : "",
 			"logJson" : "",
+			"logUserTag" : "",
 			"logText" : ""
 		}
 	};	
@@ -311,7 +313,7 @@ function printLog(next) {
 				if(argv.filter){
 					printFlag = false;
 					var originFilters = argv.filter;
-					var splitFilters = originFilter.split(/ ?\( ?| ?\) ?| ?&& ?| ?\|\| ?/);
+					var splitFilters = originFilters.split(/ ?\( ?| ?\) ?| ?&& ?| ?\|\| ?/);
 					var newScript = '';
 
 					for(index = 0; index < splitFilters.length; index++){
@@ -335,7 +337,7 @@ function printLog(next) {
 					console.log(printLog)
 
 				else if(printFlag)
-					_colorFilter(printLog, filter)		
+					_colorFilter(printLog, splitFilters)		
 			}			
 			function _splitLog(line){
 				var indexSpace = 0;
@@ -370,6 +372,15 @@ function printLog(next) {
 				log.logJson += (log.logJson == '')? "{}":"}";
 
 				log.logText = remainLogData[remainLogData.length-1];
+				log.logUserTag = "";
+				if(log.logText[0] == '/'){
+					var userTagIndex = log.logText.indexOf(":");
+					var spaceIndex = log.logText.indexOf(" ");
+					if (userTagIndex != -1 && ((spaceIndex > userTagIndex) || spaceIndex == -1)){
+						log.logUserTag = log.logText.slice(1,userTagIndex)
+						log.logText = log.logText.slice(userTagIndex+1);
+					}
+				}
 
 				return log;
 			}
@@ -434,6 +445,7 @@ function printLog(next) {
 				var indexArray = [];
 				var printLog = '';
 				for (index = 0; index < filter.length; index++){
+					
 					var log = logs;
 					var sliceIndex = 0;
 					if(filter[index] == "")
@@ -456,10 +468,11 @@ function printLog(next) {
 					else
 						return 1;
 				});
+				
 
 				for(index = indexArray.length-1; index >= 0 ; index--){
 					filterDataIndex = indexArray[index];
-					printLog = logs.slice(filterDataIndex[0] + filterDataIndex[1]) + printLog;i
+					printLog = logs.slice(filterDataIndex[0] + filterDataIndex[1]) + printLog;
 					//Change the filter's color : Yellow
 					printLog = logs.slice(filterDataIndex[0], filterDataIndex[0]+filterDataIndex[1]).yellow + printLog;
 					logs = logs.slice(0,filterDataIndex[0]);

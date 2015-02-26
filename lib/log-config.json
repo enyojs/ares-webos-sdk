@@ -10,11 +10,12 @@
 		"logThreadId" : true,
 		"logContext" : true,
 		"logMessageId" : true,
-		"logJson" : true
+		"logJson" : true,
+		"logUserTag" : true,
 	},
 	"filters":{
 		"logTime" : "",
-		"logMonotonicTime" : ["",""],
+		"logMonotonicTime" : "",
 		"logFacility" : "",
 		"logLevel" : "",
 		"logProcess" : "",
@@ -23,6 +24,7 @@
 		"logContext" : "",
 		"logMessageId" : "",
 		"logJson" : "",
+		"logUserTag" : "",
 		"logText" : ""
 	}
 }
