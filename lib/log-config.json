@@ -1,0 +1,28 @@
+{
+	"logFile" : "/media/developer/log/devlog2",
+	"logLines": 50,
+	"outputs":{
+		"logTime" : false, 
+		"logFacility" : true,
+		"logLevel" : true,
+		"logProcess" : true,
+		"logProcessId" : false,
+		"logThreadId" : true,
+		"logContext" : true,
+		"logMessageId" : true,
+		"logJson" : true
+	},
+	"filters":{
+		"logTime" : "",
+		"logMonotonicTime" : ["",""],
+		"logFacility" : "",
+		"logLevel" : "",
+		"logProcess" : "",
+		"logProcessId" : "",
+		"logThreadId" : "",
+		"logContext" : "",
+		"logMessageId" : "",
+		"logJson" : "",
+		"logText" : ""
+	}
+}
