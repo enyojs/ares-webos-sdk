@@ -40,6 +40,7 @@
 		"jsonschema": "~0.4.x",
 		"body-parser" : "1.4.x",
 		"easy-table" : "~0.3.0",
+		"inquirer" : "~0.8.0",
 		"colors" : "~1.0.3"
 	},
 	"engines": {
@@ -85,6 +86,7 @@
 		"jsonschema",
 		"body-parser",
 		"easy-table",
+		"inquirer",
 		"colors"
 	],
 	"files": [
