@@ -2,7 +2,7 @@
 	"logFile" : "/media/developer/log/devlog2",
 	"logLines": 50,
 	"outputs":{
-		"logTime" : false, 
+		"logTime" : true, 
 		"logFacility" : true,
 		"logLevel" : true,
 		"logProcess" : true,
@@ -11,7 +11,7 @@
 		"logContext" : true,
 		"logMessageId" : true,
 		"logJson" : true,
-		"logUserTag" : true,
+		"logUserTag" : true
 	},
 	"filters":{
 		"logTime" : "",

@@ -83,8 +83,6 @@ var helpString = [
 	help.format("-d, --device <DEVICE>", "Specify DEVICE to use"),
 	help.format("-D, --device-list", "List the available DEVICEs"),
 	help.format("-f, --follow", "Follow the log output (use Ctrl-C to terminate)"),
-	help.format("-l, --list", "List the installed app IDs"),
-	//help.format("--level <LEVEL>", "Tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
 	help.format("-c, --config <CONFIG_FILE>", "specify CONFIG_FILE to use"),	
 	help.format("-gc, --gen-config <FILE>", "Generate new config FILE"),
 	help.format("-F, --file <FILE>", "Specify FILE on target to display the log"),
@@ -102,10 +100,13 @@ var helpString = [
 	"Examples:",
 	"",
 	"# Display logs for app",
-	processName + " com.yourdomain.app -d emulator",
+	processName + "-d emulator -F /media/developer/log/devlog",
 	"",
 	"# Follow logs for app",
-	processName + " -f com.yourdomain.app -d emulator",
+	processName + " -f -d emulator -F /media/devleoper/log/devlog",
+	"",
+	"# Display filtered logs for app",
+	processName + " -f -d emulator -F /media/devleoper/log/devlog \" (user && info) || (kernel && warning) \"",
 	"",
 ];
 
@@ -121,9 +122,7 @@ log.verbose("argv", argv);
 argv.filter = (argv.argv.remain.length > 0)? argv.argv.remain[0] : null;
 
 var op;
-if (argv.list) {
-	op = list;
-} else if (argv['device-list']) {
+if (argv['device-list']) {
 	deviceTools.showDeviceListAndExit();
 } else if (argv.run) {
 	op = run;
@@ -152,43 +151,11 @@ if (op) {
 
 /**********************************************************************/
 
-function list(next) {
-	ipkg.installer.list(options, function(err, pkgs) {
-		var strPkgs = "";
-		if (pkgs instanceof Array) pkgs.forEach(function (pkg) {
-			strPkgs = strPkgs.concat(pkg.id).concat('\n');
-		});
-		process.stdout.write(strPkgs);
-		finish(err);
-	});
-}
-
 function generateConfig(next){
 	var dstPath = argv['gen-config'];
 	fs.writeFileSync(dstPath, fs.readFileSync(path.join(__dirname, '../lib/log-config.json')));
 	next();
 }
-
-/* Do Not Use
-function isInstalled(appId, next) {
-	var installed = false;
-	if (appId === null) {
-		return next();
-	}
-	ipkg.installer.list(options, function(err, pkgs) {
-		if (pkgs instanceof Array) pkgs.forEach(function (pkg) {
-			if(pkg.id == appId) {
-				installed = true;
-				return;
-			}
-		});
-		if (!installed) {
-			next(new Error(appId + " is not installed."));
-		} else {
-			next();
-		}
-	});
-}*/
 
 function run(next) {
 	var session = new novacom.Session(options.device, function(err, result) {
@@ -252,14 +219,21 @@ function printLog(next) {
 			session = new novacom.Session(options.device, next);
 
 			if(argv.config){
-				configFile = path.join(__dirname+"/../", argv.config);
+				configFile = path.join( __dirname, "../" + argv.config);
 				fs.readFile(configFile, 'utf8', function(err, str){
-					if(err)
+					if(err){
 						next(err);
+						return;
+					}
 					_setConfigData(str);
 				});
 				function _setConfigData(str){
-					configDataFromFile = JSON.parse(str);
+					try{
+						configDataFromFile = JSON.parse(str);
+					} catch (err){
+						next(err);
+						return;
+					}
 					for(datas in configData){
 						if (datas == "outputs" || datas == "filters")						
 							for(data in configData[datas]){
