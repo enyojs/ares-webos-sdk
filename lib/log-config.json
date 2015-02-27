@@ -1,12 +1,12 @@
 {
-	"logFile" : "/media/developer/log/devlog2",
+	"logFile" : "/media/developer/log/devlog",
 	"logLines": 50,
 	"outputs":{
 		"logTime" : true, 
 		"logFacility" : true,
 		"logLevel" : true,
 		"logProcess" : true,
-		"logProcessId" : false,
+		"logProcessId" : true,
 		"logThreadId" : true,
 		"logContext" : true,
 		"logMessageId" : true,
