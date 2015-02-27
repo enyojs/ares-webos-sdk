@@ -5,6 +5,7 @@ var fs = require('fs'),
     async = require('async'),
     sprintf = require('sprintf-js').sprintf,
 	Table = require('easy-table'),
+	inquirer = require("inquirer"),
     versionTool = require('./../lib/version-tools'),
     cliControl 	= require('./../lib/cli-control'),
     novacom = require('./../lib/novacom'),
@@ -76,18 +77,18 @@ var helpString = [
 	"",
 	help.format("To add a new device info, use '--add DEVICE_NAME -i <DEVICE_INFO>'"),
 	help.format("<DEVICE_INFO> can be one of the following forms"),
-	help.format("win32",            "\t (e.g.) --add tv2 -i \"{'username':'root', 'host':'127.0.0.1','port':'22'}\""),
-	help.format(["linux","darwin"], "\t (e.g.) --add tv2 -i '{\"username\":\"root\", \"host\":\"127.0.0.1\",\"port\":\"22\"}'"),
-	help.format("\t (e.g.) --add tv2 -i \"username=root\" -i \"host=127.0.0.1\" -i \"port=22\""),
+	help.format("win32",            "\t (e.g.) --add tv -i \"{'username':'root', 'host':'127.0.0.1','port':'22'}\""),
+	help.format(["linux","darwin"], "\t (e.g.) --add tv -i '{\"username\":\"root\", \"host\":\"127.0.0.1\",\"port\":\"22\"}'"),
+	help.format("\t (e.g.) --add tv -i \"username=root\" -i \"host=127.0.0.1\" -i \"port=22\""),
 	"",
 	help.format("To remove DEVICE, use '--remove DEVICE_NAME'"),
-	help.format("\t (e.g.) --remove tv2"),
+	help.format("\t (e.g.) --remove tv"),
 	"",
 	help.format("To modify DEVICE_INFO, use '--modify DEVICE_NAME -i <DEVICE_INFO>'"),
 	help.format("<DEVICE_INFO> can be one of the following forms"),
-	help.format("win32",            "\t (e.g.) --modify tv2 -i \"{'username':'developer','host':'192.168.0.123','port':'6622'}\""),
-	help.format(["linux","darwin"], "\t (e.g.) --modify tv2 -i '{\"username\":\"developer\",\"host\":\"192.168.0.123\",\"port\":\"6622\"}'"),
-	help.format("\t (e.g.) --modify tv2 -i \"username=developer\" -i \"host=192.168.0.123\" -i \"port=6622\""),
+	help.format("win32",            "\t (e.g.) --modify tv -i \"{'username':'developer','host':'192.168.0.123','port':'6622'}\""),
+	help.format(["linux","darwin"], "\t (e.g.) --modify tv -i '{\"username\":\"developer\",\"host\":\"192.168.0.123\",\"port\":\"6622\"}'"),
+	help.format("\t (e.g.) --modify tv -i \"username=developer\" -i \"host=192.168.0.123\" -i \"port=6622\""),
 	"",
 	"",
 	help.format("** Attributes of <DEVICE_INFO>"),
@@ -103,6 +104,15 @@ var helpString = [
 	help.format("                         ssh private key should exist under $HOME/.ssh/"),
 	help.format("   passphrase  [string]   passphrase used for generating ssh keys"),
 	help.format("   password  [string]   password for ssh connection"),
+	"",
+	"",
+	"EXAMPLES",
+	"",
+	"# Change ssh password of tv as 'foo' value",
+	help.format("\t (e.g.) -m tv -i \"password=foo\""),
+	"",
+	"# Change ssh password of tv as empty value",
+	help.format("\t (e.g.) -m tv -i \"password=\""),
 	""
 ];
 
@@ -152,8 +162,7 @@ var defaultDeviceInfo = {
 	port: 22,
 	username: "root",
 	description: "new device description",
-	files: "stream",
-	indelible: false
+	files: "stream"
 };
 
 var requiredKeys = {
@@ -169,6 +178,8 @@ var requiredKeys = {
 	"password": true
 };
 
+var questions = [];
+
 /**********************************************************************/
 function reset(next) {
 	var appdir = path.resolve(process.env.APPDATA || process.env.HOME || process.env.USERPROFILE, '.ares');
@@ -181,7 +192,7 @@ function reset(next) {
 				next();
 			}
 		},
-		list()
+		list
 	], function(err) {
 		next(err);
 	});
@@ -217,7 +228,7 @@ function list(next) {
 
 
 function listFull(next) {
-	var outputJson = []
+	var outputJson = [];
 	var resolver = new novacom.Resolver();
 	async.waterfall([
 		resolver.load.bind(resolver),
@@ -262,7 +273,6 @@ function replaceDefaultDeviceInfo(inDevice) {
 		inDevice.username = inDevice.username || defaultDeviceInfo.username;
 		inDevice.files = inDevice.files || defaultDeviceInfo.files;
 		inDevice.description = inDevice.description || defaultDeviceInfo.description;
-		inDevice.indelible = inDevice.indelible || defaultDeviceInfo.indelible;
 	}
 }
 
@@ -290,146 +300,62 @@ function refineJsonString(str) {
 	}
 }
 
-function getInput(inputMsg, next) {
-	var keyInputString = "";
-	process.stdin.resume();
-	process.stdin.setEncoding('utf8');
-	process.stdout.write(inputMsg+': ');
-	process.stdin.once('data', function (text) {
-		var input;
-		if (text !== '\n') {
-			input = text.toString().trim();
-		}
-		next(null, input);
-	});
-}
-
-function getDevice(name, next) {
-	if (!name) {
-		return next(new Error("Need to input a device name"));
-	}
-	var resolver = new novacom.Resolver();
-	async.waterfall([
-		resolver.load.bind(resolver),
-		resolver.getDeviceBy.bind(resolver, 'name', '^'+name+'$')
-	], function(err, device){
-		if (err) {
-			console.log("Adding new device named ", name, "!!");
-			next(null, {"name" : name, "mode":"add"});
-		} else {
-			next(null, device);
-		}
-	});
-}
-
 function interactiveInput(next) {
-	var mode = 'modify';
+	var mode, deviceName;
+	var resolver = new novacom.Resolver();
+
 	async.waterfall([
 		list.bind(this),
 		function(next) {
 			console.log("** You can modify the device info in the above list, or add new device.");
 			next();
 		},
-		getInput.bind(this,"Enter Device Name"),
-		getDevice.bind(this),
-		function(device, next) {
-			var inDevice = {};
-			if (device.mode) {
-				mode = device.mode;
-				delete device.mode;
-			}
-			if (device.name) {
-				console.log("Device Name :", device.name);
-			}
-			var keys = Object.keys(requiredKeys);
-			async.forEachSeries(keys, function(key, next){
-				if (requiredKeys[key] === false) {
-					inDevice[key] = device[key];
-					return next();
-				}
-				var defaultValue = (defaultDeviceInfo[key] !== 'undefined')? "(default: " + defaultDeviceInfo[key] + ")" : "";
-				var currentValue = (device[key])? "(" + device[key] + ")" : defaultValue;
-				async.waterfall([
-					getInput.bind(this, key + " " + currentValue),
-					function(input, next) {
-						inDevice[key] = (typeof input === "string" && input.length>0)? input : device[key];
-						next();
-					}
-				], function(err) {
-					next();
-				});
-			}, function(err) {
-				next(err, inDevice);
-			});
-		}
-	], function(err, inDevice){
-		if (err) {
-			return 	next(err);
-		} else {
-			var auth = 'pass'; //key or pass
-			async.series([
-				function(next) {
-					var nullValue = ["\"\"", "''"];
-					["privateKeyName", "password", "passphrase"].forEach(function(sshType) {
-						if (value = inDevice[sshType]) {
-							if (nullValue.indexOf(value) !== -1) {
-								delete inDevice[sshType];
-							}
-						}
+		_genQuestions,
+		function(next) {
+			inquirer.prompt(questions, function(answers) {
+				if (answers.confirm) {
+					log.info("setup-device#interactiveInput()", "Saved!");
+				} else {
+					log.info("setup-device#interactiveInput()", "Canceled!");
+					return next(null, {
+						"msg": "Canceled"
 					});
-					if (inDevice["privateKeyName"] && typeof inDevice["password"] === 'string') {
-						if (inDevice["password"].length === 0) {
-							auth = 'key';
-							return next();
-						}
-						async.waterfall([
-							getInput.bind(this, "Select SSH auth method [ssh Key(k) or password(p)]"),
-							function(input, next) {
-								if (!input) {
-									auth = 'key';
-								}
-								else if (input.match(/pass|P/gi)){
-									auth = 'pass';
-								} else {
-									auth = 'key';
-								}
-								next();
-							}
-						], function(err) {
-							next(err);
-						});
-					} else {
-						if (inDevice["privateKeyName"]) {
-							auth = 'key';
-						} else if ((inDevice["password"])) {
-							auth = 'pass';
-						}
-						next();
-					}
-				},
-				function (next) {
-					if (auth === 'pass') {
-						inDevice["password"] = inDevice["password"] || "";
+				}
+				var inDevice = {
+					name: deviceName,
+					host: answers['ip'],
+					port: answers['port'],
+					description: answers['description'],
+					username: answers['user']
+				};
+				if (mode !== 'remove') {
+					if (answers['auth_type'] && answers['auth_type'] === "password") {
+						inDevice["password"] = answers['password']
 						inDevice["privateKey"] = "@DELETE@";
 						inDevice["passphrase"] = "@DELETE@";
 						inDevice["privateKeyName"] = "@DELETE@";
-					} else if (auth === 'key') {
+					} else if (answers['auth_type'] && answers['auth_type'] === "ssh key") {
 						inDevice["password"] = "@DELETE@";
-						inDevice["privateKey"] = { "openSsh": inDevice["privateKeyName"] };
-						inDevice["passphrase"] = inDevice["passphrase"] || "@DELETE@";
+						inDevice["privateKey"] = {
+							"openSsh": answers['ssh_key']
+						};
+						inDevice["passphrase"] = answers['ssh_passphrase'] || "@DELETE@";
 						inDevice["privateKeyName"] = "@DELETE@";
+					} else {
+						return next(new Error("Not supported auth type (" + answers['auth_type'] + ")"));
 					}
-					next();
-				}
-			], function(err) {
-				if (err) {
-					return next(err);
+					if (answers['trans_type'] && answers['trans_type'] === "sftp(fast)") {
+						inDevice["files"] = "sftp";
+					} else if (answers['trans_type'] && answers['trans_type'] === "stream(slow)") {
+						inDevice["files"] = "stream";
+					} else {
+						return next(new Error("Not supported file transition method (" + answers['trans_type'] + ")"));
+					}
 				}
 				replaceDefaultDeviceInfo(inDevice);
 				if (inDevice.port) {
 					inDevice.port = Number(inDevice.port);
 				}
-				var resolver = new novacom.Resolver();
 				async.series([
 					resolver.load.bind(resolver),
 					resolver.modifyDeviceFile.bind(resolver, mode, inDevice),
@@ -438,11 +364,187 @@ function interactiveInput(next) {
 					if (err) {
 						return next(err);
 					}
-					next(null, {"msg": "Success to " + mode + " a device!!"});
+					next(null, {
+						"msg": "Success to " + mode + " a device!!"
+					});
 				});
-			});
+			})
 		}
-	})
+	], function(err, result) {
+		next(err, result);
+	});
+
+	function _genQuestions(next) {
+		async.waterfall([
+			resolver.load.bind(resolver),
+			resolver.list.bind(resolver),
+			function(devices, next) {
+				next(null, devices);
+			},
+			function(devices, next) {
+				var selDevice = {};
+				var inqChoices = ["add", "modify"];
+				var rmChoices = ["remove"];
+				var totChoices = inqChoices.concat(rmChoices);
+				var deviceNames = devices.map(function(device) {
+					return (device.name);
+				});
+				var transMethod = {
+					stream: "stream(slow)",
+					sftp: "sftp(fast)"
+				};
+				var _needInq = function(choice) {
+					return function(choices) {
+						return (choices.indexOf(choice) !== -1);
+					};
+				}
+				questions = [{
+					type: "list",
+					name: "op",
+					message: "Select",
+					choices: totChoices,
+					filter: function(val) {
+						return val.toLowerCase();
+					}
+				}, {
+					type: "input",
+					name: "device_name",
+					message: "Enter Device Name:",
+					when: function(answers) {
+						return (answers.op == "add");
+					},
+					validate: function(input) {
+						var done = this.async();
+						if (input.length < 1) {
+							return done("Please enter device name.");
+						}
+						if (deviceNames.indexOf(input) !== -1) {
+							return done("Device name is duplicated. Please use another name.");
+						}
+						done(true);
+					}
+				}, {
+					type: "list",
+					name: "device_name",
+					message: "Select a device",
+					choices: deviceNames,
+					when: function(answers) {
+						return (["modify", "remove"].indexOf(answers.op) !== -1);
+					}
+				}];
+				inquirer.prompt(questions, function(answers) {
+					mode = answers.op;
+					deviceName = answers.device_name;
+					devices.forEach(function(device) {
+						if (answers.device_name === device.name) {
+							selDevice = device;
+						}
+					});
+
+					questions = [{
+						type: "input",
+						name: "ip",
+						message: "Enter Device IP address:",
+						default: function() {
+							return selDevice.host || "127.0.0.1"
+						},
+						when: function(answers) {
+							return _needInq(mode)(inqChoices);
+						}
+					}, {
+						type: "input",
+						name: "port",
+						message: "Enter Device Port:",
+						default: function() {
+							return selDevice.port || "22"
+						},
+						when: function(answers) {
+							return _needInq(mode)(inqChoices);
+						}
+					}, {
+						type: "input",
+						name: "user",
+						message: "Enter ssh user:",
+						default: function() {
+							return selDevice.username || "root"
+						},
+						when: function(answers) {
+							return _needInq(mode)(inqChoices);
+						}
+					}, {
+						type: "input",
+						name: "description",
+						message: "Enter description:",
+						default: function() {
+							return selDevice.description || "new device"
+						},
+						when: function(answers) {
+							return _needInq(mode)(inqChoices);
+						}
+					}, {
+						type: "list",
+						name: "trans_type",
+						message: "Select file transition method",
+						choices: ["stream(slow)", "sftp(fast)"],
+						default: ((selDevice.files) ? transMethod[selDevice.files] : 0),
+						when: function(answers) {
+							return _needInq(mode)(inqChoices);
+						}
+					}, {
+						type: "list",
+						name: "auth_type",
+						message: "Select authentification",
+						choices: ["password", "ssh key"],
+						default: function() {
+							var idx = 0;
+							if (selDevice.privateKeyName) {
+								idx = 1;
+							}
+							return idx;
+						},
+						when: function(answers) {
+							return _needInq(mode)(inqChoices);
+						}
+					}, {
+						type: "password",
+						name: "password",
+						message: "Enter password:",
+						when: function(answers) {
+							return _needInq(mode)(inqChoices) && (answers.auth_type == "password");
+						}
+					}, {
+						type: "input",
+						name: "ssh_key",
+						message: "Enter ssh private key file name:",
+						default: function() {
+							return selDevice.privateKeyName || "webos_emul"
+						},
+						when: function(answers) {
+							return _needInq(mode)(inqChoices) && (answers.auth_type == "ssh key");
+						}
+					}, {
+						type: "input",
+						name: "ssh_passphrase",
+						message: "Enter key's passphrase:",
+						default: function() {
+							return selDevice.passphrase || undefined
+						},
+						when: function(answers) {
+							return _needInq(mode)(inqChoices) && (answers.auth_type == "ssh key");
+						}
+					}, {
+						type: "confirm",
+						name: "confirm",
+						message: "Save ?",
+						default: true
+					}];
+					next();
+				});
+			}
+		], function(err) {
+			next(err);
+		});
+	}
 }
 
 function isJson(str) {
@@ -497,6 +599,9 @@ function modifyDeviceInfo(next) {
 			}
 			inDevice.name = argv[mode];
 		}
+		if (inDevice.privateKey) {
+			inDevice.privatekey = inDevice.privateKey;
+		}
 		if (typeof inDevice.privatekey === "string") {
 			inDevice.privateKey = inDevice.privatekey;
 			inDevice.privateKey = { "openSsh": inDevice.privateKey };
@@ -509,6 +614,9 @@ function modifyDeviceInfo(next) {
 		}
 		if (mode === "add") {
 			replaceDefaultDeviceInfo(inDevice);
+			if (!inDevice.privateKey && !inDevice.password) {
+				inDevice.password = "";
+			}
 		}
 		var resolver = new novacom.Resolver();
 		if (inDevice.port) {
