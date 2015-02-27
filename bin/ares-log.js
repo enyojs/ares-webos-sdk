@@ -73,7 +73,7 @@ var helpString = [
 	help.format(processName + " - Display application logs from a webOS device."),
 	"",
 	"SYNOPSIS",
-	help.format(processName + " [OPTION...] [APP_ID]"),
+	help.format(processName + " [OPTION...]"),
 //	"Options (Not implmeneted) :",
 //	help.format(processName + " [OPTIONS] --put file://DEVICE_PATH < HOST_FILE"),
 //	help.format(processName + " [OPTIONS] --get file://DEVICE_PATH > HOST_FILE"),
@@ -83,10 +83,10 @@ var helpString = [
 	help.format("-d, --device <DEVICE>", "Specify DEVICE to use"),
 	help.format("-D, --device-list", "List the available DEVICEs"),
 	help.format("-f, --follow", "Follow the log output (use Ctrl-C to terminate)"),
-	help.format("-c, --config <CONFIG_FILE>", "specify CONFIG_FILE to use"),	
-	help.format("-gc, --gen-config <FILE>", "Generate new config FILE"),
-	help.format("-F, --file <FILE>", "Specify FILE on target to display the log"),
-	help.format("-HF, --hostfile <FILE", "Spefify FILE on host pc to display the log"),
+	help.format("-c, --config <FILTER_CONFIG_FILE>", "Specify FILTER_CONFIG_FILE to use"),
+	help.format("-gc, --gen-config <FILTER_CONFIG_FILE>", "Generate a FILTER_CONFIG_FILE"),
+	help.format("-F, --file <LOG_FILE>", "Specify LOG_FILE on target to display the log"),
+	help.format("-HF, --hostfile <LOG_FILE>", "Spefify LOG_FILE on host pc to display the log"),
 	help.format("-h, --help", "Display this help"),
 	help.format("-V, --version", "Display version info"),
 	"",
@@ -95,18 +95,16 @@ var helpString = [
 	help.format("**Restriction**"),
 	help.format("this command can display only native application logs, not web application."),
 	"", 
-	help.format("APP_ID is the id of the application for which logs are shown."),
-	"", 
 	"Examples:",
 	"",
 	"# Display logs for app",
-	processName + "-d emulator -F /media/developer/log/devlog",
+	processName + " -d emulator -F /media/developer/log/devlog",
 	"",
 	"# Follow logs for app",
-	processName + " -f -d emulator -F /media/devleoper/log/devlog",
+	processName + " -d emulator -F /media/devleoper/log/devlog -f",
 	"",
 	"# Display filtered logs for app",
-	processName + " -f -d emulator -F /media/devleoper/log/devlog \" (user && info) || (kernel && warning) \"",
+	processName + " -d emulator -F /media/devleoper/log/devlog \" (user && info) || (kernel && warning) \"",
 	"",
 ];
 
@@ -150,10 +148,11 @@ if (op) {
 }
 
 /**********************************************************************/
+var defaultConfigFile = path.join(__dirname, '../lib/log-config.json');
 
 function generateConfig(next){
 	var dstPath = argv['gen-config'];
-	fs.writeFileSync(dstPath, fs.readFileSync(path.join(__dirname, '../lib/log-config.json')));
+	fs.writeFileSync(dstPath, fs.readFileSync(defaultConfigFile));
 	next();
 }
 
@@ -162,8 +161,7 @@ function run(next) {
 		log.verbose("run()", "argv:", argv.run);
 		log.verbose("run()", "options:", options);
 		if (err) {
-			next(err);
-			return;
+			return next(err);
 		}
 		session.run(argv.run, process.stdin, process.stdout, process.stderr, next);
 	});
@@ -172,37 +170,7 @@ function run(next) {
 function printLog(next) {
 	var configFile;
 	var configDataFromFile = {};
-	var configData = {
-		"logFile" : "/media/developer/log/devlog",
-		"logLines": 50,
-		"outputs":{
-			"logTime" : true,
-			"logMonotonicTime" : true,
-			"logFacility" : true,
-			"logLevel" : true,
-			"logProcess" : true,
-			"logProcessId" : false,
-			"logThreadId" : true,
-			"logContext" : true,
-			"logMessageId" : true,
-			"logJson" : true,
-			"logUserTag" : true
-		},
-			"filters":{
-			"logTime" : "",
-			"logMonotonicTime" : "",
-			"logFacility" : "", 
-			"logLevel" : "",
-			"logProcess" : "",
-			"logProcessId" : "",
-			"logThreadId" : "",
-			"logContext" : "",
-			"logMessageId" : "",
-			"logJson" : "",
-			"logUserTag" : "",
-			"logText" : ""
-		}
-	};	
+	var configData = {};
 	log.verbose("printLog()", "options:", options);
 
 	if (argv.follow) {
@@ -211,19 +179,26 @@ function printLog(next) {
 		argv.follow = "";
 	}
 
-	var logFile = argv.file || argv.hostfile || configData.logFile;
 	var msgNotFoundLog = "Cannot access the Log file";
 	var session;
 	async.series([
-		function(next){
+		function(next) {
+			var defaultConfigData = fs.readFileSync(defaultConfigFile, 'utf8');
+			try {
+				configData = JSON.parse(defaultConfigData);
+			} catch(err) {
+				return next(new Error("JSON syntax error in " + defaultConfigFile));
+			}
+			next();
+		},
+		function(next) {
 			session = new novacom.Session(options.device, next);
 
 			if(argv.config){
-				configFile = path.join( __dirname, "../" + argv.config);
+				configFile = path.resolve(argv.config);
 				fs.readFile(configFile, 'utf8', function(err, str){
 					if(err){
-						next(err);
-						return;
+						return next(err);
 					}
 					_setConfigData(str);
 				});
@@ -231,8 +206,7 @@ function printLog(next) {
 					try{
 						configDataFromFile = JSON.parse(str);
 					} catch (err){
-						next(err);
-						return;
+						return next(new Error("JSON syntax error in " + configFile));
 					}
 					for(datas in configData){
 						if (datas == "outputs" || datas == "filters")						
@@ -248,6 +222,7 @@ function printLog(next) {
 			}
 		},
 		function(next) {
+			var logFile = argv.file || argv.hostfile || configData.logFile;
 			if(logFile == argv.hostfile){
 				fs.readFile(logFile, function(err, data){
 					_onData(data);
