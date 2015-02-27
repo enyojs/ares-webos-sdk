@@ -40,7 +40,8 @@
 		"jsonschema": "~0.4.x",
 		"body-parser" : "1.4.x",
 		"easy-table" : "~0.3.0",
-		"inquirer" : "~0.8.0"
+		"inquirer" : "~0.8.0",
+		"colors" : "~1.0.3"
 	},
 	"engines": {
 		"node": ">=0.10.0",
@@ -85,7 +86,8 @@
 		"jsonschema",
 		"body-parser",
 		"easy-table",
-		"inquirer"
+		"inquirer",
+		"colors"
 	],
 	"files": [
 		"DEMO.md",

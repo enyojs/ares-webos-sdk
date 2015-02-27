@@ -598,6 +598,11 @@
         }
       }
     },
+    "colors": {
+      "version": "1.0.3",
+      "from": "colors@",
+      "resolved": "https://registry.npmjs.org/colors/-/colors-1.0.3.tgz"
+    },
     "combined-stream": {
       "version": "0.0.4",
       "from": "https://registry.npmjs.org/combined-stream/-/combined-stream-0.0.4.tgz",
