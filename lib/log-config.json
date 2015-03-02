@@ -3,6 +3,7 @@
 	"logLines": 50,
 	"outputs":{
 		"logTime" : true, 
+		"logMonotonicTime" : true,
 		"logFacility" : true,
 		"logLevel" : true,
 		"logProcess" : true,
