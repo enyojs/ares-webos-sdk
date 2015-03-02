@@ -124,7 +124,7 @@ if (argv['device-list']) {
 	deviceTools.showDeviceListAndExit();
 } else if (argv.run) {
 	op = run;
-} else if (argv.device) {
+} else if (argv.device || argv.hostfile) {
 	op = printLog;
 } else if (argv['gen-config']) {
 	op = generateConfig;
@@ -179,6 +179,7 @@ function printLog(next) {
 		argv.follow = "";
 	}
 
+
 	var msgNotFoundLog = "Cannot access the Log file";
 	var session;
 	async.series([
@@ -192,8 +193,6 @@ function printLog(next) {
 			next();
 		},
 		function(next) {
-			session = new novacom.Session(options.device, next);
-
 			if(argv.config){
 				configFile = path.resolve(argv.config);
 				fs.readFile(configFile, 'utf8', function(err, str){
@@ -220,6 +219,7 @@ function printLog(next) {
 					}
 				}
 			}
+			next();
 		},
 		function(next) {
 			var logFile = argv.file || argv.hostfile || configData.logFile;
@@ -231,6 +231,7 @@ function printLog(next) {
 				});
 			}
 			else {
+				session = new novacom.Session(options.device, next);
 				var command = "test -e " + logFile + " && tail -n " + configData.logLines + " " + argv.follow + " " + logFile + " || echo " + msgNotFoundLog;
 				session.run(command, process.stdin, _onData, process.stderr, next);
 			}
@@ -259,11 +260,12 @@ function printLog(next) {
 
 				var printFlag = true;
 				var printLog = _generateLog(logs);
+				var splitFilters = [];
 
 				if(argv.filter){
 					printFlag = false;
 					var originFilters = argv.filter;
-					var splitFilters = originFilters.split(/ ?\( ?| ?\) ?| ?&& ?| ?\|\| ?/);
+					splitFilters = originFilters.split(/ ?\( ?| ?\) ?| ?&& ?| ?\|\| ?/);
 					var newScript = '';
 
 					for(index = 0; index < splitFilters.length; index++){
@@ -283,11 +285,16 @@ function printLog(next) {
 					if(eval(newScript))
 						printFlag = true;
 				}
-				if(printFlag && !argv.filter)
-					console.log(printLog)
 
-				else if(printFlag)
-					_colorFilter(printLog, splitFilters)		
+				for (filter in configData.filters){
+					if(Array.isArray(filter))
+						splitFilters.concat(configData.filters[filter]);
+					else
+						splitFilters.push(configData.filters[filter]);
+				}	
+				
+				if(printFlag)
+					_colorFilter(printLog, splitFilters, "yellow");
 			}			
 			function _splitLog(line){
 				var indexSpace = 0;
@@ -322,14 +329,15 @@ function printLog(next) {
 				log.logJson += (log.logJson == '')? "{}":"}";
 
 				log.logText = remainLogData[remainLogData.length-1];
+				log.logUserAppId = "";
 				log.logUserTag = "";
-				if(log.logText[0] == '/'){
-					var userTagIndex = log.logText.indexOf(":");
-					var spaceIndex = log.logText.indexOf(" ");
-					if (userTagIndex != -1 && ((spaceIndex > userTagIndex) || spaceIndex == -1)){
-						log.logUserTag = log.logText.slice(1,userTagIndex)
-						log.logText = log.logText.slice(userTagIndex+1);
-					}
+				var userTagIndex1 = log.logText.indexOf("/");
+				var userTagIndex2 = log.logText.indexOf(":");
+
+				if(userTagIndex1 != -1 && userTagIndex2 != -1 && userTagIndex1 < userTagIndex2){
+					log.logUserAppId = log.logText.slice(0, userTagIndex1);
+					log.logUserTag = log.logText.slice(userTagIndex1+1, userTagIndex2);
+					log.logText = log.logText.slice(userTagIndex2+1);
 				}
 
 				return log;
@@ -375,15 +383,21 @@ function printLog(next) {
 					if(configData.outputs[output]){
 						if(output == 'logProcessId' || (output=='logThreadId' && configData.outputs.logProcessId == false))
 							log += "[";
+						if((logs.logUserAddId != "" || logs.logUserTag != "") && output == 'logUserTag')
+							log += "/";							
 
 						log += logs[output];
 
 						if(output == 'logFacility' && configData.outputs.logLevel)
 							log += ".";
-						else if (output == 'logProcessId' && configData.outputs.logThreadId)
+						else if ((output == 'logProcessId' && configData.outputs.logThreadId) || (output == 'logUserTag'))
 							log += ":";
 						else if (output == 'logThreadId' || (output == 'logProcessId' && configData.outputs.logThreadId == false))
 							log += "] "
+						else if (output == 'logUserAppId'){
+							var sp = (configData.outputs.logUserTag)?"" : "/:";
+							log += sp;
+						}
 						else
 							log += " ";
 					}
@@ -391,7 +405,7 @@ function printLog(next) {
 				return log;
 			}
 
-			function _colorFilter(logs, filter){
+			function _colorFilter(logs, filter, color){
 				var indexArray = [];
 				var printLog = '';
 				for (index = 0; index < filter.length; index++){
@@ -424,7 +438,7 @@ function printLog(next) {
 					filterDataIndex = indexArray[index];
 					printLog = logs.slice(filterDataIndex[0] + filterDataIndex[1]) + printLog;
 					//Change the filter's color : Yellow
-					printLog = logs.slice(filterDataIndex[0], filterDataIndex[0]+filterDataIndex[1]).yellow + printLog;
+					printLog = logs.slice(filterDataIndex[0], filterDataIndex[0]+filterDataIndex[1])[color] + printLog;
 					logs = logs.slice(0,filterDataIndex[0]);
 				}
 
