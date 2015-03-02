@@ -224,7 +224,7 @@ function printLog(next) {
 		function(next) {
 			var logFile = argv.file || argv.hostfile || configData.logFile;
 			logFile = path.resolve(logFile);
-			if(logFile === path.resolve(argv.hostfile)){
+			if(argv.hostfile && logFile === path.resolve(argv.hostfile)){
 				fs.readFile(logFile, function(err, data){
 					_onData(data);
 					next();
