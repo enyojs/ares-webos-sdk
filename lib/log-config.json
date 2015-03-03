@@ -12,6 +12,7 @@
 		"logContext" : true,
 		"logMessageId" : true,
 		"logJson" : true,
+		"logUserAppId" : true,
 		"logUserTag" : true
 	},
 	"filters":{
@@ -25,6 +26,7 @@
 		"logContext" : "",
 		"logMessageId" : "",
 		"logJson" : "",
+		"logUserAppId": "", 
 		"logUserTag" : "",
 		"logText" : ""
 	}
