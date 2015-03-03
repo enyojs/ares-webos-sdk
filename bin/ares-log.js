@@ -195,12 +195,9 @@ function printLog(next) {
 		function(next) {
 			if(argv.config){
 				configFile = path.resolve(argv.config);
-				fs.readFile(configFile, 'utf8', function(err, str){
-					if(err){
-						return next(err);
-					}
-					_setConfigData(str);
-				});
+				var str = fs.readFileSync(configFile, 'utf8');
+				_setConfigData(str);
+				
 				function _setConfigData(str){
 					try{
 						configDataFromFile = JSON.parse(str);
@@ -231,9 +228,18 @@ function printLog(next) {
 				});
 			}
 			else {
-				session = new novacom.Session(options.device, next);
-				var command = "test -e " + logFile + " && tail -n " + configData.logLines + " " + argv.follow + " " + logFile + " || echo " + msgNotFoundLog;
-				session.run(command, process.stdin, _onData, process.stderr, next);
+				async.waterfall([
+					function(next){
+						new novacom.Session(options.device, next);
+					},
+					function(session, next){
+						var command = "test -e " + logFile + " && tail -n " + configData.logLines + " " + argv.follow + " " + logFile + " || echo " + msgNotFoundLog;
+						session.run(command, process.stdin, _onData, process.stderr, next);
+
+					}
+				], function(err){
+					next(err);
+				});
 			}
 
 			function _onData(data) {
@@ -383,18 +389,19 @@ function printLog(next) {
 					if(configData.outputs[output]){
 						if(output == 'logProcessId' || (output=='logThreadId' && configData.outputs.logProcessId == false))
 							log += "[";
-						if((logs.logUserAddId != "" || logs.logUserTag != "") && output == 'logUserTag')
+						if((logs.logUserAppId != "" || logs.logUserTag != "") && output == 'logUserTag'){
 							log += "/";							
+						}
 
 						log += logs[output];
 
 						if(output == 'logFacility' && configData.outputs.logLevel)
 							log += ".";
-						else if ((output == 'logProcessId' && configData.outputs.logThreadId) || (output == 'logUserTag'))
+						else if ((output == 'logProcessId' && configData.outputs.logThreadId) || ((logs.logUserAppId != "" || logs.logUserTag != "") && (output == 'logUserTag')))
 							log += ":";
 						else if (output == 'logThreadId' || (output == 'logProcessId' && configData.outputs.logThreadId == false))
 							log += "] "
-						else if (output == 'logUserAppId'){
+						else if (logs.logUserAppId != "" && output == 'logUserAppId'){
 							var sp = (configData.outputs.logUserTag)?"" : "/:";
 							log += sp;
 						}
