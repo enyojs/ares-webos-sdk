@@ -409,6 +409,7 @@ function printLog(next) {
 							log += " ";
 					}
 				}
+				log += logs.logText;
 				return log;
 			}
 
