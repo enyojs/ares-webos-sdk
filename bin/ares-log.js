@@ -18,10 +18,11 @@ var fs  	= require('fs'),
 var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
-	log.info('exit', err);
-	log.error('exit', err.toString());
-	cliControl.end(-1);
+    log.error("*** " + processName + ": "+ err.toString());
+    log.info('uncaughtException', err.stack);
+    cliControl.end(-1);
 });
+
 
 if (process.argv.length === 2) {
 	process.argv.splice(2, 0, '--help');
@@ -38,13 +39,11 @@ var knownOpts = {
 	"version":	Boolean,
 	// command-specific options
 	"device-list":		Boolean,
-	"list":		Boolean,
-	"port":		[String, Array],
 	"device":	[String, null],
 	// no shortHands
-	"run":		[String, null],
-	"file":		[String, null],
-	"hostfile":	path,
+	"id" : 	[String, null],
+	"file" : [String, null],
+	"output" : [String, null],
 	"follow":	Boolean,
 	"config":	[String, null],
 	"gen-config":	path
@@ -57,14 +56,13 @@ var shortHands = {
 	"V": ["--version"],
 	// command-specific aliases
 	"D": ["--device-list"],
-	"l": ["--list"],
-	"p": ["--port"],
+	"i": ["--id"],
 	"f": ["--follow"],
-	"d": ["--device"],
 	"F": ["--file"],
+	"o": ["--output"],
+	"d": ["--device"],
 	"c": ["--config"],
 	"gc": ["--gen-config"],
-	"HF": ["--hostfile"]
 };
 
 var helpString = [
@@ -74,19 +72,16 @@ var helpString = [
 	"",
 	"SYNOPSIS",
 	help.format(processName + " [OPTION...]"),
-//	"Options (Not implmeneted) :",
-//	help.format(processName + " [OPTIONS] --put file://DEVICE_PATH < HOST_FILE"),
-//	help.format(processName + " [OPTIONS] --get file://DEVICE_PATH > HOST_FILE"),
-//	"",
+	help.format(processName + " [OPTION...] <FILTER>"),
 	"",
 	"OPTION",
 	help.format("-d, --device <DEVICE>", "Specify DEVICE to use"),
 	help.format("-D, --device-list", "List the available DEVICEs"),
 	help.format("-f, --follow", "Follow the log output (use Ctrl-C to terminate)"),
-	help.format("-c, --config <FILTER_CONFIG_FILE>", "Specify FILTER_CONFIG_FILE to use"),
-	help.format("-gc, --gen-config <FILTER_CONFIG_FILE>", "Generate a FILTER_CONFIG_FILE"),
-	help.format("-F, --file <LOG_FILE>", "Specify LOG_FILE on target to display the log"),
-	help.format("-HF, --hostfile <LOG_FILE>", "Spefify LOG_FILE on host pc to display the log"),
+	//help.format("-F, --file <LOG_FILE>", "Specify LOG_FILE on target"),
+	help.format("-o, --output <FORMAT>, ", 
+			"Display additional log data with default log, <FORMAT> : time, process"),
+	help.format("-i, --id <APP ID> or <Service ID>", "Specify ID to display"),
 	help.format("-h, --help", "Display this help"),
 	help.format("-V, --version", "Display version info"),
 	"",
@@ -98,14 +93,28 @@ var helpString = [
 	"Examples:",
 	"",
 	"# Display logs for app",
-	processName + " -d emulator -F /media/developer/log/devlog",
+	processName + " -d emulator",
 	"",
 	"# Follow logs for app",
-	processName + " -d emulator -F /media/devleoper/log/devlog -f",
+	processName + " -d emulator -f",
 	"",
 	"# Display filtered logs for app",
-	processName + " -d emulator -F /media/devleoper/log/devlog \" (user && info) || (kernel && warning) \"",
+	processName + " -d emulator <FILTER> <FILTER> ...",
 	"",
+	"## <FILTER> is a series of",
+	"tag[:LEVEL], (e.g. UserTag1:E, *:I)",
+	"",
+	"LEVEL priority",
+	" D\tDebug (lowest)",
+	" I\tInfo",
+	" W\tWarning",
+	" E\tError",
+	" C\tCritical",
+	" S\tSilent (higest)",
+	"",
+	" '*' mean all tags",
+	" If no <FILTER> Rule specified, filter defaults to '*:D'",
+	""
 ];
 
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-*.js'*/);
@@ -117,15 +126,10 @@ log.level = argv.level || 'warn';
 
 /**********************************************************************/
 log.verbose("argv", argv);
-argv.filter = (argv.argv.remain.length > 0)? argv.argv.remain[0] : null;
 
 var op;
 if (argv['device-list']) {
 	deviceTools.showDeviceListAndExit();
-} else if (argv.run) {
-	op = run;
-} else if (argv.device || argv.hostfile) {
-	op = printLog;
 } else if (argv['gen-config']) {
 	op = generateConfig;
 } else if (argv.version) {
@@ -134,7 +138,7 @@ if (argv['device-list']) {
 	help.print(helpString);
 	cliControl.end();
 } else {
-	cliControl.end();
+	op = printLog;
 }
 
 var options = {
@@ -156,310 +160,195 @@ function generateConfig(next){
 	next();
 }
 
-function run(next) {
-	var session = new novacom.Session(options.device, function(err, result) {
-		log.verbose("run()", "argv:", argv.run);
-		log.verbose("run()", "options:", options);
-		if (err) {
-			return next(err);
-		}
-		session.run(argv.run, process.stdin, process.stdout, process.stderr, next);
-	});
-}
 
 function printLog(next) {
-	var configFile;
-	var configDataFromFile = {};
-	var configData = {};
 	log.verbose("printLog()", "options:", options);
+	
+	var self = this;
+	argv.follow = (argv.follow)? "-f":"";
 
-	if (argv.follow) {
-		argv.follow = "-f";
-	} else {
-		argv.follow = "";
-	}
-
-
-	var msgNotFoundLog = "Cannot access the Log file";
-	var session;
 	async.series([
-		function(next) {
-			var defaultConfigData = fs.readFileSync(defaultConfigFile, 'utf8');
-			try {
-				configData = JSON.parse(defaultConfigData);
-			} catch(err) {
-				return next(new Error("JSON syntax error in " + defaultConfigFile));
-			}
-			next();
-		},
-		function(next) {
-			if(argv.config){
-				configFile = path.resolve(argv.config);
-				var str = fs.readFileSync(configFile, 'utf8');
-				_setConfigData(str);
-				
-				function _setConfigData(str){
-					try{
-						configDataFromFile = JSON.parse(str);
-					} catch (err){
-						return next(new Error("JSON syntax error in " + configFile));
-					}
-					for(datas in configData){
-						if (datas == "outputs" || datas == "filters")						
-							for(data in configData[datas]){
-								if(configDataFromFile[datas][data] == undefined)
-									continue;
-								configData[datas][data] = configDataFromFile[datas][data];
-							}
-						else
-							configData[datas] = configDataFromFile[datas] || configData[datas];
-					}
-				}
-			}
-			next();
-		},
-		function(next) {
-			var logFile = argv.file || argv.hostfile || configData.logFile;
-			logFile = path.resolve(logFile);
-			if(argv.hostfile && logFile === path.resolve(argv.hostfile)){
-				fs.readFile(logFile, function(err, data){
-					_onData(data);
-					next();
-				});
-			}
-			else {
-				async.waterfall([
-					function(next){
-						new novacom.Session(options.device, next);
-					},
-					function(session, next){
-						var command = "test -e " + logFile + " && tail -n " + configData.logLines + " " + argv.follow + " " + logFile + " || echo " + msgNotFoundLog;
-						session.run(command, process.stdin, _onData, process.stderr, next);
-
-					}
-				], function(err){
-					next(err);
-				});
-			}
-
-			function _onData(data) {
-				var str;
-				if (Buffer.isBuffer(data)) {
-					str = data.toString();
-				} else {
-					str = data;
-				}
-				str.split(/\r?\n/).forEach(_onLine);
-			}
-
-			function _onLine(line) {	
-				if (line == '' || line == undefined)
-					return;
-
-				var logs = _splitLog(line);
-
-				for (filter in configData.filters){
-					if(_checkFilter(logs, filter, configData.filters[filter]) == false){
-						return;
-					}
-				}
-
-				var printFlag = true;
-				var printLog = _generateLog(logs);
-				var splitFilters = [];
-
-				if(argv.filter){
-					printFlag = false;
-					var originFilters = argv.filter;
-					splitFilters = originFilters.split(/ ?\( ?| ?\) ?| ?&& ?| ?\|\| ?/);
-					var newScript = '';
-
-					for(index = 0; index < splitFilters.length; index++){
-						if(splitFilters[index] == '')
-							continue;
-						var filterIndex = originFilters.indexOf(splitFilters[index]);
-						if (filterIndex == 0){
-							newScript += ("_checkInputFilter(printLog,'"+splitFilters[index]+"')");
-						} else {
-							newScript += (originFilters.slice(0,filterIndex)+"_checkInputFilter(printLog,'"+splitFilters[index]+"')");
-						}
-						originFilters = originFilters.slice(filterIndex + splitFilters[index].length);
-					}
-
-					newScript += originFilters;
-
-					if(eval(newScript))
-						printFlag = true;
-				}
-
-				for (filter in configData.filters){
-					if(Array.isArray(filter))
-						splitFilters.concat(configData.filters[filter]);
-					else
-						splitFilters.push(configData.filters[filter]);
-				}	
-				
-				if(printFlag)
-					_colorFilter(printLog, splitFilters, "yellow");
-			}			
-			function _splitLog(line){
-				var indexSpace = 0;
-				var indexText = -1;
-				var log = {
-					logTime:"",
-					logMonotonicTime:"",
-					logFacility:"",
-					logProcess:"",
-					logProcessId:"",
-					logContext:"",
-					logMessageId:""				
-				};
-
-				// Split the log by " "(empty space)
-				for (data in log) {
-					indexSpace = line.slice(++indexText).indexOf(" ");
-					log[data] = line.slice(indexText, indexText+indexSpace);
-					indexText += indexSpace;
-				}
-				log.logLevel = log.logFacility.split(".")[1] || '';
-				log.logFacility = log.logFacility.split(".")[0] || '';
-
-				log.logThreadId = log.logProcessId.slice(1,log.logProcessId.length-1).split(":")[1] || '';
-				log.logProcessId = log.logProcessId.slice(1,log.logProcessId.length-1).split(":")[0] || '';
-
-				remainLogData = line.slice(indexText).split("} ");	//Json data & Free Text Data
-				log.logJson = "";
-
-				for(index = 0 ; index < remainLogData.length-1; index++)
-					log.logJson += remainLogData[index];
-				log.logJson += (log.logJson == '')? "{}":"}";
-
-				log.logText = remainLogData[remainLogData.length-1];
-				log.logUserAppId = "";
-				log.logUserTag = "";
-				var userTagIndex1 = log.logText.indexOf("/");
-				var userTagIndex2 = log.logText.indexOf(":");
-
-				if(userTagIndex1 != -1 && userTagIndex2 != -1 && userTagIndex1 < userTagIndex2){
-					log.logUserAppId = log.logText.slice(0, userTagIndex1);
-					log.logUserTag = log.logText.slice(userTagIndex1+1, userTagIndex2);
-					log.logText = log.logText.slice(userTagIndex2+1);
-				}
-
-				return log;
-			}
-
-			//User Input Filter
-			function _checkInputFilter(logs, filterData){
-				if (logs.indexOf(filterData) != -1)
-					return true;
-				return false;
-			}
-			//Config Data Filter
-			function _checkFilter(logs, filter, filterData){
-				var level = "emerg alert crit err error warn warning notice info debug";
-				if (filter == "logLevel" && Array.isArray(filterData) == false){
-					var index = level.indexOf(filterData);
-					if (index != -1){
-						filterData = level.slice(0,index+filterData.length).split(" ");
-					}
-				}
-
-				filter = filter || "logText";
-
-				if (Array.isArray(filterData)){
-					for(data in filterData){
-						// it is true, one or more data in filterData is matched with log (OR)
-						if(logs[filter].indexOf(filterData[data]) != -1)
-							return true;
-					}
-				}
-				else{
-					// It is true, data is matched with log
-					if (logs[filter].indexOf(filterData) != -1)
-						return true;
-				}
-				//No matched.
-				return false;
-			}
-
-			function _generateLog(logs){
-				var log = '';
-				for(output in configData.outputs){
-					if(configData.outputs[output]){
-						if(output == 'logProcessId' || (output=='logThreadId' && configData.outputs.logProcessId == false))
-							log += "[";
-						if((logs.logUserAppId != "" || logs.logUserTag != "") && output == 'logUserTag'){
-							log += "/";							
-						}
-
-						log += logs[output];
-
-						if(output == 'logFacility' && configData.outputs.logLevel)
-							log += ".";
-						else if ((output == 'logProcessId' && configData.outputs.logThreadId) || ((logs.logUserAppId != "" || logs.logUserTag != "") && (output == 'logUserTag')))
-							log += ":";
-						else if (output == 'logThreadId' || (output == 'logProcessId' && configData.outputs.logThreadId == false))
-							log += "] "
-						else if (logs.logUserAppId != "" && output == 'logUserAppId'){
-							var sp = (configData.outputs.logUserTag)?"" : "/:";
-							log += sp;
-						}
-						else
-							log += " ";
-					}
-				}
-				log += logs.logText;
-				return log;
-			}
-
-			function _colorFilter(logs, filter, color){
-				var indexArray = [];
-				var printLog = '';
-				for (index = 0; index < filter.length; index++){
-					
-					var log = logs;
-					var sliceIndex = 0;
-					if(filter[index] == "")
-						continue;
-
-					while(1){
-						findIndex = log.indexOf(filter[index]);
-						if(findIndex == -1)
-							break;
-						indexArray.push([sliceIndex+findIndex,filter[index].length]);
-						sliceIndex += (findIndex + filter[index].length);
-						log = log.slice(findIndex + filter[index].length);
-					}
-				}
-				indexArray = indexArray.sort(function(a, b){
-					if(a[0] == b[0])
-						return 0;
-					if(a[0] < b[0])
-						return -1;
-					else
-						return 1;
-				});
-				
-
-				for(index = indexArray.length-1; index >= 0 ; index--){
-					filterDataIndex = indexArray[index];
-					printLog = logs.slice(filterDataIndex[0] + filterDataIndex[1]) + printLog;
-					//Change the filter's color : Yellow
-					printLog = logs.slice(filterDataIndex[0], filterDataIndex[0]+filterDataIndex[1])[color] + printLog;
-					logs = logs.slice(0,filterDataIndex[0]);
-				}
-
-				printLog = logs + printLog;
-				console.log(printLog);
-			}
-		}
+		_splitArguments.bind(self),
+		_getLogs.bind(self)
 	], function(err, result) {
+		next(err);
+	});
+	
+}
+
+/**********************************************************************/
+
+function _splitArguments(next){
+	log.verbose("_splitArguments()");
+	var self = this;
+	var filters = argv.argv.remain;
+	var stdLevel = ["D","I", "W", "E", "C", "S"];
+	var stdOutputs = {DEFAULT : "", TIME: "time", PROCESS:"time:process:pid:tid"};
+
+	self.id = argv.id || "";
+	self.filters = {};
+	self.filters["*"] = "D";
+
+	for(index = 0; index < filters.length; index++){
+		var filter = filters[index].split(":");
+		if (filter.length > 2 )
+			return next(new Error("Invalid filter expression"));
+		if (filter.length == 2 && (filter[0] == "" || filter[1] == "") )
+			return next(new Error("Invalid filter expression"));
+		if (filter.length == 2  && stdLevel.indexOf(filter[1].toUpperCase()) == -1)
+			return next(new Error("Invalid filter expression"));
+			
+		self.filters[filter[0]] = filter[1] || "D";
+	}
+	if(argv.output){
+		if(stdOutputs.hasOwnProperty(argv.output.toUpperCase()))
+			argv.output = stdOutputs[argv.output.toUpperCase()];
+		else 
+			next(new Error("Error, Invalid parameter to -o"));
+	}
+	next();
+}
+
+function _getLogs(next){
+	log.verbose("_getLogs()");
+	var logFile = argv.file || "/media/developer/log/devlog";
+	var msgNotFoundLog = "Cannot access the Log file";
+	
+	async.waterfall([
+		function(next){
+			new novacom.Session(argv.device, next);
+		},
+		function (session, next){
+			
+			var command = util.format('test -e %s && ( wc -l %s | xargs tail %s -n ) || echo %s',
+				logFile,
+				logFile,
+				argv.follow,
+				msgNotFoundLog);
+			session.run(command, process.stdin, _onData, process.stderr, next);
+		}
+	], function (err){
 		next(err);
 	});
 }
 
-/**********************************************************************/
+function _onData(data) {
+	var str = (Buffer.isBuffer(data))? data.toString():data;
+	str.split(/\r?\n/).forEach(_onLine);
+}
+
+function _onLine(line) {
+	var msgNotFoundLog = "Cannot access the Log file";
+	if (line == '' || line == undefined)
+		return;
+	if (line == msgNotFoundLog){
+		throw new Error(line);
+	}
+	var logLine = _splitLog(line);
+	if(_checkFilter(logLine)){
+		_printLog(logLine);
+	}
+}
+
+function _splitLog(line){
+	var indexSpace = 0;
+	var indexText = -1;
+	var log = {
+		time:"",
+		monotonicTime:"",
+		facility:"",
+		process:"",
+		pid:"",
+		context:"",
+		messageId:""				
+	};
+	// Split the log by " "(empty space)
+	for (data in log) {
+		indexSpace = line.slice(++indexText).indexOf(" ");
+		log[data] = line.slice(indexText, indexText+indexSpace);
+		indexText += indexSpace;
+	}
+
+	log.time = new Date(log.time).toString();
+	log.level = log.facility.split(".")[1] || '';
+	log.facility = log.facility.split(".")[0] || '';
+	
+	log.tid = log.pid.slice(1,log.pid.length-1).split(":")[1] || '';
+	log.pid = log.pid.slice(1,log.pid.length-1).split(":")[0] || '';
+	
+	remainLogData = line.slice(indexText).split("} ");	//Json data & Free Text Data
+	log.json = "";
+	
+	for(index = 0 ; index < remainLogData.length-1; index++)
+		log.json += remainLogData[index];
+	log.json += (log.json == '')? "{}":"}";
+	log.text = remainLogData[remainLogData.length-1];
+
+	log.id = "";
+	log.tag = "";
+
+	var tagIndex1 = log.text.indexOf("/");
+	var tagIndex2 = log.text.indexOf(":");
+	if(tagIndex1 != -1 && tagIndex2 != -1 && tagIndex1 < tagIndex2){
+		log.id = log.text.slice(0, tagIndex1);
+		log.tag = log.text.slice(tagIndex1+1, tagIndex2);
+		log.text = log.text.slice(tagIndex2+1);
+	}
+
+	return log;
+}
+
+function _checkFilter(logLine){
+	var stdLevel = ["DEBUG","INFO", "WARNING", "ERROR", "CRITICAL", "SILENT"];
+	var stdShortLevel = { D: "DEBUG", I:"INFO", W:"WARNING", E:"ERROR", C:"CRITICAL", S:"SILENT"};
+	var filterFlag = true;
+	var idFlag = true;
+	var shortLevel, levelindex, lineLevelIndex;
+
+	if (this.id != ""){
+		idFlag = (this.id == logLine.id)?true:false;		
+	}
+
+	if(this.filters.hasOwnProperty(logLine.tag)){
+		shortLevel = this.filters[logLine.tag].toUpperCase();
+	}
+	else {
+		shortLevel = this.filters["*"].toUpperCase();
+	}
+		levelIndex = stdLevel.indexOf(stdShortLevel[shortLevel]);
+		lineLevelIndex = stdLevel.indexOf(logLine.level.toUpperCase());
+		if(levelIndex == -1 || lineLevelIndex == -1 || levelIndex > lineLevelIndex)
+			filterFlag = false;		
+	
+	return filterFlag&&idFlag;
+}
+
+function _printLog(logLine){
+	var colorSet = { DEBUG : "blue", INFO:"green", WARNING:"yellow", ERROR:"red", CRITICAL:"cyan", SILENT:"gray"};
+	var defaultLogLine = logLine.level + "|" + logLine.tag + "|" + logLine.id;
+	var log = "[" + defaultLogLine + "] ";
+	if (logLine.text.trim().length === 0)
+		return;
+	if (argv.output){
+		var output  = argv.output.split(":");
+		for(index = 0; index < output.length; index++){
+			if (output[index] == 'pid')
+				log += "[";
+			if (output[index] == 'tid')
+				log += ":";
+			if(logLine[output[index]]){
+				log += (logLine[output[index].toLowerCase()]+" ");
+			}
+			if (output[index] == 'tid')
+					log+= "] ";
+			
+		}
+	}
+	log += logLine.text;
+	log = log[colorSet[logLine.level.toUpperCase()]];
+	console.log(log);
+}
+
 
 function finish(err, value) {
 	log.info("finish():", "err:", err);
@@ -476,6 +365,3 @@ function finish(err, value) {
 	}
 }
 
-process.on('uncaughtException', function (err) {
-	console.log('Caught exception: ' + err);
-});
