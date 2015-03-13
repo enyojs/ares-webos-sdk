@@ -97,9 +97,6 @@ var helpString = [
 	help.format("   host [string]   ip address"),
 	help.format("   port [string]   port number"),
 	help.format("   username [string]   user name to connect ('developer' or 'prisoner')"),
-	help.format("   files ['stream' | 'sftp']   file stream type can be 'stream' or 'sftp'"),
-	help.format("                         if target device support sftp-server,"),
-	help.format("                         sftp is more stable than general stream"),
 	help.format("   privatekey  [string]   ssh private key file name."),
 	help.format("                         ssh private key should exist under $HOME/.ssh/"),
 	help.format("   passphrase  [string]   passphrase used for generating ssh keys"),
@@ -172,7 +169,7 @@ var requiredKeys = {
 	"port" : true,
 	"username": true,
 	"description": true,
-	"files" : true,
+	"files" : false,
 	"privateKeyName" : true,
 	"passphrase": true,
 	"password": true
@@ -250,7 +247,6 @@ function listFull(next) {
 							privatekey: device.privateKeyName,
 							passphrase: device.passphrase,
 							platform: device.type,
-							files: device.files,
 							description: device.description
 						}
 					};
@@ -343,13 +339,6 @@ function interactiveInput(next) {
 						inDevice["privateKeyName"] = "@DELETE@";
 					} else {
 						return next(new Error("Not supported auth type (" + answers['auth_type'] + ")"));
-					}
-					if (answers['trans_type'] && answers['trans_type'] === "sftp(fast)") {
-						inDevice["files"] = "sftp";
-					} else if (answers['trans_type'] && answers['trans_type'] === "stream(slow)") {
-						inDevice["files"] = "stream";
-					} else {
-						return next(new Error("Not supported file transition method (" + answers['trans_type'] + ")"));
 					}
 				}
 				replaceDefaultDeviceInfo(inDevice);
@@ -478,15 +467,6 @@ function interactiveInput(next) {
 						default: function() {
 							return selDevice.description || "new device"
 						},
-						when: function(answers) {
-							return _needInq(mode)(inqChoices);
-						}
-					}, {
-						type: "list",
-						name: "trans_type",
-						message: "Select file transition method",
-						choices: ["stream(slow)", "sftp(fast)"],
-						default: ((selDevice.files) ? transMethod[selDevice.files] : 0),
 						when: function(answers) {
 							return _needInq(mode)(inqChoices);
 						}
@@ -629,7 +609,7 @@ function modifyDeviceInfo(next) {
 		], function(err) {
 			if (err) {
 				return next(err);
-			} 
+			}
 			next(null, {"msg": "Success to " + mode + " a device named " + inDevice.name + "!!"});
 		});
 	} catch (err) {
@@ -649,7 +629,7 @@ function removeDeviceInfo(next) {
 		], function(err) {
 			if (err) {
 				return next(err);
-			} 
+			}
 			next(null, {"msg": "Success to remove a device named " + argv.remove + "!!"});
 		});
 	} catch (err) {

@@ -47,13 +47,6 @@
             ],
             "description": "SSH Private Key File Name located in the host pc"
         },
-        "files": {
-            "enum": [
-                "stream",
-                "sftp"
-            ],
-            "description": "File transmission type. stream is node stream method. if target device run sftp-server, sftp is more reliable than stream."
-        },
         "indelible": {
             "type": [
             	"boolean",
