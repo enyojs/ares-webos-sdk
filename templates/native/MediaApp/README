@@ -1,0 +1,22 @@
+
+Purpose:
+        webOS sdl media app template.
+
+Building:
+        mkdir BUILD
+        cd BUILD
+        cmake ..
+        make
+        cp ../res ../pkg/
+        cd ../pkg
+
+Packaging and installing:
+        ares-package .
+        ares-install your_package_name.ipk -d your_target
+
+Testing:
+        Launch app.
+        Press 1 to play or pause the music.
+        Press 0 to stop the music.
+
+Bugs:

@@ -43,6 +43,54 @@
 					}]
 				},
 				{
+					"id": "sdl_basic",
+					"type": "native",
+					"version": "0.0.1",
+					"isDefault": false,
+					"description": "SDL Basic UI",
+					"class":"native_app",
+					"deps": ["nativeappinfo", "nativeicon"],
+					"files": [{
+						"url": "@PLUGINDIR@/templates/native/2DGames"
+					}]
+				},
+				{
+					"id": "sdl_media",
+					"type": "native",
+					"version": "0.0.1",
+					"isDefault": false,
+					"description": "SDL Media App",
+					"class":"native_app",
+					"deps": ["nativeappinfo", "nativeicon"],
+					"files": [{
+						"url": "@PLUGINDIR@/templates/native/MediaApp"
+					}]
+				},
+				{
+					"id": "sdl_opengles1",
+					"type": "native",
+					"version": "0.0.1",
+					"isDefault": false,
+					"description": "SDL with OpenGLES v1.1",
+					"class":"native_app",
+					"deps": ["nativeappinfo", "nativeicon"],
+					"files": [{
+						"url": "@PLUGINDIR@/templates/native/OpenGLESv1.1Project"
+					}]
+				},
+				{
+					"id": "sdl_opengles2",
+					"type": "native",
+					"version": "0.0.1",
+					"isDefault": false,
+					"description": "SDL with OpenGLES v2.0",
+					"class":"native_app",
+					"deps": ["nativeappinfo", "nativeicon"],
+					"files": [{
+						"url": "@PLUGINDIR@/templates/native/OpenGLESv2.0Project"
+					}]
+				},
+				{
 					"id": "webos-service",
 					"type": "webosService",
 					"version": "0.1",
@@ -52,12 +100,18 @@
 							"url": "@PLUGINDIR@/templates/webos-service",
 							"prefixToAdd": ""
 						}
-					],
-					"filesubstitution": [
-						"package.json",
-						"services.json",
-						"helloworld_webos_service.js",
-						"helloclient.js"
+					]
+				},
+				{
+					"id": "native-service",
+					"type": "nativeService",
+					"version": "0.1",
+					"description": "webOS Native Service Template",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/native-service",
+							"prefixToAdd": ""
+						}
 					]
 				},
 				{
@@ -89,6 +143,21 @@
 					]
 				},
 				{
+					"id": "nativeappinfo",
+					"type": "appinfo",
+					"version": "0.0.1",
+					"description": "appinfo.json for native application",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/nativeappinfo",
+							"prefixToAdd": "pkg"
+						}
+					],
+					"filesubstitution": [
+						"appinfo.json"
+					]
+				},
+				{
 					"id": "webicon",
 					"type": "image",
 					"version": "0.0.1",
@@ -107,6 +176,18 @@
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/enyoicon"
+						}
+					]
+				},
+				{
+					"id": "nativeicon",
+					"type": "image",
+					"version": "0.0.1",
+					"description": "native app icon files [icon.png (80x80), largeIcon.png (130x130)]",
+					"files": [
+						{
+							"url": "@PLUGINDIR@/templates/nativeicon",
+							"prefixToAdd": "pkg"
 						}
 					]
 				},

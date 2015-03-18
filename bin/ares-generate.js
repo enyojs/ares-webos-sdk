@@ -8,6 +8,7 @@ var fs      = require('fs'),
     shelljs = require('shelljs'),
     mkdirp  = require('mkdirp'),
     nopt    = require('nopt'),
+    inquirer = require("inquirer"),
     sprintf     = require('sprintf-js').sprintf,
     prjgen      = require('ares-generator'),
     versionTool = require('./../lib/version-tools'),
@@ -38,6 +39,7 @@ var DEF_BP_FILE = path.join(cliData.getPath(), 'baseBpVer.json');
 var DEF_BP_VER = '2.5';
 var DEF_SRC_TYPE = 'template';
 var DEF_SVC_NAME = 'com.yourdomain.app.service';
+var DEF_SVC_EXE = 'main';
 var VER_FILES = {
     "moonstone" : "lib/moonstone/version.js",
     "garnet" : "lib/garnet/version.js",
@@ -144,7 +146,8 @@ function showUsage(hiddenFlag) {
         "",
         help.format("-l, --list <TYPE>"),
         help.format("\t List the available templates corresponding with TYPE [default: " + DEF_SRC_TYPE + "]"),
-        help.format("\t Available TYPE is 'template', 'webosService', 'appinfo'"),
+        help.format("\t Available TYPE is one of 'template', 'webosService', 'appinfo'"),
+        help.format("\t                           'native', 'nativeService"),
         "",
         help.format("-p, --property <PROPERTY>", "Set the properties of appinfo.json"),
         help.format("\t PROPERTY can be one of the following forms"),
@@ -163,7 +166,7 @@ function showUsage(hiddenFlag) {
         "",
         help.format("-de, --default-enyo <ENYO-VERSION>"),
         help.format("\t Set default enyo framework version in the templates"),
-        "",        
+        "",
         help.format("--level <LEVEL>", "Tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
         help.format("-h, --help", "Display this help"),
         help.format("-V, --version", "Display version info"),
@@ -260,6 +263,120 @@ function list() {
 function generate() {
     log.info("generate");
     var self = this;
+    var _queryAppInfo = function (options, next) {
+        var selTempl;
+        for (i = 0; i < options.tmplNames.length; i++) {
+            if ( ['template', 'native', 'game'].indexOf(tmplInfos[options.tmplNames[i]].type) !== -1 ) {
+                selTmpl = tmplInfos[options.tmplNames[i]];
+                selTmpl.id = options.tmplNames[i];
+                break;
+            }
+        }
+
+        if ( typeof selTmpl !== 'undefined' && options.appInfoProps.length == 0 ) {
+            var questions = [
+                { type: "input",
+                  name: "id",
+                  message: "app id:",
+                  default: function() {
+                      return "com.yourdomain.app"
+                  }
+                },
+                { type: "input",
+                  name: "title",
+                  message: "title:",
+                  default: function() {
+                      return "new app"
+                  }
+                },
+                { type: "list",
+                  name: "type",
+                  message: "Select type",
+                  choices: ["web", "native", "native_game"],
+                  filter: function(val) {
+                      return val.toLowerCase();
+                  },
+                  default: function() {
+                      var idx = 0;
+                      if (selTmpl.type.match(/(native|game)/i)) {
+                          idx = 1;
+                      }
+                      return idx;
+                  },
+                },
+                { type: "input",
+                  name: "main",
+                  message: "main:",
+                  default: function() {
+                      var defMain = "index.html"
+                      if (selTmpl.type.match(/(native|game)/i)) {
+                          defMain = selTmpl.id.toLowerCase();
+                      }
+                      return defMain;
+                  }
+                },
+                { type: "input",
+                  name: "version",
+                  message: "version:",
+                  default: function() {
+                      return "0.0.1"
+                  }
+                }
+            ];
+            inquirer.prompt(questions, function(answers) {
+                options.appInfoProps.push("id=" + answers["id"]);
+                options.appInfoProps.push("title=" + answers["title"]);
+                options.appInfoProps.push("type=" + answers["type"]);
+                options.appInfoProps.push("main=" + answers["main"]);
+                options.executable = answers["main"];
+                options.appInfoProps.push("version=" + answers["version"]);
+                next();
+            });
+        } else {
+            next();
+        }
+    }
+
+    var _querySvcInfo = function (options, next) {
+        var selSvc;
+        for (i = 0; i < options.tmplNames.length; i++) {
+            if (tmplInfos[options.tmplNames[i]].type.match(/service/i)) {
+                selSvc = tmplInfos[options.tmplNames[i]];
+                selSvc.id = options.tmplNames[i];
+                break;
+            }
+        }
+
+        if ( typeof selSvc !== 'undefined' && !options.svcName ) {
+            var questions = [
+                { type: "input",
+                  name: "id",
+                  message: "service id:",
+                  default: function() {
+                      return DEF_SVC_NAME;
+                  }
+                },
+                { type: "input",
+                  name: "executable",
+                  message: "executable file name:",
+                  default: function() {
+                      return DEF_SVC_EXE;
+                  },
+                  when: function(answers) {
+                      return (selSvc.type.match(/native/i));
+                  }
+                }
+            ];
+            inquirer.prompt(questions, function(answers) {
+                options.svcName = answers["id"];
+                options.executable = answers["executable"];
+                next();
+            });
+        } else {
+            next();
+        }
+    }
+
     var _genApp = function (options, substitutions, next) {
         log.silly("_genApp#substitutions:", substitutions);
         self.tmplConf.level = log.level;
@@ -281,6 +398,8 @@ function generate() {
         _copyTempl.bind(self, false),
         _loadTemplConf.bind(self),
         _checkOptions.bind(self),
+        _queryAppInfo.bind(self, options),
+        _querySvcInfo.bind(self, options),
         _substParams.bind(self),
         _genApp.bind(self, options),
     ], function(err) {
@@ -342,7 +461,7 @@ function _loadTemplConf(transMaps, next) {
                             return;
                         }
                     });
-                });                
+                });
             }
             next();
         }, function(err) {
@@ -550,7 +669,8 @@ function _substParams(next) {
         }
         var wordMaps = {
             "@ENYO-VERSION@": options.bpVer || savDefBpVer || DEF_BP_VER,
-            "@SERVICE-NAME@": (options.svcName || DEF_SVC_NAME)
+            "@SERVICE-NAME@": (options.svcName || DEF_SVC_NAME),
+            "@EXECUTABLE-NAME@": (options.executable || DEF_SVC_EXE)
         };
         var substitution = { fileRegexp: '\\.(js|json|c|cpp|cc|css|less|mm|h|hpp|hh|html|htm|md|txt|sh|bat|cmd|xml|dtd|php|java|rb|py)$' };
         substitution.regexp = wordMaps;
@@ -600,6 +720,17 @@ function _checkOptions(next) {
         setImmediate(next);
     };
     var _chkDst = function(next) {
+        if (argv.template && !dstPath) {
+            return next(new Error("Pleaes specify a directory name or path to generate."));
+        }
+        if (dstPath && fs.existsSync(dstPath) && !options.overwrite) {
+            var files = fs.readdirSync(dstPath);
+            if (files.length > 0) {
+                return next(new Error(dstPath + " is not empty, please check the directory."));
+            } else {
+                options.overwrite = true;
+            }
+        }
         if (!(/^[a-zA-Z0-9\.\_\-]*$/.test(path.basename(dstPath)))){
             return next(new Error("Not available AppDir name"));
         }

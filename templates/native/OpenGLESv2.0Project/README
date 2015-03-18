@@ -1,0 +1,23 @@
+
+Purpose:
+        webOS sdl with OpenGLESv2.0 app template.
+
+Building:
+        mkdir BUILD
+        cd BUILD
+        cmake ..
+        make
+        cp ../res ../pkg/
+        cd ../pkg
+
+
+Packaging and installing:
+        ares-package .
+        ares-install your_package_name.ipk -d your_target
+
+
+Testing:
+        just launch
+
+
+Bugs:

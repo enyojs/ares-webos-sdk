@@ -1,0 +1,10 @@
+{
+	"id" : "@SERVICE-NAME@",
+	"description":"native service template",
+	"engine":"native",
+	"executable":"@EXECUTABLE-NAME@",
+	"services": [ {
+		"name": "@SERVICE-NAME@",
+		"description": "native service template"
+	}]
+}
