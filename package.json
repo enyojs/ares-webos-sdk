@@ -41,7 +41,10 @@
 		"body-parser" : "1.4.x",
 		"easy-table" : "~0.3.0",
 		"inquirer" : "~0.8.0",
-		"colors" : "~1.0.3"
+		"colors" : "~1.0.3",
+		"strip-bom": "^1.0.0",
+		"encoding": "^0.1.11",
+		"chardet": "0.0.8"
 	},
 	"engines": {
 		"node": ">=0.10.0",
@@ -87,7 +90,10 @@
 		"body-parser",
 		"easy-table",
 		"inquirer",
-		"colors"
+		"colors",
+		"strip-bom",
+		"encoding",
+		"chardet"
 	],
 	"files": [
 		"DEMO.md",
