@@ -1,0 +1,33 @@
+
+Purpose:
+        webOS Native service template.
+
+Building:
+	mkdir BUILD
+	cd BUILD
+	cmake ..
+	make
+	cd ../pkg
+
+Generating app & icon:
+	ares-generate . -t webappinfo -f
+	ares-generate . -t webicon -f
+
+
+Packaging and installing:
+	ares-package .
+	ares-install your_package_name.ipk -d your_target
+
+
+Testing:
+
+   Try:  
+
+        ares-novacom -d your_target -r "luna-send-pub -n 1 luna://com.yourdomain.service.template/echo '{\"input\" : \"hello\"}'"
+	ares-novacom -d your_target -r "luna-send-pub -n 1 luna://com.yourdomain.service.template/getUTCTime '{}'"
+	ares-novacom -d your_target -r "luna-send-pub -i -f luna://com.yourdomain.service.template/startHeartBeat '{\"subscribe\" : true}'"
+	ares-novacom -d your_target -r "luna-send-pub -i -f luna://com.yourdomain.service.template/stopHeartBeat '{\"subscribe\" : true}'"
+
+
+Bugs:
+

@@ -1,0 +1,28 @@
+
+Purpose:
+        webOS games app template.
+        3DGames
+
+Building:
+        mkdir BUILD
+        cd BUILD
+        cmake ..
+        make
+        cd ../pkg
+
+Generating app & icon:
+        ares-generate . -t webappinfo -f
+        ares-generate . -t webicon -f
+        change "index.html" in "main" of appinfo.json to "3DGame".
+        change "web" in "type" of appinfo.json to "native_game". 
+
+Packaging and installing:
+        ares-package .
+        ares-install your_package_name.ipk -d your_target
+
+
+Testing:
+        just launch
+
+Bugs:
+
