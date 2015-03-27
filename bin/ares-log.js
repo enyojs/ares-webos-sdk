@@ -299,8 +299,8 @@ function _splitLog(line){
 }
 
 function _checkFilter(logLine){
-	var stdLevel = ["DEBUG","INFO", "WARNING", "ERROR", "CRITICAL", "SILENT"];
-	var stdShortLevel = { D: "DEBUG", I:"INFO", W:"WARNING", E:"ERROR", C:"CRITICAL", S:"SILENT"};
+	var stdLevel = ["DEBUG","INFO", "WARNING", "ERR", "CRIT", "SILENT"];
+	var stdShortLevel = { D: "DEBUG", I:"INFO", W:"WARNING", E:"ERR", C:"CRIT", S:"SILENT"};
 	var filterFlag = true;
 	var idFlag = true;
 	var shortLevel, levelindex, lineLevelIndex;
@@ -324,7 +324,7 @@ function _checkFilter(logLine){
 }
 
 function _printLog(logLine){
-	var colorSet = { DEBUG : "blue", INFO:"green", WARNING:"yellow", ERROR:"red", CRITICAL:"cyan", SILENT:"gray"};
+	var colorSet = { DEBUG : "blue", INFO:"green", WARNING:"yellow", ERR:"red", CRIT:"cyan", SILENT:"gray"};
 	var defaultLogLine = logLine.level + "|" + logLine.tag + "|" + logLine.id;
 	var log = "[" + defaultLogLine + "] ";
 	if (logLine.text.trim().length === 0)
