@@ -1,0 +1,7 @@
+{
+	"install" : {
+		"tempDirForIpk" : "/media/developer/temp",
+		"changeTempDir" : true,
+		"removeIpkAfterInst" : true
+	}
+}
