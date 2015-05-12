@@ -1,18 +1,6 @@
 {
 	"services": [
-		{
-			"active": true,
-			"id":"webos",
-			"name":"webOS",
-			"type": ["build", "test"],
-			"command":"@NODE@", "params":[
-				"@PLUGINDIR@/ares/server/bdWebos.js", "-l", "http", "-I", "@INSTALLDIR@", "-P", "/webos", "-p", "0", "-t", "240000"
-			],
-			"pluginClient": "@PLUGINURL@/ares/client/package.js",
-			"useJsonp":false,
-			"verbose": false,
-			"respawn": false
-		},
+		{},
 		{
 			"id": "genZip",
 			"sources": [
@@ -37,7 +25,7 @@
 					"isDefault": true,
 					"description": "Enyo moonstone app",
 					"class": "moonstone",
-					"deps": ["enyoappinfo", "enyoicon"],
+					"deps": ["enyoappinfo", "enyoicon", "moonstone"],
 					"files": [{
 						"url": "@PLUGINDIR@/templates/app-moonstone"
 					}]
@@ -98,7 +86,7 @@
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/webos-service",
-							"prefixToAdd": ""
+							"at": ""
 						}
 					]
 				},
@@ -110,7 +98,7 @@
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/native-service",
-							"prefixToAdd": ""
+							"at": ""
 						}
 					]
 				},
@@ -150,7 +138,7 @@
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/nativeappinfo",
-							"prefixToAdd": "pkg"
+							"at": "pkg"
 						}
 					],
 					"filesubstitution": [
@@ -159,7 +147,7 @@
 				},
 				{
 					"id": "webicon",
-					"type": "image",
+					"type": "icon",
 					"version": "0.0.1",
 					"description": "normal icon files [icon.png (80x80), largeIcon.png (130x130)]",
 					"files": [
@@ -170,7 +158,7 @@
 				},
 				{
 					"id": "enyoicon",
-					"type": "image",
+					"type": "icon",
 					"version": "0.0.1",
 					"description": "enyo icon files [icon.png (80x80), largeIcon.png (130x130)]",
 					"files": [
@@ -181,42 +169,34 @@
 				},
 				{
 					"id": "nativeicon",
-					"type": "image",
+					"type": "icon",
 					"version": "0.0.1",
 					"description": "native app icon files [icon.png (80x80), largeIcon.png (130x130)]",
 					"files": [
 						{
 							"url": "@PLUGINDIR@/templates/nativeicon",
-							"prefixToAdd": "pkg"
+							"at": "pkg"
 						}
 					]
 				},
 				{
 					"id": "moonstone-2.5",
-					"type": "bootplate",
+					"type": "library",
 					"version": "2.5",
 					"onDevice": true,
 					"description": "bootplate-moonstone",
 					"files": [{
-						"url": "@PLUGINDIR@/templates/empty",
-						"symlink": {
-							"enyo": "@PLUGINDIR@/templates/bootplate-moonstone/enyo",
-							"lib": "@PLUGINDIR@/templates/bootplate-moonstone/lib"
-						}
+						"url": "@PLUGINDIR@/templates/libraries/moonstone-2.5.zip"
 					}]
 				},
 				{
 					"id": "moonstone-2.3",
-					"type": "bootplate",
+					"type": "library",
 					"version": "2.3",
 					"onDevice": true,
 					"description": "bootplate-moonstone",
 					"files": [{
-						"url": "@PLUGINDIR@/templates/empty",
-						"symlink": {
-							"enyo": "@PLUGINDIR@/templates/bootplate-moonstone-2.3/enyo",
-							"lib": "@PLUGINDIR@/templates/bootplate-moonstone-2.3/lib"
-						}
+						"url": "@PLUGINDIR@/templates/libraries/moonstone-2.3.zip"
 					}]
 				}
 			]
