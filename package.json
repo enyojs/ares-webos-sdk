@@ -14,7 +14,6 @@
 		"ares-setup-device": "./bin/ares-setup-device.js"
 	},
 	"dependencies": {
-		"ares-generator": "0.3.4",
 		"shelljs": "~0.3.0",
 		"request": "2.12.x",
 		"async": "~0.2.9",
@@ -44,7 +43,8 @@
 		"colors" : "~1.0.3",
 		"strip-bom": "^1.0.0",
 		"encoding": "^0.1.11",
-		"chardet": "0.0.8"
+		"chardet": "0.0.8",
+		"extract-zip":"~1.0.3"
 	},
 	"engines": {
 		"node": ">=0.10.0",
@@ -65,7 +65,6 @@
 		"install": "node ./scripts/sub-npm.js"
 	},
 	"bundledDependencies": [
-		"ares-generator",
 		"shelljs",
 		"request",
 		"async",
@@ -93,7 +92,8 @@
 		"colors",
 		"strip-bom",
 		"encoding",
-		"chardet"
+		"chardet",
+		"extract-zip"
 	],
 	"files": [
 		"DEMO.md",

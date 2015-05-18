@@ -6,15 +6,16 @@ var fs      = require('fs'),
     log     = require('npmlog'),
     vm      = require('vm'),
     shelljs = require('shelljs'),
-    mkdirp  = require('mkdirp'),
-    nopt    = require('nopt'),
+    mkdirp = require('mkdirp'),
+    nopt = require('nopt'),
     inquirer = require("inquirer"),
-    sprintf     = require('sprintf-js').sprintf,
-    prjgen      = require('ares-generator'),
+    table = require('easy-table'),
+    sprintf = require('sprintf-js').sprintf,
+    prjgen = require('./../lib/generator'),
     versionTool = require('./../lib/version-tools'),
-    cliControl  = require('./../lib/cli-control'),
-    help        = require('./../lib/helpFormat'),
-    errMsgHdlr  = require('./../lib/error-handler'),
+    cliControl = require('./../lib/cli-control'),
+    help = require('./../lib/helpFormat'),
+    errMsgHdlr = require('./../lib/error-handler'),
     cliData  = require('./../lib/cli-appdata').create('.ares');
 
 shelljs.config.fatal = true;  // Abort on all shelljs errors (e.g. cp/rm/mkdir)
@@ -56,7 +57,6 @@ if ((idx = process.argv.indexOf('--list')) !== -1 || (idx = process.argv.indexOf
 /**********************************************************************/
 var knownOpts = {
     "help": Boolean,
-    "hidden-help": Boolean,
     "version": Boolean,
     "list": String,
     "overwrite": Boolean,
@@ -71,7 +71,6 @@ var knownOpts = {
 };
 var shortHands = {
     "h":        "--help",
-    "hh": ["--hidden-help"],
     "V":        "--version",
     "l":        "--list",
     "f":        "--overwrite",
@@ -93,8 +92,8 @@ log.level = argv.level || 'warn';
 
 /**********************************************************************/
 
-if (argv.help || argv['hidden-help']) {
-    showUsage(argv['hidden-help']);
+if (argv.help) {
+    showUsage();
     cliControl.end();
 }
 
@@ -108,7 +107,7 @@ if (argv.close) {
 } else if (argv.list || argv["default-enyo"]) {
     op = list;
 } else if (argv.initialize) {
-    op = initialize;
+	op = initialize;
 } else {
     op = generate;
 }
@@ -130,7 +129,7 @@ if (op) {
     });
 }
 
-function showUsage(hiddenFlag) {
+function showUsage() {
     var helpString = [
         "",
         "NAME",
@@ -145,9 +144,14 @@ function showUsage(hiddenFlag) {
         help.format("", "TEMPLATE can be listed via " + processName + " --list, -l"),
         "",
         help.format("-l, --list <TYPE>"),
-        help.format("\t List the available templates corresponding with TYPE [default: " + DEF_SRC_TYPE + "]"),
-        help.format("\t Available TYPE is one of 'template', 'webosService', 'appinfo'"),
-        help.format("\t                           'native', 'nativeService"),
+        help.format("\t List the available templates corresponding with TYPE"),
+        help.format("\t If no TYPE is specified, it displays app and service templates"),
+        help.format("\t Available TYPE is one of the following."),
+        help.format("\t                          'web' to display web app as well as node.js service templates"),
+        help.format("\t                          'native' to display native app as well as native service templates"),
+        help.format("\t                          'app', 'service' to display app or service regardless of web/native"),
+        help.format("\t                          'icon' to display icon only"),
+        help.format("\t                          'appinfo' to display appinfo.json template only"),
         "",
         help.format("-p, --property <PROPERTY>", "Set the properties of appinfo.json"),
         help.format("\t PROPERTY can be one of the following forms"),
@@ -189,45 +193,19 @@ function showUsage(hiddenFlag) {
         ""
     ];
 
-    var hiddenhelpString = [
-        "",
-        "EXTRA-OPTION",
-        help.format("--initialize", "Initialize ares-generate command."),
-        help.format("", "Make copies of bootplate templates in CLI data directory"),
-        "EXAMPLES",
-        "",
-        "# Initialize ares-generate command",
-        processName+" --initialize",
-        "",
-    ];
-
     help.print(helpString);
-    if (hiddenFlag) {
-        help.print(hiddenhelpString);
-    }
 }
 
 function initialize() {
     log.info("initialize");
-    var self = this;
-    async.waterfall([
-        _getTransMaps.bind(self),
-        _copyTempl.bind(self, true),
-        function(transMap, next) {
-        	_rmDefVer(next);
-        }
-    ], function(err) {
-        finish(err, {msg: "Success"});
-    });
+    finish(null, {msg: "Success"});
 }
 
 function savDefVer() {
     log.info("savDefVer");
     var self = this;
     async.waterfall([
-        _getTransMaps.bind(self),
         _loadTemplConf.bind(self),
-        _checkOptions.bind(self),
         _savDefVer.bind(self)
     ], function(err) {
         finish(err, {msg:"Success"});
@@ -238,22 +216,72 @@ function savDefVer() {
 function list() {
     log.info("list");
     var self = this;
-    var _display = function (type, next) {
-        if (type == 'true') {
-            type = DEF_SRC_TYPE;
+    var tmplTable = new table;
+    var types = ["Web Application", "Native Application", "JS Service", "Native Service"];
+    var typeMap = {
+        template: 0,
+        webosService: 2,
+        native: 1,
+        nativeService: 3
+    }
+
+    var _inputSource = function(source) {
+        var prefixString = (source.isDefault) ? '(default) ' : '';
+        tmplTable.cell('ID', source.id);
+        if (typeMap.hasOwnProperty(source.type)) {
+            tmplTable.cell('Project Type', typeMap[source.type], function(val, width) {
+                return types[val]
+            });
+        } else {
+            tmplTable.cell('Project Type', source.type);
         }
+        tmplTable.cell('Version', source.version);
+        tmplTable.cell('Description', prefixString + source.description);
+        tmplTable.newRow();
+    }
+
+
+    var _display = function(type, next) {
+
+        var searchMap = {
+            true: ['web application', 'native application', 'js service', 'native service'],
+            template: ["web application"],
+            webosService: ["JS service"],
+            nativeService: ["native service"],
+            web: ["web application", "JS service"],
+            native: ["native application", "native service"],
+            application: ["web application", "native application"],
+            app: ["web application", "native application"],
+            service: ["JS service", "native service"],
+            image: ["icon"]
+        }
+
+        if (searchMap.hasOwnProperty(type)) {
+            type = searchMap[type];
+        }
+
         this.tmplConf.sources.forEach(function(source) {
-            if (source.type === type) {
-                console.log(sprintf("%-40s\t%-10s\t%s %s", source.id, source.version, source.description, source.isDefault ? "(default)" : ""));
+            var prjTypes = typeMap.hasOwnProperty(source.type) ? types[typeMap[source.type]].toUpperCase() : source.type.toUpperCase();
+            if (Array.isArray(type)) {
+                for (index in type) {
+                    if (prjTypes === type[index].toUpperCase()) {
+                        _inputSource(source);
+                        break;
+                    }
+                }
+            } else {
+                if (prjTypes.indexOf(type.toUpperCase()) !== -1) {
+                    _inputSource(source);
+                }
             }
         });
+        tmplTable.sort(['Project Type', 'ID']);
+        console.log(tmplTable.print());
         setImmediate(next);
     }
 
     async.waterfall([
-        _getTransMaps.bind(self),
         _loadTemplConf.bind(self),
-        _checkOptions.bind(self),
         _display.bind(self, options.listType)
     ], function(err) {
         finish(err);
@@ -380,7 +408,7 @@ function generate() {
     var _genApp = function (options, substitutions, next) {
         log.silly("_genApp#substitutions:", substitutions);
         self.tmplConf.level = log.level;
-        async.waterfall ([
+        async.waterfall([
             function (next) {
                 new prjgen.Generator(this.tmplConf, next);
             },
@@ -394,8 +422,6 @@ function generate() {
     }
 
     async.waterfall([
-        _getTransMaps.bind(self),
-        _copyTempl.bind(self, false),
         _loadTemplConf.bind(self),
         _checkOptions.bind(self),
         _queryAppInfo.bind(self, options),
@@ -421,52 +447,19 @@ function finish(err, value) {
     }
 }
 
-function _loadTemplConf(transMaps, next) {
+function _loadTemplConf(next) {
     var self = this;
     self.tmplInfos = { /* "bootplate" : {"type":"template", "class":"moonstone", "version":"1.0.0", "default":false} */ };
     var _rplcLoclPath = function (data, next) {
         var objConf;
         try {
             data = data.replace(/@PLUGINDIR@/g, path.dirname(TMPL_FILE)).replace(/\\/g,'/');
-            transMaps.forEach(function(map){
-                 data = data.replace(new RegExp(map.from, "g"), map.to).replace(/\\/g,'/');
-            });
             objConf = JSON.parse(data);
             self.tmplConf = objConf.services[1];
         } catch(e) {
             throw "Improper JSON: "+data;
         }
         setImmediate(next);
-    };
-    var _rplcVersion = function (next) {
-        async.forEachSeries(self.tmplConf.sources, function(source, next) {
-            var filePaths = [];
-            if (source.files) {
-                source.files.forEach(function(file){
-                    filePaths = filePaths.concat(file.url || []);
-                    if (file.symlink) {
-                        var symlinks = Object.keys(file.symlink).map(function(key) {
-                                        return file.symlink[key];
-                                    });
-                        filePaths = filePaths.concat(symlinks);
-                    }
-                });
-                var exit = false;
-                filePaths.forEach(function(fp){
-                    if (exit) return;
-                    transMaps.forEach(function(tm) {
-                        if (fp.indexOf(tm.to) === 0) {
-                            source.version = tm.version;
-                            exit = true;
-                            return;
-                        }
-                    });
-                });
-            }
-            next();
-        }, function(err) {
-            setImmediate(next, err);
-        });
     };
     var _hookTmplConf = function (next) {
        async.forEachSeries(self.tmplConf.sources, function(source, next) {
@@ -496,16 +489,16 @@ function _loadTemplConf(transMaps, next) {
                     log.warn("Changing --onDevice value to " + options.bpVer);
                 }
             }
-            if (source.class) {
-                var savDefBpVer;
-                if (fs.existsSync(DEF_BP_FILE)) {
-                    savDefBpVer = fs.readFileSync(DEF_BP_FILE, 'utf8');
-                }
-                var bpVer = (options.bpVer || savDefBpVer|| source.version);
-                var depName = source.class + '-' + bpVer;
-                source.deps = source.deps || [];
-                source.deps.push(depName);
-                if (self.tmplInfos.hasOwnProperty(depName)) {
+
+            var savDefBpVer;
+            if (fs.existsSync(DEF_BP_FILE)) {
+                savDefBpVer = fs.readFileSync(DEF_BP_FILE, 'utf8');
+            }
+            var bpVer = (options.bpVer || savDefBpVer || source.version);
+            for (index in source.deps) {
+                var depName = source.deps[index] + '-' + bpVer;
+                if (self.tmplInfos.hasOwnProperty(depName) && self.tmplInfos[depName].type == 'library') {
+                    source.deps[index] = depName;
                     source.version = self.tmplInfos[depName].version;
                 }
             }
@@ -517,7 +510,6 @@ function _loadTemplConf(transMaps, next) {
     async.waterfall([
         fs.readFile.bind(fs, TMPL_FILE, 'utf8'),
         _rplcLoclPath.bind(self),
-        _rplcVersion.bind(self),
         _hookTmplConf.bind(self),
         _rplcDeps.bind(self)
     ], function(err) {
@@ -705,7 +697,7 @@ function _checkOptions(next) {
                 if (!self.tmplInfos.hasOwnProperty(tmplName)) {
                     return next(new Error("Please check the template name"));
                 }
-                if (self.tmplInfos[tmplName].type.match(/template/i)) {
+                if (self.tmplInfos[tmplName].type.match(/template/i) || self.tmplInfos[tmplName].type.match(/native/i)) {
                     reqInfos.tmplCnt++;
                     reqInfos.tmplNames.push(tmplName);
                 } else if (self.tmplInfos[tmplName].type.match(/Service/i)) {
@@ -747,7 +739,7 @@ function _checkOptions(next) {
             if (needRplc) {
                 async.forEachSeries(self.tmplConf.sources, function(source, next) {
                     if (reqInfos.svcNames.indexOf(source.id) !== -1) {
-                        source.files[0].prefixToAdd = "services/" + source.id;
+                        source.files[0].at = "services/" + source.id;
                     }
                     next();
                 }, function(err) {
@@ -772,7 +764,7 @@ function _checkOptions(next) {
     var _chkBpVer = function(next) {
         var avblBpVers = [];
         for (tmplName in self.tmplInfos) {
-            if (self.tmplInfos[tmplName].type === 'bootplate' &&
+            if (self.tmplInfos[tmplName].type === 'library' &&
                     self.tmplInfos[tmplName].onDevice === true ) {
                 var ver = self.tmplInfos[tmplName].version;
                 var dotCnt = (ver.match(/\./g) || []).length;
@@ -814,7 +806,7 @@ function _savDefVer(next) {
         var defBpVer = (options.defBpVer == 'true')? DEF_BP_VER : options.defBpVer;
         var avblBpVers = [];
         for (tmplName in self.tmplInfos) {
-            if (self.tmplInfos[tmplName].type === 'bootplate' &&
+            if (self.tmplInfos[tmplName].type === 'library' &&
                     self.tmplInfos[tmplName].onDevice === true ) {
                 var ver = self.tmplInfos[tmplName].version;
                 var dotCnt = (ver.match(/\./g) || []).length;

@@ -4,9 +4,3 @@
 [submodule "enyo"]
 	path = enyo
 	url = ../enyo.git
-[submodule "node_modules/ares-generator"]
-	path = node_modules/ares-generator
-	url = ../ares-generator.git
-[submodule "templates/bootplate-moonstone"]
-	path = templates/bootplate-moonstone
-	url = ../bootplate-moonstone.git
