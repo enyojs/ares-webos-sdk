@@ -66,6 +66,7 @@ var knownOpts = {
 //    "proxy-url": url,
     "onDevice": String,
     "initialize": Boolean,
+    "no-query": Boolean,
     "default-enyo": String,
     "level": ['silly', 'verbose', 'info', 'http', 'warn', 'error']
 };
@@ -79,6 +80,7 @@ var shortHands = {
     "s":        "--servicename",
     "D":        "--onDevice",
     "de":       "--default-enyo",
+    "nq":       "--no-query",
 //    "P":        "--proxy-url",
     "v":        ["--level", "verbose"]
 };
@@ -120,6 +122,7 @@ var options = {
     svcName: argv.servicename,
     bpVer: argv.onDevice,
     defBpVer: argv["default-enyo"],
+    query: ((argv.hasOwnProperty('query')) ? argv.query : true),
     dstPath: argv.argv.remain[0]
 };
 
@@ -293,6 +296,9 @@ function generate() {
     var self = this;
     var _queryAppInfo = function (options, next) {
         var selTempl;
+        if (!options.query) {
+            return next();
+        }
         for (i = 0; i < options.tmplNames.length; i++) {
             if ( ['template', 'native', 'game'].indexOf(tmplInfos[options.tmplNames[i]].type) !== -1 ) {
                 selTmpl = tmplInfos[options.tmplNames[i]];
@@ -367,6 +373,9 @@ function generate() {
 
     var _querySvcInfo = function (options, next) {
         var selSvc;
+        if (!options.query) {
+            return next();
+        }
         for (i = 0; i < options.tmplNames.length; i++) {
             if (tmplInfos[options.tmplNames[i]].type.match(/service/i)) {
                 selSvc = tmplInfos[options.tmplNames[i]];
