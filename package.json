@@ -14,7 +14,7 @@
 		"ares-setup-device": "./bin/ares-setup-device.js"
 	},
 	"dependencies": {
-		"shelljs": "~0.3.0",
+		"shelljs": ">=0.5.1",
 		"request": "2.12.x",
 		"async": "~0.2.9",
 		"mkdirp": "~0.3.5",
@@ -26,7 +26,7 @@
 		"fstream": "0.1.x",
 		"graceful-fs": "1.2.x",
 		"combined-stream": "~0.0.4",
-		"ssh2": "~0.4.8",
+		"ssh2": ">=0.4.8",
 		"npmlog": "~0.0.4",
 		"nopt": "~2.1.2",
 		"semver": "2.1.0",
