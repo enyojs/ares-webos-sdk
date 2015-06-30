@@ -1,20 +1,19 @@
-var fs      = require('fs'),
-    path    = require("path"),
-    log     = require('npmlog'),
-    nopt    = require('nopt'),
-    async   = require('async'),
-    spawn   = require('child_process').spawn,
-    exec   = require('child_process').exec,
-    inquirer = require('inquirer'),
-    util    = require('util'),
+var fs 		= require('fs'),
+    path 	= require("path"),
+    log 	= require('npmlog'),
+    nopt 	= require('nopt'),
+    async	= require('async'),
+	spawn   = require('child_process').spawn,
+	exec   = require('child_process').exec,
+	inquirer = require('inquirer'),
+	util    = require('util'),
     shelljs = require('shelljs'),
     source  = require('shell-source'),
-    mkdirp  = require('mkdirp'),
-    ipkg        = require('./../lib/ipkg-tools'),
+    mkdirp	= require('mkdirp'),
     versionTool = require('./../lib/version-tools'),
-    cliControl  = require('./../lib/cli-control'),
-    cliData     = require('./../lib/cli-appdata').create('.ares'),
-    help        = require('./../lib/helpFormat');
+    cliControl 	= require('./../lib/cli-control'),
+	cliData		= require('./../lib/cli-appdata').create('.ares'),
+    help 		= require('./../lib/helpFormat');
 
 shelljs.config.fatal = true;  // Abort on all shelljs errors (e.g. cp/rm/mkdir)
 /**********************************************************************/
@@ -22,12 +21,12 @@ shelljs.config.fatal = true;  // Abort on all shelljs errors (e.g. cp/rm/mkdir)
 var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 process.on('uncaughtException', function (err) {
-    log.error('uncaughtException', err.stack);
-    cliControl.end(-1);
+	log.error('uncaughtException', err.stack);
+	cliControl.end(-1);
 });
 
 if (process.argv.length === 2) {
-    process.argv.splice(2, 0, '--help');
+	process.argv.splice(2, 0, '--help');
 }
 var idx;
 if ((idx = process.argv.indexOf('--chip')) !== -1 || (idx = process.argv.indexOf('-i')) !== -1) {
@@ -38,266 +37,266 @@ if ((idx = process.argv.indexOf('--chip')) !== -1 || (idx = process.argv.indexOf
 /**********************************************************************/
 
 var knownOpts = {
-    "version":  Boolean,
-    "help":     Boolean,
+	"version":	Boolean,
+	"help":		Boolean,
     "ndkpath":  String,
-    "arch":     String,
-    "chip":     String,
-    "configure":    String,
-    "level":    ['silly', 'verbose', 'info', 'http', 'warn', 'error']
+	"arch":		String,
+	"chip":		String,
+	"configure":	String,
+	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
 };
 var shortHands = {
-    "V": ["--version"],
-    "h": ["--help"],
+	"V": ["--version"],
+	"h": ["--help"],
     "n": ["--ndkpath"],
-    "a": ["--arch"],
-    "i": ["--chip"],
-    "c": ["--configure"],
-    "v": ["--level", "verbose"]
+	"a": ["--arch"],
+	"i": ["--chip"],
+	"c": ["--configure"],
+	"v": ["--level", "verbose"]
 };
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ares-build.js'*/);
 /**********************************************************************/
 
 log.heading = processName;
 log.level = argv.level || 'warn';
-ipkg.launcher.log.level = log.level;
 
 /**********************************************************************/
 
 if (argv.help) {
-    showUsage();
-    cliControl.end();
+	showUsage();
+	cliControl.end();
 }
 
 log.verbose("argv", argv);
 
 var op;
 if (argv['version']) {
-    versionTool.showVersionAndExit();
+	versionTool.showVersionAndExit();
 } else {
-    op = runBuild;
+	op = runBuild;
 }
 
 if (process.platform !== "linux") {
-    return finish("This command does not support this platform. This command only works in linux");
+	return finish("This command does not support this platform. This command only works in linux");
 }
 //FIXME: more proper code?
 if (argv.arch) {
-    if (['x86', 'arm'].indexOf(argv.arch) === -1) {
-        return finish("--arch option should be one of '" + ['x86', 'arm'].join(', ') + "'");
-    }
+	if (['x86', 'arm'].indexOf(argv.arch) === -1) {
+		return finish("--arch option should be one of '" + ['x86', 'arm'].join(', ') + "'");
+	}
 }
 if (argv.configure) {
-    if (['DEBUG', 'RELEASE'].indexOf(argv.configure.toUpperCase()) === -1) {
-        return finish("--configure option should be one of '" + ['Debug', 'Release'].join(', ') + "'");
-    }
+	if (['DEBUG', 'RELEASE'].indexOf(argv.configure.toUpperCase()) === -1) {
+		return finish("--configure option should be one of '" + ['Debug', 'Release'].join(', ') + "'");
+	}
 }
 if (argv.argv.remain.length > 1) {
-    return finish("Please check arguments");
+	return finish("Please check arguments");
 }
 var buildDir = argv.argv.remain[0];
 
 /**********************************************************************/
 
 if (op) {
-    versionTool.checkNodeVersion(function(err) {
-        op(finish);
-    });
+	versionTool.checkNodeVersion(function(err) {
+		op(finish);
+	});
 }
 
 function showUsage() {
-    var helpString = [
-        "",
-        "NAME",
-        help.format(processName + " - Build Native App or Service template"),
-        "",
-        "SYNOPSIS",
-        help.format(processName + " [OPTION...] <DIR>"),
-        "",
-        "OPTION",
-        help.format("-a, --arch", "x86 | arm"),
-        help.format("-i, --chip", "default | h15 | lm15 | m14 | <String>"),
-        help.format("-c, --configure", "Debug | Release"),
-        help.format("-n, --ndkpath", "<webOS NDK Path>"),
-        "",
-        //help.format("--level <LEVEL>", "tracing LEVEL is one of 'silly', 'verbose', 'info', 'http', 'warn', 'error' [warn]"),
-        help.format("-h, --help", "Display this help"),
-        help.format("-V, --version", "Display version info"),
-        "",
-        "EXAMPLES",
-        "",
-        "# Build native templates with specifying ndk path",
-        processName + " -n /opt/webosndk ~/projects/app",
-        "",
-        "# Build native templates configured with debugging mode for arm",
-        processName + " -n /opt/webosndk -c Debug -a arm ~/projects/app",
-        ""
-    ];
-    help.print(helpString);
+	var helpString = [
+		"",
+		"NAME",
+		help.format(processName + " - Build Native App or Service template"),
+		"",
+		"SYNOPSIS",
+		help.format(processName + " [OPTION...] <DIR>"),
+		"",
+		// "OPTION",
+		// help.format("-a, --arch", "x86 | arm"),
+		// help.format("-i, --chip", "default | h15 | lm15u | m14 | <String>"),
+		// help.format("-c, --configure", "Debug | Release"),
+		// help.format("-n, --ndkpath", "<webOS NDK Path>"),
+		// "",
+		help.format("-h, --help", "Display this help"),
+		help.format("-V, --version", "Display version info"),
+		"",
+		"EXAMPLES",
+        "# Build native templates",
+        processName + " ~/projects/app",
+		// "",
+		// "# Build native templates with specifying ndk path",
+		// processName + " -n /opt/webosndk ~/projects/app",
+		// "",
+		// "# Build native templates configured with debugging mode for arm",
+		// processName + " -n /opt/webosndk -c Debug -a arm ~/projects/app",
+		""
+	];
+	help.print(helpString);
 }
 
 function runBuild(next) {
-    if (!buildDir) {
-        return finish("Please check the app or service directory path to build");
-    }
-    var cliDataPath = cliData.getPath();
-    var buildConf = {}; /* ndkPath, arch, configure */
+	if (!buildDir) {
+		return finish("Please check the app or service directory path to build");
+	}
+	var cliDataPath = cliData.getPath();
+	var buildConf = {}; /* ndkPath, arch, configure */
 
-    async.series([
-        _checkNDK,
-        _queryNDKPath,
-        _applyEnvForNDK,
-        _makeDirForCmake,
-        _runCmake,
-        _runMake,
-        _postAction
-    ], function(err) {
-        next(err, {msg:"Success"});
-    })
+	async.series([
+		// _checkNDK,
+		// _queryNDKPath,
+		// _applyEnvForNDK,
+		_makeDirForCmake,
+		_runCmake,
+		_runMake,
+		_postAction
+	], function(err) {
+		next(err, {msg:"Success"});
+	})
 
-    function _checkNDK(next) {
-        // Check NDK installation path
-        this.buildConfigFile = path.join(cliDataPath, 'buildConfig.json');
-        if (!fs.existsSync(this.buildConfigFile)) {
-            return next();
-        }
-        fs.readFile(this.buildConfigFile, function(err, data) {
-            buildConf = JSON.parse(data);
-            next();
-        });
-    }
-    function _queryNDKPath(next) {
-            self = this;
-            var questions = [{
-              type: "input",
-              name: "ndkPath",
-              message: "installed webOS-NDK Path:",
-              default: function() {
-                    return "/opt/webosndk";
-              },
-              validate: function(input) {
-                    var done = this.async();
-                    if (input.length < 1 || !fs.existsSync(input)) {
-                        return done("Please check webOS-NDK Path");
-                    }
-                    done(true);
-              },
-              when: function(answers) {
-                 return (typeof buildConf["ndkPath"] === 'undefined' && !argv.ndkpath)?true : false;
-              }
-            },
-            { type: "list",
-              name: "arch",
-              message: "arch:",
-              choices: ["x86", "arm"],
-              default: function() {
-                 return 0;
-              },
-              when: function(answers) {
-                 return (typeof buildConf["arch"] === 'undefined' && !argv.arch)? true : false;
-              }
-            },
-            { type: "list",
-              name: "chip",
-              message: "arch:",
-              choices: ["default", "h15", "m15", "m14", "etc"],
-              default: function() {
-                 return 0;
-              },
-              when: function(answers) {
-                 return (typeof buildConf["chip"] === 'undefined' && !argv.chip)? true : false;
-              }
-            },
-            { type: "input",
-              name: "chip_etc",
-              message: "chip (etc):",
-              default: function() {
-                    return "etc";
-              },
-              validate: function(input) {
-                    var done = this.async();
-                    if (input.length < 1) {
-                        return done("Please input valid child name.");
-                    }
-                    done(true);
-              },
-              when: function(answers) {
-                 return (typeof buildConf["chip"] === 'undefined' && !argv.chip && argv.chip === "etc")?
-                    true : false;
-              }
-            },
-            { type: "list",
-              name: "configure",
-              message: "configure:",
-              choices: ["Debug", "Release"],
-              default: function() {
-                 return 0;
-              },
-              when: function(answers) {
-                 return (typeof buildConf["configure"] === 'undefined' && !argv.configure)? true : false;
-              }
-            }
-        ];
-        inquirer.prompt(questions, function(answers) {
-            buildConf["ndkPath"] = (argv.ndkpath = argv.ndkpath || answers.ndkPath || buildConf["ndkPath"]);
-            buildConf["arch"] = (argv.arch = argv.arch || answers.arch || buildConf["arch"]);
-            if (answers.chip === "etc" && !answers.chip_etc) {
-                answers.chip = answers.chip_etc;
-            }
-            if (argv.chip === "true") argv.chip = "default";
-            buildConf["chip"] = (argv.chip = argv.chip || answers.chip || buildConf["chip"]);
-            buildConf["configure"] = (argv.configure = argv.configure || answers.configure || buildConf["configure"]);
-            console.log("************************************************************");
-            console.log("[" + processName + "] --ndkpath: " + buildConf["ndkPath"]);
-            console.log("[" + processName + "] --arch: " + buildConf["arch"]);
-            console.log("[" + processName + "] --chip: " + buildConf["chip"]);
-            console.log("[" + processName + "] --configure: " + buildConf["configure"]);
-            console.log("[" + processName + "] " + "Saving ndk path in " + self.buildConfigFile);
-            console.log("************************************************************");
-            fs.writeFileSync(self.buildConfigFile, JSON.stringify(buildConf, null, "\t"));
-            next();
-        });
-    }
-    function _applyEnvForNDK(next) {
-        async.waterfall([
-            _queryMachineArch,
-            _findEnvFile,
-            source.bind(this)
-        ], function(err) {
-            next(err);
-        });
-        function _findEnvFile(machine, next) {
-            if (!machine) {
-                return next(new Error('Undefined machine name'));
-            }
-            var suffixEnvFileName = (buildConf["chip"] === 'default')? '' : '-' + buildConf["chip"];
-            var envFileName = "env_toolchain_linux_" + machine + '-'+ buildConf["arch"] + suffixEnvFileName;
-            var envFilePath = path.join(buildConf["ndkPath"], envFileName);
-            if (!fs.existsSync(envFilePath)) {
-                return next(new Error("Cannot find " + envFilePath));
-            }
-            console.log("Loading env file from " + envFilePath);
-            next(null, envFilePath);
-        }
+	function _checkNDK(next) {
+		// Check NDK installation path
+		this.buildConfigFile = path.join(cliDataPath, 'buildConfig.json');
+		if (!fs.existsSync(this.buildConfigFile)) {
+			return next();
+		}
+		fs.readFile(this.buildConfigFile, function(err, data) {
+			buildConf = JSON.parse(data);
+			next();
+		});
+	}
+	function _queryNDKPath(next) {
+			self = this;
+			var questions = [{
+			  type: "input",
+			  name: "ndkPath",
+			  message: "installed webOS-NDK Path:",
+			  default: function() {
+					return "/opt/webosndk";
+			  },
+			  validate: function(input) {
+					var done = this.async();
+					if (input.length < 1 || !fs.existsSync(input)) {
+						return done("Please check webOS-NDK Path");
+					}
+					done(true);
+			  },
+			  when: function(answers) {
+				 return (typeof buildConf["ndkPath"] === 'undefined' && !argv.ndkpath)?true : false;
+			  }
+			},
+			{ type: "list",
+			  name: "arch",
+			  message: "arch:",
+			  choices: ["x86", "arm"],
+			  default: function() {
+				 return 0;
+			  },
+			  when: function(answers) {
+				 return (typeof buildConf["arch"] === 'undefined' && !argv.arch)? true : false;
+			  }
+		    },
+			{ type: "list",
+			  name: "chip",
+			  message: "arch:",
+			  choices: ["default", "h15", "m15", "m14", "etc"],
+			  default: function() {
+				 return 0;
+			  },
+			  when: function(answers) {
+				 return (typeof buildConf["chip"] === 'undefined' && !argv.chip)? true : false;
+			  }
+		    },
+			{ type: "input",
+			  name: "chip_etc",
+			  message: "chip (etc):",
+			  default: function() {
+					return "etc";
+			  },
+			  validate: function(input) {
+					var done = this.async();
+					if (input.length < 1) {
+						return done("Please input valid child name.");
+					}
+					done(true);
+			  },
+			  when: function(answers) {
+				 return (typeof buildConf["chip"] === 'undefined' && !argv.chip && argv.chip === "etc")?
+					true : false;
+			  }
+		    },
+			{ type: "list",
+			  name: "configure",
+			  message: "configure:",
+			  choices: ["Debug", "Release"],
+			  default: function() {
+				 return 0;
+			  },
+			  when: function(answers) {
+				 return (typeof buildConf["configure"] === 'undefined' && !argv.configure)? true : false;
+			  }
+		    }
+		];
+		inquirer.prompt(questions, function(answers) {
+			buildConf["ndkPath"] = (argv.ndkpath = argv.ndkpath || answers.ndkPath || buildConf["ndkPath"]);
+			buildConf["arch"] = (argv.arch = argv.arch || answers.arch || buildConf["arch"]);
+			if (answers.chip === "etc" && !answers.chip_etc) {
+				answers.chip = answers.chip_etc;
+			}
+			if (argv.chip === "true") argv.chip = "default";
+			buildConf["chip"] = (argv.chip = argv.chip || answers.chip || buildConf["chip"]);
+			buildConf["configure"] = (argv.configure = argv.configure || answers.configure || buildConf["configure"]);
+			console.log("************************************************************");
+			console.log("[" + processName + "] --ndkpath: " + buildConf["ndkPath"]);
+			console.log("[" + processName + "] --arch: " + buildConf["arch"]);
+			console.log("[" + processName + "] --chip: " + buildConf["chip"]);
+			console.log("[" + processName + "] --configure: " + buildConf["configure"]);
+			console.log("[" + processName + "] " + "Saving ndk path in " + self.buildConfigFile);
+			console.log("************************************************************");
+			fs.writeFileSync(self.buildConfigFile, JSON.stringify(buildConf, null, "\t"));
+			next();
+		});
+	}
+	function _applyEnvForNDK(next) {
+		async.waterfall([
+			_queryMachineArch,
+			_findEnvFile,
+			source.bind(this)
+		], function(err) {
+			next(err);
+		});
+		function _findEnvFile(machine, next) {
+			if (!machine) {
+				return next(new Error('Undefined machine name'));
+			}
+			var suffixEnvFileName = (buildConf["chip"] === 'default')? '' : '-' + buildConf["chip"];
+			var envFileName = "env_toolchain_linux_" + machine + '-'+ buildConf["arch"] + suffixEnvFileName;
+			var envFilePath = path.join(buildConf["ndkPath"], envFileName);
+			if (!fs.existsSync(envFilePath)) {
+				return next(new Error("Cannot find " + envFilePath));
+			}
+			console.log("Loading env file from " + envFilePath);
+			next(null, envFilePath);
+		}
 
-        function _queryMachineArch(next) {
-            var cmd = "uname -m";
-            var machines = ['x86_64', 'x86'];
-            exec(cmd, function (err, stdout, stderr) {
-                            var machine = stdout.toString().trim();
-                            machine = machine.replace(/i.+86$/g, 'x86');
-                            machine = machine.replace(/x86[-_]64$/g, 'x86_64');
-                            console.log("machine:", machine);
-                            if (machines.indexOf(machine) !== -1) {
-                                next(null, machine);
-                            } else {
-                                next(new Error('Unsupported machine(' + machine + ')'));
-                            }
-            });
-        }
-    }
+		function _queryMachineArch(next) {
+			var cmd = "uname -m";
+			var machines = ['x86_64', 'x86'];
+			exec(cmd, function (err, stdout, stderr) {
+							var machine = stdout.toString().trim();
+							machine = machine.replace(/i.+86$/g, 'x86');
+							machine = machine.replace(/x86[-_]64$/g, 'x86_64');
+							console.log("machine:", machine);
+							if (machines.indexOf(machine) !== -1) {
+								next(null, machine);
+							} else {
+								next(new Error('Unsupported machine(' + machine + ')'));
+							}
+			});
+		}
+	}
 
-    function _makeDirForCmake(next) {
+	function _makeDirForCmake(next) {
         this.tmpCmakeDir = path.join(path.resolve(buildDir), 'BUILD_CMAKE');
         if (fs.existsSync(this.tmpCmakeDir)) {
             console.log("[" + processName + "] " + this.tmpCmakeDir + " is already existing...");
@@ -307,12 +306,14 @@ function runBuild(next) {
             console.log("[" + processName + "] Making a 'BUILD_CMAKE' directory " + this.tmpCmakeDir);
             mkdirp.sync(this.tmpCmakeDir);
         }
-        next();
-    }
-    function _runCmake(next) {
+		next();
+	}
+	function _runCmake(next) {
         console.log("[" + processName + "] Running cmake in " + this.tmpCmakeDir);
         var options = ['..'];
-        options.push("-DCMAKE_BUILD_TYPE=" + buildConf["configure"].toUpperCase());
+        if (buildConf["configure"]) {
+            options.push("-DCMAKE_BUILD_TYPE=" + buildConf["configure"].toUpperCase());
+        }
         console.log("[" + processName + "] cmake " + options.join(' '));
         var cmakePrc = spawn('cmake', options, {cwd:this.tmpCmakeDir});
         cmakePrc.stdout.on('data', function(data) {
@@ -327,8 +328,8 @@ function runBuild(next) {
             }
             next();
         });
-    }
-    function _runMake(next) {
+	}
+	function _runMake(next) {
         console.log("[" + processName + "] Running make in " +  this.tmpCmakeDir);
         var options = [];
         console.log("[" + processName + "] make " + options.join(' '));
@@ -345,26 +346,26 @@ function runBuild(next) {
             }
             next();
         });
-    }
-    function _postAction(next) {
+	}
+	function _postAction(next) {
         console.log("DONE");
-        next();
-    }
+		next();
+	}
 }
 
 function finish(err, value) {
-    if (err) {
-        log.error(err);
-        log.verbose(err.stack);
-        cliControl.end(-1);
-    } else {
-        if (value && value.msg) {
-            console.log(value.msg);
-        }
-        cliControl.end();
-    }
+	if (err) {
+		log.error(err);
+		log.verbose(err.stack);
+		cliControl.end(-1);
+	} else {
+		if (value && value.msg) {
+			console.log(value.msg);
+		}
+		cliControl.end();
+	}
 }
 
 process.on('uncaughtException', function (err) {
-    console.log('Caught exception: ' + err);
+	console.log('Caught exception: ' + err);
 });
