@@ -300,7 +300,7 @@ function generate() {
             return next();
         }
         for (i = 0; i < options.tmplNames.length; i++) {
-            if ( ['template', 'native', 'game'].indexOf(tmplInfos[options.tmplNames[i]].type) !== -1 ) {
+            if ( ['template', 'native', 'game', 'appinfo'].indexOf(tmplInfos[options.tmplNames[i]].type) !== -1 ) {
                 selTmpl = tmplInfos[options.tmplNames[i]];
                 selTmpl.id = options.tmplNames[i];
                 break;
@@ -715,6 +715,9 @@ function _checkOptions(next) {
                 } else {
                     reqInfos.etcCnt++;
                     reqInfos.etcNames.push(tmplName);
+                }
+                if (self.tmplInfos[tmplName].type.match(/appinfo/i) || self.tmplInfos[tmplName].type.match(/icon/i)) {
+                    options.overwrite = true;
                 }
             });
         }
