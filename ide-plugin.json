@@ -137,8 +137,7 @@
 					"description": "appinfo.json for native application",
 					"files": [
 						{
-							"url": "@PLUGINDIR@/templates/nativeappinfo",
-							"at": "pkg"
+							"url": "@PLUGINDIR@/templates/nativeappinfo"
 						}
 					],
 					"filesubstitution": [
@@ -174,8 +173,7 @@
 					"description": "native app icon files [icon.png (80x80), largeIcon.png (130x130)]",
 					"files": [
 						{
-							"url": "@PLUGINDIR@/templates/nativeicon",
-							"at": "pkg"
+							"url": "@PLUGINDIR@/templates/nativeicon"
 						}
 					]
 				},

@@ -44,7 +44,8 @@
 		"strip-bom": "^1.0.0",
 		"encoding": "^0.1.11",
 		"chardet": "0.0.8",
-		"extract-zip":"~1.0.3"
+		"extract-zip":"~1.0.3",
+		"shell-source" : "~1.1.0"
 	},
 	"engines": {
 		"node": ">=0.10.0",
@@ -93,7 +94,8 @@
 		"strip-bom",
 		"encoding",
 		"chardet",
-		"extract-zip"
+		"extract-zip",
+		"shell-source"
 	],
 	"files": [
 		"DEMO.md",
