@@ -147,11 +147,11 @@ function runBuild(next) {
         // _queryNDKPath,
         // _applyEnvForNDK,
         _makeDirForCmake,
-        _loadAppInfo,
-        _findCMakeOutDir,
+        //_loadAppInfo,
+        //_findCMakeOutDir,
         _runCmake,
         _runMake,
-        _copyEssentialFilesToOutDir,
+        //_copyEssentialFilesToOutDir,
         _postAction
     ], function(err) {
         next(err, {msg:"Success"});
