@@ -37,3 +37,26 @@ target_link_libraries (${BIN_NAME}
         ${SDL2_LDFLAGS}
         ${GLES1.1_LDFLAGS}
 )
+
+
+# copy appinfo.json file to output folder
+if(EXISTS "${CMAKE_SOURCE_DIR}/appinfo.json")
+    file(COPY "${CMAKE_SOURCE_DIR}/appinfo.json" DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+else()
+    MESSAGE( "'appinfo.json' file was not found !!")
+endif()
+
+# copy icon.png file to output folder
+if(EXISTS "${CMAKE_SOURCE_DIR}/icon.png")
+    file(COPY "${CMAKE_SOURCE_DIR}/icon.png" DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+else()
+    MESSAGE( "'icon.png' file was not found !!")
+endif()
+
+# copy largeIcon.png file to output folder
+if(EXISTS "${CMAKE_SOURCE_DIR}/largeIcon.png")
+    file(COPY "${CMAKE_SOURCE_DIR}/largeIcon.png" DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+else()
+    MESSAGE( "'largeIcon.png' file was not found !!")
+endif()
+
