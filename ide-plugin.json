@@ -92,7 +92,8 @@
 				},
 				{
 					"id": "native-service",
-					"type": "nativeService",
+					"xtype": "nativeService",
+					"type": "x",
 					"version": "0.1",
 					"description": "webOS Native Service Template",
 					"files": [
