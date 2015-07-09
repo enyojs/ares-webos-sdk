@@ -323,27 +323,14 @@ function generate() {
                       return "new app"
                   }
                 },
-                { type: "list",
-                  name: "type",
-                  message: "Select type",
-                  choices: ["web", "native", "native_game"],
-                  filter: function(val) {
-                      return val.toLowerCase();
-                  },
-                  default: function() {
-                      var idx = 0;
-                      if (selTmpl.type.match(/(native|game)/i)) {
-                          idx = 1;
-                      }
-                      return idx;
-                  },
-                },
                 { type: "input",
                   name: "main",
                   message: "main:",
-                  default: function() {
+                  default: function(answer) {
                       var defMain = "index.html"
-                      if (selTmpl.type.match(/(native|game)/i)) {
+                      answer.type = "web";
+                      if (selTmpl.type.match(/native/i)) {
+                          answer.type = "native";
                           defMain = selTmpl.id.toLowerCase();
                       }
                       return defMain;
