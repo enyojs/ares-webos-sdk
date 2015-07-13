@@ -331,7 +331,7 @@ function generate() {
                       answer.type = "web";
                       if (selTmpl.type.match(/native/i) || selTmpl.id.match(/nativeappinfo/i)) {
                           answer.type = "native";
-                          defMain = selTmpl.id.toLowerCase();
+                          defMain = "executable_binary";
                       }
                       return defMain;
                   }
