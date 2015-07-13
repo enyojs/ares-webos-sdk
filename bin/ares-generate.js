@@ -329,7 +329,7 @@ function generate() {
                   default: function(answer) {
                       var defMain = "index.html"
                       answer.type = "web";
-                      if (selTmpl.type.match(/native/i)) {
+                      if (selTmpl.type.match(/native/i) || selTmpl.id.match(/nativeappinfo/i)) {
                           answer.type = "native";
                           defMain = selTmpl.id.toLowerCase();
                       }
