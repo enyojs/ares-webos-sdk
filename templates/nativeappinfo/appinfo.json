@@ -2,7 +2,7 @@
     "id": "com.yourdomain.app",
     "version": "0.0.1",
     "vendor": "My Company",
-    "type": "native_game",
+    "type": "native",
     "main": "executable",
     "title": "native app",
     "icon": "icon.png",
