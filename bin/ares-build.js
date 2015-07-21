@@ -77,7 +77,7 @@ if (argv['version']) {
 }
 
 if (process.platform !== "linux") {
-    // return finish("This command does not support this platform. This command only works in linux");
+    return finish("This command does not support this platform. This command only works in linux");
 }
 //FIXME: more proper code?
 if (argv.arch) {
