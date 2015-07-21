@@ -40,7 +40,7 @@ var DEF_BP_FILE = path.join(cliData.getPath(), 'baseBpVer.json');
 var DEF_BP_VER = '2.5';
 var DEF_SRC_TYPE = 'template';
 var DEF_SVC_NAME = 'com.yourdomain.app.service';
-var DEF_SVC_EXE = 'main';
+var DEF_SVC_EXE = 'executable';
 var VER_FILES = {
     "moonstone" : "lib/moonstone/version.js",
     "garnet" : "lib/garnet/version.js",
@@ -331,7 +331,7 @@ function generate() {
                       answer.type = "web";
                       if (selTmpl.type.match(/native/i) || selTmpl.id.match(/nativeappinfo/i)) {
                           answer.type = "native";
-                          defMain = "executable_binary";
+                          defMain = "executable";
                       }
                       return defMain;
                   }
