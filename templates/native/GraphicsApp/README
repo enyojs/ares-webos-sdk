@@ -3,19 +3,18 @@ Purpose:
         webOS games app template.
         GraphicsApp
 
-Building:
+Building can be one of the following options.
+
+ (option1) Building:
         mkdir BUILD
         cd BUILD
         cmake ..
         make
-        cp ../res ../pkg/
-        cd ../pkg
+        cd ../pkg_[xxx]
 
-Generating app & icon:
-        ares-generate . -t webappinfo -f
-        ares-generate . -t webicon -f
-        change "index.html" in "main" of appinfo.json to "2DGame".
-        change "web" in "type" of appinfo.json to "native_game".
+ (option 2) Building:
+        ares-build .
+        cd pkg_[xxx]
 
 Packaging and installing:
         ares-package .
