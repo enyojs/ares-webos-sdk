@@ -2,14 +2,18 @@
 Purpose:
         webOS sdl with OpenGLESv2.0 app template.
 
-Building:
+Building can be one of the following options.
+
+ (option1) Building:
         mkdir BUILD
         cd BUILD
         cmake ..
         make
-        cp ../res ../pkg/
-        cd ../pkg
+        cd ../pkg_[xxx]
 
+ (option 2) Building:
+        ares-build .
+        cd pkg_[xxx]
 
 Packaging and installing:
         ares-package .

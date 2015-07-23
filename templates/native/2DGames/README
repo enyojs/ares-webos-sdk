@@ -2,18 +2,22 @@
 Purpose:
         webOS basic sdl app template.
 
-Building:
+Building can be one of the following options.
+
+ (option1) Building:
         mkdir BUILD
         cd BUILD
         cmake ..
         make
-        cp ../res ../pkg/
-        cd ../pkg
+        cd ../pkg_[xxx]
+
+ (option 2) Building:
+        ares-build .
+        cd pkg_[xxx]
 
 Packaging and installing:
         ares-package .
         ares-install your_package_name.ipk -d your_target
-
 
 Testing:
         just launch
