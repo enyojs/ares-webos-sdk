@@ -642,6 +642,8 @@ function _substParams(next) {
                 _insertProperty(properties, prop);
             }
         });
+        //FIXME: set main vaule to executable file name.
+        if (properties['main']) options.executable = properties['main'];
         substitution.json = properties;
         substitution.add = {};
         for (key in properties) {
